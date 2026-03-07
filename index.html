@@ -15,7 +15,8 @@
     --gray: #888;
     --gray-light: #c8c8c8;
     --gray-dark: #333;
-    --accent: #e8e4dd;
+    --accent: #f0c840;
+    --accent-dim: rgba(240,200,64,0.15);
   }
 
   body {
@@ -38,7 +39,6 @@
   }
   .slide.active { display: flex; }
 
-  /* Navigation */
   .nav {
     position: fixed;
     bottom: 30px;
@@ -67,7 +67,6 @@
     letter-spacing: 0.05em;
   }
 
-  /* Page number */
   .page-num {
     position: absolute;
     bottom: 30px;
@@ -79,436 +78,173 @@
   }
 
   /* Typography */
-  h1 {
-    font-size: 72px;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-  }
-  h2 {
-    font-size: 42px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-    margin-bottom: 40px;
-  }
-  h3 {
-    font-size: 24px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    margin-bottom: 16px;
-  }
-  p {
-    font-size: 18px;
-    line-height: 1.8;
-    color: var(--gray-light);
-    font-weight: 300;
-  }
+  h1 { font-size: 72px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+  h2 { font-size: 42px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 40px; }
+  h3 { font-size: 24px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 16px; }
+  p { font-size: 18px; line-height: 1.8; color: var(--gray-light); font-weight: 300; }
   .label {
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--gray);
-    margin-bottom: 20px;
-    font-weight: 500;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 20px; font-weight: 500;
   }
 
-  /* Slide 1: Cover */
-  .slide-cover {
-    justify-content: flex-end;
-    padding-bottom: 120px;
-  }
+  /* Cover */
+  .slide-cover { justify-content: flex-end; padding-bottom: 120px; }
   .slide-cover .logo {
-    font-size: 14px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    font-weight: 500;
-    margin-bottom: 24px;
-    color: var(--gray-light);
+    font-size: 14px; letter-spacing: 0.3em; text-transform: uppercase;
+    font-weight: 500; margin-bottom: 24px; color: var(--gray-light);
   }
-  .slide-cover h1 {
-    font-size: 80px;
-    margin-bottom: 16px;
-  }
-  .slide-cover .sub {
-    font-size: 20px;
-    color: var(--gray);
-    font-weight: 300;
-    letter-spacing: 0.02em;
-  }
+  .slide-cover h1 { font-size: 80px; margin-bottom: 16px; }
+  .slide-cover .sub { font-size: 20px; color: var(--gray); font-weight: 300; letter-spacing: 0.02em; }
   .cover-line {
-    position: absolute;
-    top: 0;
-    right: 30%;
-    width: 1px;
-    height: 100%;
-    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.06), transparent);
+    position: absolute; top: 0; right: 30%; width: 1px; height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(240,200,64,0.12), transparent);
+  }
+  .cover-accent {
+    position: absolute; top: 60px; right: 80px; width: 6px; height: 60px;
+    background: var(--accent); border-radius: 3px;
   }
 
-  /* Slide 2: About */
-  .slide-about .about-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-  }
-  .about-meta {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-top: 40px;
-  }
+  /* About */
+  .slide-about .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .about-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
   .about-meta-item .meta-label {
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--gray);
-    margin-bottom: 6px;
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gray); margin-bottom: 6px;
   }
-  .about-meta-item .meta-value {
-    font-size: 15px;
-    color: var(--white);
-    font-weight: 400;
-  }
-  .culture-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 32px;
-  }
+  .about-meta-item .meta-value { font-size: 15px; color: var(--white); font-weight: 400; }
+  .culture-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
   .culture-tag {
-    padding: 8px 20px;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 100px;
-    font-size: 13px;
-    color: var(--gray-light);
-    font-weight: 400;
-    letter-spacing: 0.02em;
+    padding: 8px 20px; border: 1px solid rgba(240,200,64,0.3); border-radius: 100px;
+    font-size: 13px; color: var(--gray-light); font-weight: 400; letter-spacing: 0.02em;
   }
 
-  /* Slide 3: Concept */
-  .slide-concept {
-    text-align: center;
-    align-items: center;
-  }
-  .concept-copy {
-    font-size: 48px;
-    font-weight: 700;
-    line-height: 1.5;
-    letter-spacing: -0.01em;
-    margin-bottom: 48px;
-  }
-  .concept-copy span {
-    color: var(--gray);
-  }
-  .concept-desc {
-    max-width: 700px;
-    text-align: center;
-    font-size: 16px;
-    line-height: 2;
-  }
-  .concept-pillars {
-    display: flex;
-    gap: 60px;
-    margin-top: 56px;
-  }
-  .concept-pillar {
-    text-align: center;
-  }
-  .concept-pillar .pillar-icon {
-    font-size: 28px;
-    margin-bottom: 12px;
-    opacity: 0.5;
-  }
+  /* Concept */
+  .slide-concept { text-align: center; align-items: center; }
+  .concept-copy { font-size: 48px; font-weight: 700; line-height: 1.5; letter-spacing: -0.01em; margin-bottom: 48px; }
+  .concept-copy span { color: var(--accent); }
+  .concept-desc { max-width: 700px; text-align: center; font-size: 16px; line-height: 2; }
+  .concept-pillars { display: flex; gap: 60px; margin-top: 56px; }
+  .concept-pillar { text-align: center; }
   .concept-pillar .pillar-label {
-    font-size: 12px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--gray);
-    margin-bottom: 6px;
+    font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 6px;
   }
-  .concept-pillar .pillar-text {
-    font-size: 14px;
-    color: var(--gray-light);
-  }
+  .concept-pillar .pillar-text { font-size: 14px; color: var(--gray-light); }
 
-  /* Slide 4: Value Flow */
-  .flow-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
-    margin-top: 48px;
-  }
+  /* Value Flow */
+  .flow-container { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 48px; }
   .flow-step {
-    text-align: center;
-    padding: 32px 24px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    width: 200px;
+    text-align: center; padding: 32px 24px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; width: 200px;
   }
   .flow-step.highlight {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.15);
+    background: var(--accent-dim); border-color: rgba(240,200,64,0.3);
   }
-  .flow-step .step-num {
-    font-size: 11px;
-    color: var(--gray);
-    letter-spacing: 0.15em;
-    margin-bottom: 12px;
-  }
-  .flow-step .step-title {
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-  .flow-step .step-desc {
-    font-size: 12px;
-    color: var(--gray);
-    line-height: 1.6;
-  }
-  .flow-arrow {
-    color: var(--gray);
-    font-size: 20px;
-  }
+  .flow-step .step-num { font-size: 11px; color: var(--gray); letter-spacing: 0.15em; margin-bottom: 12px; }
+  .flow-step .step-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .flow-step .step-desc { font-size: 12px; color: var(--gray); line-height: 1.6; }
+  .flow-arrow { color: var(--accent); font-size: 20px; }
 
-  /* Slide 5: Menu Overview */
-  .menu-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-    margin-top: 48px;
-  }
+  /* Menu Overview */
+  .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
   .menu-card {
-    padding: 40px 32px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    transition: all 0.3s;
+    padding: 40px 32px; background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; transition: all 0.3s;
   }
-  .menu-card:hover {
-    background: rgba(255,255,255,0.06);
-    border-color: rgba(255,255,255,0.15);
-  }
+  .menu-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(240,200,64,0.3); }
   .menu-card .menu-num {
-    font-size: 48px;
-    font-weight: 800;
-    color: rgba(255,255,255,0.08);
-    margin-bottom: 20px;
-    line-height: 1;
+    font-size: 48px; font-weight: 800; color: rgba(240,200,64,0.15);
+    margin-bottom: 20px; line-height: 1;
   }
-  .menu-card .menu-en {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    letter-spacing: -0.01em;
-  }
-  .menu-card .menu-ja {
-    font-size: 13px;
-    color: var(--gray);
-    margin-bottom: 20px;
-  }
-  .menu-card .menu-items {
-    list-style: none;
-    font-size: 12px;
-    color: var(--gray-light);
-    line-height: 2;
-  }
+  .menu-card .menu-en { font-size: 18px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .menu-card .menu-ja { font-size: 13px; color: var(--gray); margin-bottom: 20px; }
+  .menu-card .menu-items { list-style: none; font-size: 12px; color: var(--gray-light); line-height: 2; }
 
-  /* Slide 6-9: Menu Detail */
-  .detail-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-    height: 100%;
-  }
+  /* Menu Detail */
+  .detail-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; height: 100%; }
   .detail-left h2 { margin-bottom: 12px; }
-  .detail-left .detail-ja {
-    font-size: 16px;
-    color: var(--gray);
-    margin-bottom: 32px;
-  }
-  .detail-items {
-    list-style: none;
-    margin-bottom: 32px;
-  }
+  .detail-left .detail-ja { font-size: 16px; color: var(--gray); margin-bottom: 32px; }
+  .detail-items { list-style: none; margin-bottom: 32px; }
   .detail-items li {
-    font-size: 15px;
-    color: var(--gray-light);
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    font-weight: 300;
+    font-size: 15px; color: var(--gray-light); padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 300;
   }
-  .detail-right {
-    position: relative;
-    height: 440px;
-  }
-  .detail-tag {
-    display: inline-block;
-    padding: 6px 16px;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 100px;
-    font-size: 12px;
-    color: var(--gray-light);
-    margin-top: 8px;
-  }
+  .detail-right { position: relative; height: 440px; }
 
-  /* Photo Gallery (1 large + 2 small) */
-  .gallery {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
+  /* Gallery */
+  .gallery { position: relative; width: 100%; height: 100%; }
   .gallery-page {
-    display: none;
-    width: 100%;
-    height: 100%;
-    gap: 8px;
+    display: none; width: 100%; height: 100%; gap: 8px;
   }
   .gallery-page.active {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
   }
-  .gallery-page .img-large {
-    grid-row: 1 / 3;
-    border-radius: 16px;
-    overflow: hidden;
+  .gallery-page .img-large { grid-row: 1 / 3; border-radius: 16px; overflow: hidden; position: relative; }
+  .gallery-page .img-small { border-radius: 16px; overflow: hidden; position: relative; }
+  .gallery-page img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery-page .img-label {
+    position: absolute; bottom: 12px; left: 12px;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+    padding: 4px 12px; border-radius: 100px;
+    font-size: 11px; color: var(--white); font-weight: 500;
+    letter-spacing: 0.03em;
   }
-  .gallery-page .img-small {
-    border-radius: 16px;
-    overflow: hidden;
-  }
-  .gallery-page img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  .gallery-page .img-large .img-label {
+    bottom: 16px; left: 16px; padding: 6px 16px; font-size: 12px;
+    border-left: 2px solid var(--accent);
   }
   .gallery-nav {
-    position: absolute;
-    bottom: -32px;
-    right: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    position: absolute; bottom: -32px; right: 0;
+    display: flex; align-items: center; gap: 8px;
   }
-  .gallery-dots {
-    display: flex;
-    gap: 6px;
-  }
+  .gallery-dots { display: flex; gap: 6px; }
   .gallery-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.2);
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-    padding: 0;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.2); cursor: pointer;
+    transition: all 0.2s; border: none; padding: 0;
   }
-  .gallery-dot.active {
-    background: rgba(255,255,255,0.7);
-    width: 18px;
-    border-radius: 3px;
-  }
+  .gallery-dot.active { background: var(--accent); width: 18px; border-radius: 3px; }
   .gallery-btn {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    color: var(--white);
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    color: var(--white); width: 28px; height: 28px; border-radius: 50%;
+    cursor: pointer; font-size: 12px; display: flex; align-items: center;
+    justify-content: center; transition: all 0.2s;
   }
-  .gallery-btn:hover { background: rgba(255,255,255,0.15); }
+  .gallery-btn:hover { background: rgba(240,200,64,0.2); border-color: var(--accent); }
 
-  /* Slide 10-12: Case Study */
-  .case-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 80px;
-    align-items: center;
-    height: 100%;
-  }
-  .case-visual {
-    position: relative;
-    height: 460px;
-  }
+  /* Case Study */
+  .case-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; height: 100%; }
+  .case-visual { position: relative; height: 460px; }
   .case-info .case-client {
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--gray);
-    margin-bottom: 16px;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 16px;
   }
   .case-info h2 { margin-bottom: 32px; }
-  .case-flow {
-    margin-bottom: 32px;
-  }
-  .case-flow-item {
-    padding: 16px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
+  .case-flow { margin-bottom: 32px; }
+  .case-flow-item { padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .case-flow-item .cfi-label {
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--gray);
-    margin-bottom: 6px;
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 6px; font-weight: 500;
   }
-  .case-flow-item .cfi-text {
-    font-size: 15px;
-    color: var(--gray-light);
-    font-weight: 300;
-    line-height: 1.6;
-  }
-  .case-services {
-    display: flex;
-    gap: 8px;
-  }
+  .case-flow-item .cfi-text { font-size: 15px; color: var(--gray-light); font-weight: 300; line-height: 1.6; }
+  .case-services { display: flex; gap: 8px; }
   .case-service-tag {
-    padding: 6px 16px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 100px;
-    font-size: 12px;
-    color: var(--gray-light);
+    padding: 6px 16px; background: var(--accent-dim);
+    border: 1px solid rgba(240,200,64,0.25); border-radius: 100px;
+    font-size: 12px; color: var(--accent);
   }
 
-  /* Slide 13: Contact */
-  .slide-contact {
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-  .slide-contact h1 {
-    font-size: 64px;
-    margin-bottom: 40px;
-  }
-  .contact-info {
-    display: flex;
-    gap: 60px;
-    margin-top: 20px;
-  }
+  /* Contact */
+  .slide-contact { justify-content: center; align-items: center; text-align: center; }
+  .slide-contact h1 { font-size: 64px; margin-bottom: 40px; }
+  .contact-info { display: flex; gap: 60px; margin-top: 20px; }
   .contact-item .ci-label {
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--gray);
-    margin-bottom: 8px;
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gray); margin-bottom: 8px;
   }
-  .contact-item .ci-value {
-    font-size: 16px;
-    color: var(--gray-light);
-    font-weight: 400;
-  }
+  .contact-item .ci-value { font-size: 16px; color: var(--gray-light); font-weight: 400; }
+  .contact-item .ci-value a { color: var(--accent); text-decoration: none; }
 </style>
 </head>
 <body>
@@ -516,6 +252,7 @@
 <!-- SLIDE 1: Cover -->
 <div class="slide slide-cover active" data-slide="1">
   <div class="cover-line"></div>
+  <div class="cover-accent"></div>
   <div class="logo">newparade</div>
   <h1>Creative<br>Boutique</h1>
   <p class="sub">Company Deck 2026</p>
@@ -538,22 +275,10 @@
     </div>
     <div>
       <div class="about-meta">
-        <div class="about-meta-item">
-          <div class="meta-label">Founded</div>
-          <div class="meta-value">2023</div>
-        </div>
-        <div class="about-meta-item">
-          <div class="meta-label">Location</div>
-          <div class="meta-value">Tokyo</div>
-        </div>
-        <div class="about-meta-item">
-          <div class="meta-label">Team</div>
-          <div class="meta-value">Creative Boutique Div.</div>
-        </div>
-        <div class="about-meta-item">
-          <div class="meta-label">Strength</div>
-          <div class="meta-value">Strategy + Creative + Sense</div>
-        </div>
+        <div class="about-meta-item"><div class="meta-label">Founded</div><div class="meta-value">2023</div></div>
+        <div class="about-meta-item"><div class="meta-label">Location</div><div class="meta-value">Tokyo</div></div>
+        <div class="about-meta-item"><div class="meta-label">Team</div><div class="meta-value">Creative Boutique Div.</div></div>
+        <div class="about-meta-item"><div class="meta-label">Strength</div><div class="meta-value">Strategy + Creative + Sense</div></div>
       </div>
     </div>
   </div>
@@ -563,26 +288,15 @@
 <!-- SLIDE 3: Concept -->
 <div class="slide slide-concept" data-slide="3">
   <div class="label">Our Concept</div>
-  <div class="concept-copy">
-    企画する。<span>つくる。</span>届ける。
-  </div>
+  <div class="concept-copy">企画する。<span>つくる。</span>届ける。</div>
   <p class="concept-desc">
     すべてのプロジェクトに、プロデュース × クリエイティブディレクションで上流から参画。<br>
     カルチャーの目線で事業課題を再解釈し、企画して、形にします。
   </p>
   <div class="concept-pillars">
-    <div class="concept-pillar">
-      <div class="pillar-label">vs Consultant</div>
-      <div class="pillar-text">企画だけでなく「形にする」</div>
-    </div>
-    <div class="concept-pillar">
-      <div class="pillar-label">vs Production</div>
-      <div class="pillar-text">作るだけでなく「上流から企画する」</div>
-    </div>
-    <div class="concept-pillar">
-      <div class="pillar-label">vs Agency</div>
-      <div class="pillar-text">カルチャーの感性で「再解釈する」</div>
-    </div>
+    <div class="concept-pillar"><div class="pillar-label">vs Consultant</div><div class="pillar-text">企画だけでなく「形にする」</div></div>
+    <div class="concept-pillar"><div class="pillar-label">vs Production</div><div class="pillar-text">作るだけでなく「上流から企画する」</div></div>
+    <div class="concept-pillar"><div class="pillar-label">vs Agency</div><div class="pillar-text">カルチャーの感性で「再解釈する」</div></div>
   </div>
   <div class="page-num">03 / 13</div>
 </div>
@@ -592,35 +306,15 @@
   <div class="label">How We Create Value</div>
   <h2 style="text-align:center;">価値提供の流れ</h2>
   <div class="flow-container">
-    <div class="flow-step">
-      <div class="step-num">01</div>
-      <div class="step-title">事業課題</div>
-      <div class="step-desc">クライアントが<br>抱える課題</div>
-    </div>
+    <div class="flow-step"><div class="step-num">01</div><div class="step-title">事業課題</div><div class="step-desc">クライアントが<br>抱える課題</div></div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step highlight">
-      <div class="step-num">02</div>
-      <div class="step-title">カルチャーの目線で<br>再解釈</div>
-      <div class="step-desc">newparade固有の<br>付加価値</div>
-    </div>
+    <div class="flow-step highlight"><div class="step-num">02</div><div class="step-title">カルチャーの目線で<br>再解釈</div><div class="step-desc">newparade固有の<br>付加価値</div></div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step">
-      <div class="step-num">03</div>
-      <div class="step-title">企画</div>
-      <div class="step-desc">ブランド設計<br>プロモ企画<br>イベント企画</div>
-    </div>
+    <div class="flow-step"><div class="step-num">03</div><div class="step-title">企画</div><div class="step-desc">ブランド設計<br>プロモ企画<br>イベント企画</div></div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step">
-      <div class="step-num">04</div>
-      <div class="step-title">アウトプット</div>
-      <div class="step-desc">CI / KV / イベント<br>キャンペーン</div>
-    </div>
+    <div class="flow-step"><div class="step-num">04</div><div class="step-title">アウトプット</div><div class="step-desc">CI / KV / イベント<br>キャンペーン</div></div>
     <div class="flow-arrow">&rarr;</div>
-    <div class="flow-step">
-      <div class="step-num">05</div>
-      <div class="step-title">事業インパクト</div>
-      <div class="step-desc">売上・認知・<br>ブランド価値向上</div>
-    </div>
+    <div class="flow-step"><div class="step-num">05</div><div class="step-title">事業インパクト</div><div class="step-desc">売上・認知・<br>ブランド価値向上</div></div>
   </div>
   <div class="page-num">04 / 13</div>
 </div>
@@ -630,50 +324,10 @@
   <div class="label">Services</div>
   <h2>4つのサービス</h2>
   <div class="menu-grid">
-    <div class="menu-card">
-      <div class="menu-num">01</div>
-      <div class="menu-en">Produce</div>
-      <div class="menu-ja">企画・プロデュース</div>
-      <ul class="menu-items">
-        <li>事業企画</li>
-        <li>キャンペーン企画</li>
-        <li>コンテンツ企画</li>
-        <li>PJ設計・チーム組成</li>
-      </ul>
-    </div>
-    <div class="menu-card">
-      <div class="menu-num">02</div>
-      <div class="menu-en">Branding</div>
-      <div class="menu-ja">ブランドをつくる</div>
-      <ul class="menu-items">
-        <li>ブランドコンセプト</li>
-        <li>CI / VI</li>
-        <li>ガイドライン</li>
-        <li>ネーミング</li>
-      </ul>
-    </div>
-    <div class="menu-card">
-      <div class="menu-num">03</div>
-      <div class="menu-en">Creative Direction</div>
-      <div class="menu-ja">クリエイティブをつくる</div>
-      <ul class="menu-items">
-        <li>KV / メインビジュアル</li>
-        <li>広告クリエイティブ</li>
-        <li>アートディレクション</li>
-        <li>プロモーション</li>
-      </ul>
-    </div>
-    <div class="menu-card">
-      <div class="menu-num">04</div>
-      <div class="menu-en">Experience</div>
-      <div class="menu-ja">体験をつくる</div>
-      <ul class="menu-items">
-        <li>ポップアップ</li>
-        <li>イベント</li>
-        <li>空間デザイン</li>
-        <li>体験設計</li>
-      </ul>
-    </div>
+    <div class="menu-card"><div class="menu-num">01</div><div class="menu-en">Produce</div><div class="menu-ja">企画・プロデュース</div><ul class="menu-items"><li>事業企画</li><li>キャンペーン企画</li><li>コンテンツ企画</li><li>PJ設計・チーム組成</li></ul></div>
+    <div class="menu-card"><div class="menu-num">02</div><div class="menu-en">Branding</div><div class="menu-ja">ブランドをつくる</div><ul class="menu-items"><li>ブランドコンセプト</li><li>CI / VI</li><li>ガイドライン</li><li>ネーミング</li></ul></div>
+    <div class="menu-card"><div class="menu-num">03</div><div class="menu-en">Creative Direction</div><div class="menu-ja">クリエイティブをつくる</div><ul class="menu-items"><li>KV / メインビジュアル</li><li>広告クリエイティブ</li><li>アートディレクション</li><li>プロモーション</li></ul></div>
+    <div class="menu-card"><div class="menu-num">04</div><div class="menu-en">Experience</div><div class="menu-ja">体験をつくる</div><ul class="menu-items"><li>ポップアップ</li><li>イベント</li><li>空間デザイン</li><li>体験設計</li></ul></div>
   </div>
   <div class="page-num">05 / 13</div>
 </div>
@@ -696,25 +350,25 @@
         企画からクリエイティブの形にするまでを一気通貫で<br>
         プロデュースします。
       </p>
-      <span class="detail-tag">TANP — ブランド再定義プロジェクト</span>
     </div>
     <div class="detail-right">
       <div class="gallery" data-gallery>
         <div class="gallery-page active">
-          <div class="img-large"><img src="images/tanp-hero.jpg" alt="TANP"></div>
-          <div class="img-small"><img src="images/tanp-gifts.jpg" alt="TANP gifts"></div>
-          <div class="img-small"><img src="images/tanp-cards.jpg" alt="TANP cards"></div>
+          <div class="img-large"><img src="images/tanp-hero.jpg" alt="TANP"><span class="img-label">TANP</span></div>
+          <div class="img-small"><img src="images/tanp-gifts.jpg" alt="TANP"></div>
+          <div class="img-small"><img src="images/tanp-cards.jpg" alt="TANP"></div>
         </div>
         <div class="gallery-page">
-          <div class="img-large"><img src="images/tanp-products.jpg" alt="TANP products"></div>
-          <div class="img-small"><img src="images/tanp-fathers.jpg" alt="TANP Father's day"></div>
-          <div class="img-small"><img src="images/tanp-mothers.jpg" alt="TANP Mother's day"></div>
+          <div class="img-large"><img src="images/ego-exhibition.jpg" alt="ego graphica"><span class="img-label">ego graphica</span></div>
+          <div class="img-small"><img src="images/ego-dialogue.jpg" alt="ego graphica"></div>
+          <div class="img-small"><img src="images/ego-app.jpg" alt="ego graphica"></div>
         </div>
-        <div class="gallery-nav">
-          <div class="gallery-dots"></div>
-          <button class="gallery-btn" data-gallery-prev>&larr;</button>
-          <button class="gallery-btn" data-gallery-next>&rarr;</button>
+        <div class="gallery-page">
+          <div class="img-large"><img src="images/memstock-1.jpg" alt="memStock"><span class="img-label">memStock</span></div>
+          <div class="img-small"><img src="images/memstock-2.jpg" alt="memStock"></div>
+          <div class="img-small"><img src="images/memstock-3.jpg" alt="memStock"></div>
         </div>
+        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
       </div>
     </div>
   </div>
@@ -738,25 +392,25 @@
         ブランドの核をつくり、すべての接点に<br>
         一貫性を持たせます。
       </p>
-      <span class="detail-tag">ego graphica — BI/VI/ガイドライン構築</span>
     </div>
     <div class="detail-right">
       <div class="gallery" data-gallery>
         <div class="gallery-page active">
-          <div class="img-large"><img src="images/ego-exhibition.jpg" alt="ego graphica exhibition"></div>
-          <div class="img-small"><img src="images/ego-dialogue.jpg" alt="ego graphica app"></div>
-          <div class="img-small"><img src="images/ego-app.jpg" alt="ego graphica UI"></div>
+          <div class="img-large"><img src="images/ego-exhibition.jpg" alt="ego graphica"><span class="img-label">ego graphica</span></div>
+          <div class="img-small"><img src="images/ego-ooh-poster.jpg" alt="ego graphica"></div>
+          <div class="img-small"><img src="images/ego-app.jpg" alt="ego graphica"></div>
         </div>
         <div class="gallery-page">
-          <div class="img-large"><img src="images/ego-ooh-poster.jpg" alt="ego graphica poster"></div>
-          <div class="img-small"><img src="images/ego-ooh-billboard.jpg" alt="ego graphica billboard"></div>
-          <div class="img-small"><img src="images/ego-ooh-digital.jpg" alt="ego graphica digital"></div>
+          <div class="img-large"><img src="images/richill-model.jpg" alt="RICHILL"><span class="img-label">RICHILL</span></div>
+          <div class="img-small"><img src="images/richill-packages.jpg" alt="RICHILL"></div>
+          <div class="img-small"><img src="images/richill-product.jpg" alt="RICHILL"></div>
         </div>
-        <div class="gallery-nav">
-          <div class="gallery-dots"></div>
-          <button class="gallery-btn" data-gallery-prev>&larr;</button>
-          <button class="gallery-btn" data-gallery-next>&rarr;</button>
+        <div class="gallery-page">
+          <div class="img-large"><img src="images/tanp-hero.jpg" alt="TANP"><span class="img-label">TANP</span></div>
+          <div class="img-small"><img src="images/tanp-products.jpg" alt="TANP"></div>
+          <div class="img-small"><img src="images/tanp-cards.jpg" alt="TANP"></div>
         </div>
+        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
       </div>
     </div>
   </div>
@@ -780,25 +434,25 @@
         キャンペーンやプロモーションの<br>
         クリエイティブ全体を統括します。
       </p>
-      <span class="detail-tag">ego graphica — OOH / 広告クリエイティブ</span>
     </div>
     <div class="detail-right">
       <div class="gallery" data-gallery>
         <div class="gallery-page active">
-          <div class="img-large"><img src="images/ego-ooh-store.jpg" alt="ego graphica store"></div>
-          <div class="img-small"><img src="images/ego-ooh-station.jpg" alt="ego graphica station"></div>
-          <div class="img-small"><img src="images/ego-ooh-billboard.jpg" alt="ego graphica billboard"></div>
+          <div class="img-large"><img src="images/ego-ooh-store.jpg" alt="ego graphica"><span class="img-label">ego graphica OOH</span></div>
+          <div class="img-small"><img src="images/ego-ooh-station.jpg" alt="ego graphica"></div>
+          <div class="img-small"><img src="images/ego-ooh-billboard.jpg" alt="ego graphica"></div>
         </div>
         <div class="gallery-page">
-          <div class="img-large"><img src="images/ego-ooh-digital.jpg" alt="ego graphica digital"></div>
-          <div class="img-small"><img src="images/ego-ooh-poster.jpg" alt="ego graphica poster"></div>
-          <div class="img-small"><img src="images/ego-exhibition.jpg" alt="ego graphica exhibition"></div>
+          <div class="img-large"><img src="images/richill-strawberry.jpg" alt="RICHILL"><span class="img-label">RICHILL</span></div>
+          <div class="img-small"><img src="images/richill-grape.jpg" alt="RICHILL"></div>
+          <div class="img-small"><img src="images/richill-cake.jpg" alt="RICHILL"></div>
         </div>
-        <div class="gallery-nav">
-          <div class="gallery-dots"></div>
-          <button class="gallery-btn" data-gallery-prev>&larr;</button>
-          <button class="gallery-btn" data-gallery-next>&rarr;</button>
+        <div class="gallery-page">
+          <div class="img-large"><img src="images/tanp-gifts.jpg" alt="TANP"><span class="img-label">TANP</span></div>
+          <div class="img-small"><img src="images/tanp-fathers.jpg" alt="TANP"></div>
+          <div class="img-small"><img src="images/tanp-mothers.jpg" alt="TANP"></div>
         </div>
+        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
       </div>
     </div>
   </div>
@@ -822,25 +476,25 @@
         ブランドの世界観を体感できる<br>
         場をつくります。
       </p>
-      <span class="detail-tag">RICHILL — プロダクト&体験設計</span>
     </div>
     <div class="detail-right">
       <div class="gallery" data-gallery>
         <div class="gallery-page active">
-          <div class="img-large"><img src="images/richill-model.jpg" alt="RICHILL model"></div>
-          <div class="img-small"><img src="images/richill-product.jpg" alt="RICHILL product"></div>
-          <div class="img-small"><img src="images/richill-packages.jpg" alt="RICHILL packages"></div>
+          <div class="img-large"><img src="images/richill-model.jpg" alt="RICHILL"><span class="img-label">RICHILL</span></div>
+          <div class="img-small"><img src="images/richill-product.jpg" alt="RICHILL"></div>
+          <div class="img-small"><img src="images/richill-packages.jpg" alt="RICHILL"></div>
         </div>
         <div class="gallery-page">
-          <div class="img-large"><img src="images/richill-strawberry.jpg" alt="RICHILL strawberry"></div>
-          <div class="img-small"><img src="images/richill-grape.jpg" alt="RICHILL grape"></div>
-          <div class="img-small"><img src="images/richill-cake.jpg" alt="RICHILL cake"></div>
+          <div class="img-large"><img src="images/ego-ooh-digital.jpg" alt="ego graphica"><span class="img-label">ego graphica Exhibition</span></div>
+          <div class="img-small"><img src="images/ego-exhibition.jpg" alt="ego graphica"></div>
+          <div class="img-small"><img src="images/ego-ooh-store.jpg" alt="ego graphica"></div>
         </div>
-        <div class="gallery-nav">
-          <div class="gallery-dots"></div>
-          <button class="gallery-btn" data-gallery-prev>&larr;</button>
-          <button class="gallery-btn" data-gallery-next>&rarr;</button>
+        <div class="gallery-page">
+          <div class="img-large"><img src="images/pickyou-1.jpg" alt="pickyou"><span class="img-label">pickyou</span></div>
+          <div class="img-small"><img src="images/pickyou-2.jpg" alt="pickyou"></div>
+          <div class="img-small"><img src="images/memstock-1.jpg" alt="memStock"></div>
         </div>
+        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
       </div>
     </div>
   </div>
@@ -854,43 +508,26 @@
       <div class="gallery" data-gallery>
         <div class="gallery-page active">
           <div class="img-large"><img src="images/tanp-hero.jpg" alt="TANP"></div>
-          <div class="img-small"><img src="images/tanp-gifts.jpg" alt="TANP gifts"></div>
-          <div class="img-small"><img src="images/tanp-cards.jpg" alt="TANP cards"></div>
+          <div class="img-small"><img src="images/tanp-gifts.jpg" alt="TANP"></div>
+          <div class="img-small"><img src="images/tanp-cards.jpg" alt="TANP"></div>
         </div>
         <div class="gallery-page">
-          <div class="img-large"><img src="images/tanp-products.jpg" alt="TANP products"></div>
-          <div class="img-small"><img src="images/tanp-fathers.jpg" alt="TANP fathers"></div>
-          <div class="img-small"><img src="images/tanp-mothers.jpg" alt="TANP mothers"></div>
+          <div class="img-large"><img src="images/tanp-products.jpg" alt="TANP"></div>
+          <div class="img-small"><img src="images/tanp-fathers.jpg" alt="TANP"></div>
+          <div class="img-small"><img src="images/tanp-mothers.jpg" alt="TANP"></div>
         </div>
-        <div class="gallery-nav">
-          <div class="gallery-dots"></div>
-          <button class="gallery-btn" data-gallery-prev>&larr;</button>
-          <button class="gallery-btn" data-gallery-next>&rarr;</button>
-        </div>
+        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
       </div>
     </div>
     <div class="case-info">
       <div class="case-client">Case Study 01</div>
       <h2>TANP</h2>
       <div class="case-flow">
-        <div class="case-flow-item">
-          <div class="cfi-label">Challenge</div>
-          <div class="cfi-text">事業成長に伴うブランドの一貫性不足。ギフト市場No.1を目指すためのブランド基盤構築</div>
-        </div>
-        <div class="case-flow-item">
-          <div class="cfi-label">Approach</div>
-          <div class="cfi-text">ブランドコアの設計からVI策定、サイト内外の展開デザインまでを一気通貫でプロデュース</div>
-        </div>
-        <div class="case-flow-item">
-          <div class="cfi-label">Output</div>
-          <div class="cfi-text">BI設計 / CI・VI / ガイドライン / サイトデザイン / 展開物</div>
-        </div>
+        <div class="case-flow-item"><div class="cfi-label">Challenge</div><div class="cfi-text">事業成長に伴うブランドの一貫性不足。ギフト市場No.1を目指すためのブランド基盤構築</div></div>
+        <div class="case-flow-item"><div class="cfi-label">Approach</div><div class="cfi-text">ブランドコアの設計からVI策定、サイト内外の展開デザインまでを一気通貫でプロデュース</div></div>
+        <div class="case-flow-item"><div class="cfi-label">Output</div><div class="cfi-text">BI設計 / CI・VI / ガイドライン / サイトデザイン / 展開物</div></div>
       </div>
-      <div class="case-services">
-        <span class="case-service-tag">Produce</span>
-        <span class="case-service-tag">Branding</span>
-        <span class="case-service-tag">Creative Direction</span>
-      </div>
+      <div class="case-services"><span class="case-service-tag">Produce</span><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
     </div>
   </div>
   <div class="page-num">10 / 13</div>
@@ -903,43 +540,26 @@
       <div class="gallery" data-gallery>
         <div class="gallery-page active">
           <div class="img-large"><img src="images/ego-exhibition.jpg" alt="ego graphica"></div>
-          <div class="img-small"><img src="images/ego-dialogue.jpg" alt="ego graphica app"></div>
-          <div class="img-small"><img src="images/ego-ooh-store.jpg" alt="ego graphica store"></div>
+          <div class="img-small"><img src="images/ego-dialogue.jpg" alt="ego graphica"></div>
+          <div class="img-small"><img src="images/ego-ooh-store.jpg" alt="ego graphica"></div>
         </div>
         <div class="gallery-page">
-          <div class="img-large"><img src="images/ego-ooh-poster.jpg" alt="ego graphica poster"></div>
-          <div class="img-small"><img src="images/ego-app.jpg" alt="ego graphica UI"></div>
-          <div class="img-small"><img src="images/ego-ooh-digital.jpg" alt="ego graphica digital"></div>
+          <div class="img-large"><img src="images/ego-ooh-poster.jpg" alt="ego graphica"></div>
+          <div class="img-small"><img src="images/ego-app.jpg" alt="ego graphica"></div>
+          <div class="img-small"><img src="images/ego-ooh-digital.jpg" alt="ego graphica"></div>
         </div>
-        <div class="gallery-nav">
-          <div class="gallery-dots"></div>
-          <button class="gallery-btn" data-gallery-prev>&larr;</button>
-          <button class="gallery-btn" data-gallery-next>&rarr;</button>
-        </div>
+        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
       </div>
     </div>
     <div class="case-info">
       <div class="case-client">Case Study 02</div>
       <h2>ego graphica</h2>
       <div class="case-flow">
-        <div class="case-flow-item">
-          <div class="cfi-label">Challenge</div>
-          <div class="cfi-text">アート体験を「鑑賞」から「関与」へ再定義する次世代プラットフォームの世界観構築</div>
-        </div>
-        <div class="case-flow-item">
-          <div class="cfi-label">Approach</div>
-          <div class="cfi-text">ブランドの思想構築からVI策定、Web・プラットフォームのデザイン実装、OOH展開まで包括的に支援</div>
-        </div>
-        <div class="case-flow-item">
-          <div class="cfi-label">Output</div>
-          <div class="cfi-text">BI / CI・VI / Web / アプリUI / OOH / 展示空間設計</div>
-        </div>
+        <div class="case-flow-item"><div class="cfi-label">Challenge</div><div class="cfi-text">アート体験を「鑑賞」から「関与」へ再定義する次世代プラットフォームの世界観構築</div></div>
+        <div class="case-flow-item"><div class="cfi-label">Approach</div><div class="cfi-text">ブランドの思想構築からVI策定、Web・プラットフォームのデザイン実装、OOH展開まで包括的に支援</div></div>
+        <div class="case-flow-item"><div class="cfi-label">Output</div><div class="cfi-text">BI / CI・VI / Web / アプリUI / OOH / 展示空間設計</div></div>
       </div>
-      <div class="case-services">
-        <span class="case-service-tag">Produce</span>
-        <span class="case-service-tag">Branding</span>
-        <span class="case-service-tag">Creative Direction</span>
-      </div>
+      <div class="case-services"><span class="case-service-tag">Produce</span><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
     </div>
   </div>
   <div class="page-num">11 / 13</div>
@@ -952,43 +572,26 @@
       <div class="gallery" data-gallery>
         <div class="gallery-page active">
           <div class="img-large"><img src="images/richill-model.jpg" alt="RICHILL"></div>
-          <div class="img-small"><img src="images/richill-product.jpg" alt="RICHILL product"></div>
-          <div class="img-small"><img src="images/richill-packages.jpg" alt="RICHILL packages"></div>
+          <div class="img-small"><img src="images/richill-product.jpg" alt="RICHILL"></div>
+          <div class="img-small"><img src="images/richill-packages.jpg" alt="RICHILL"></div>
         </div>
         <div class="gallery-page">
-          <div class="img-large"><img src="images/richill-strawberry.jpg" alt="RICHILL strawberry"></div>
-          <div class="img-small"><img src="images/richill-grape.jpg" alt="RICHILL grape"></div>
-          <div class="img-small"><img src="images/richill-cake.jpg" alt="RICHILL cake"></div>
+          <div class="img-large"><img src="images/richill-strawberry.jpg" alt="RICHILL"></div>
+          <div class="img-small"><img src="images/richill-grape.jpg" alt="RICHILL"></div>
+          <div class="img-small"><img src="images/richill-cake.jpg" alt="RICHILL"></div>
         </div>
-        <div class="gallery-nav">
-          <div class="gallery-dots"></div>
-          <button class="gallery-btn" data-gallery-prev>&larr;</button>
-          <button class="gallery-btn" data-gallery-next>&rarr;</button>
-        </div>
+        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
       </div>
     </div>
     <div class="case-info">
       <div class="case-client">Case Study 03</div>
       <h2>RICHILL</h2>
       <div class="case-flow">
-        <div class="case-flow-item">
-          <div class="cfi-label">Challenge</div>
-          <div class="cfi-text">CBDベイプブランドのプロダクトデザインおよびブランド視覚体験の設計</div>
-        </div>
-        <div class="case-flow-item">
-          <div class="cfi-label">Approach</div>
-          <div class="cfi-text">単なる喫煙具ではなく、日常に溶け込む「ライフスタイル・ツール」としての佇まいを追求</div>
-        </div>
-        <div class="case-flow-item">
-          <div class="cfi-label">Output</div>
-          <div class="cfi-text">プロダクトデザイン / パッケージ / ブランド体験設計</div>
-        </div>
+        <div class="case-flow-item"><div class="cfi-label">Challenge</div><div class="cfi-text">CBDベイプブランドのプロダクトデザインおよびブランド視覚体験の設計</div></div>
+        <div class="case-flow-item"><div class="cfi-label">Approach</div><div class="cfi-text">単なる喫煙具ではなく、日常に溶け込む「ライフスタイル・ツール」としての佇まいを追求</div></div>
+        <div class="case-flow-item"><div class="cfi-label">Output</div><div class="cfi-text">プロダクトデザイン / パッケージ / ブランド体験設計</div></div>
       </div>
-      <div class="case-services">
-        <span class="case-service-tag">Branding</span>
-        <span class="case-service-tag">Creative Direction</span>
-        <span class="case-service-tag">Experience</span>
-      </div>
+      <div class="case-services"><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span><span class="case-service-tag">Experience</span></div>
     </div>
   </div>
   <div class="page-num">12 / 13</div>
@@ -999,18 +602,9 @@
   <div class="label">Get in Touch</div>
   <h1>Let's Create<br>Together.</h1>
   <div class="contact-info">
-    <div class="contact-item">
-      <div class="ci-label">Email</div>
-      <div class="ci-value">hello@newparade.jp</div>
-    </div>
-    <div class="contact-item">
-      <div class="ci-label">Web</div>
-      <div class="ci-value">newparade.jp</div>
-    </div>
-    <div class="contact-item">
-      <div class="ci-label">Location</div>
-      <div class="ci-value">Tokyo, Japan</div>
-    </div>
+    <div class="contact-item"><div class="ci-label">Email</div><div class="ci-value">hello@newparade.jp</div></div>
+    <div class="contact-item"><div class="ci-label">Web</div><div class="ci-value">newparade.jp</div></div>
+    <div class="contact-item"><div class="ci-label">Location</div><div class="ci-value">Tokyo, Japan</div></div>
   </div>
   <div class="page-num">13 / 13</div>
 </div>
@@ -1023,49 +617,33 @@
 </div>
 
 <script>
-  // Slide navigation
   let current = 1;
   const total = 13;
-
   function showSlide(n) {
     document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
     document.querySelector(`[data-slide="${n}"]`).classList.add('active');
     document.getElementById('current').textContent = n;
   }
-
-  document.getElementById('next').addEventListener('click', () => {
-    if (current < total) { current++; showSlide(current); }
-  });
-  document.getElementById('prev').addEventListener('click', () => {
-    if (current > 1) { current--; showSlide(current); }
-  });
-
+  document.getElementById('next').addEventListener('click', () => { if (current < total) { current++; showSlide(current); } });
+  document.getElementById('prev').addEventListener('click', () => { if (current > 1) { current--; showSlide(current); } });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight' || e.key === ' ') {
-      e.preventDefault();
-      if (current < total) { current++; showSlide(current); }
-    }
-    if (e.key === 'ArrowLeft') {
-      if (current > 1) { current--; showSlide(current); }
-    }
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (current < total) { current++; showSlide(current); } }
+    if (e.key === 'ArrowLeft') { if (current > 1) { current--; showSlide(current); } }
   });
 
-  // Gallery carousel
+  // Gallery
   document.querySelectorAll('[data-gallery]').forEach(gallery => {
     const pages = gallery.querySelectorAll('.gallery-page');
     const dotsContainer = gallery.querySelector('.gallery-dots');
     const prevBtn = gallery.querySelector('[data-gallery-prev]');
     const nextBtn = gallery.querySelector('[data-gallery-next]');
     let idx = 0;
-
-    // Create dots
     pages.forEach((_, i) => {
       const dot = document.createElement('button');
       dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
       dot.addEventListener('click', (e) => { e.stopPropagation(); goTo(i); });
       dotsContainer.appendChild(dot);
     });
-
     function goTo(n) {
       pages[idx].classList.remove('active');
       dotsContainer.children[idx].classList.remove('active');
@@ -1073,7 +651,6 @@
       pages[idx].classList.add('active');
       dotsContainer.children[idx].classList.add('active');
     }
-
     prevBtn.addEventListener('click', (e) => { e.stopPropagation(); goTo(idx - 1); });
     nextBtn.addEventListener('click', (e) => { e.stopPropagation(); goTo(idx + 1); });
   });
