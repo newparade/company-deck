@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>newparade - Company Deck</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --black: #0a0a0a;
+    --white: #f8f7f4;
+    --gray: #888;
+    --gray-light: #c8c8c8;
+    --gray-dark: #333;
+    --accent: #e8e4dd;
+  }
+
+  body {
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    background: var(--black);
+    color: var(--white);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .slide {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    padding: 60px 80px;
+    position: relative;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .slide.active { display: flex; }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    bottom: 30px;
+    right: 40px;
+    z-index: 100;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .nav button {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+  .nav button:hover { background: rgba(255,255,255,0.2); }
+  .nav .counter {
+    color: var(--gray);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+
+  /* Page number */
+  .page-num {
+    position: absolute;
+    bottom: 30px;
+    left: 80px;
+    color: var(--gray);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 72px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  h2 {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 40px;
+  }
+  h3 {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+  p {
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--gray-light);
+    font-weight: 300;
+  }
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  /* Slide 1: Cover */
+  .slide-cover {
+    justify-content: flex-end;
+    padding-bottom: 120px;
+  }
+  .slide-cover .logo {
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 24px;
+    color: var(--gray-light);
+  }
+  .slide-cover h1 {
+    font-size: 80px;
+    margin-bottom: 16px;
+  }
+  .slide-cover .sub {
+    font-size: 20px;
+    color: var(--gray);
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+  .cover-line {
+    position: absolute;
+    top: 0;
+    right: 30%;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.06), transparent);
+  }
+
+  /* Slide 2: About */
+  .slide-about .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .about-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 40px;
+  }
+  .about-meta-item .meta-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 6px;
+  }
+  .about-meta-item .meta-value {
+    font-size: 15px;
+    color: var(--white);
+    font-weight: 400;
+  }
+  .culture-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 32px;
+  }
+  .culture-tag {
+    padding: 8px 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--gray-light);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  /* Slide 3: Concept */
+  .slide-concept {
+    text-align: center;
+    align-items: center;
+  }
+  .concept-copy {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    margin-bottom: 48px;
+  }
+  .concept-copy span {
+    color: var(--gray);
+  }
+  .concept-desc {
+    max-width: 700px;
+    text-align: center;
+    font-size: 16px;
+    line-height: 2;
+  }
+  .concept-pillars {
+    display: flex;
+    gap: 60px;
+    margin-top: 56px;
+  }
+  .concept-pillar {
+    text-align: center;
+  }
+  .concept-pillar .pillar-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+  .concept-pillar .pillar-label {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 6px;
+  }
+  .concept-pillar .pillar-text {
+    font-size: 14px;
+    color: var(--gray-light);
+  }
+
+  /* Slide 4: Value Flow */
+  .flow-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 48px;
+  }
+  .flow-step {
+    text-align: center;
+    padding: 32px 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    width: 200px;
+  }
+  .flow-step.highlight {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+  }
+  .flow-step .step-num {
+    font-size: 11px;
+    color: var(--gray);
+    letter-spacing: 0.15em;
+    margin-bottom: 12px;
+  }
+  .flow-step .step-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .flow-step .step-desc {
+    font-size: 12px;
+    color: var(--gray);
+    line-height: 1.6;
+  }
+  .flow-arrow {
+    color: var(--gray);
+    font-size: 20px;
+  }
+
+  /* Slide 5: Menu Overview */
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+  }
+  .menu-card {
+    padding: 40px 32px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    transition: all 0.3s;
+  }
+  .menu-card:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.15);
+  }
+  .menu-card .menu-num {
+    font-size: 48px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.08);
+    margin-bottom: 20px;
+    line-height: 1;
+  }
+  .menu-card .menu-en {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .menu-card .menu-ja {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 20px;
+  }
+  .menu-card .menu-items {
+    list-style: none;
+    font-size: 12px;
+    color: var(--gray-light);
+    line-height: 2;
+  }
+
+  /* Slide 6-9: Menu Detail */
+  .detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    height: 100%;
+  }
+  .detail-left h2 { margin-bottom: 12px; }
+  .detail-left .detail-ja {
+    font-size: 16px;
+    color: var(--gray);
+    margin-bottom: 32px;
+  }
+  .detail-items {
+    list-style: none;
+    margin-bottom: 32px;
+  }
+  .detail-items li {
+    font-size: 15px;
+    color: var(--gray-light);
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-weight: 300;
+  }
+  .detail-right {
+    background: rgba(255,255,255,0.04);
+    border-radius: 20px;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .detail-right .placeholder {
+    color: var(--gray);
+    font-size: 14px;
+    text-align: center;
+    line-height: 1.8;
+  }
+  .detail-tag {
+    display: inline-block;
+    padding: 6px 16px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--gray-light);
+    margin-top: 8px;
+  }
+
+  /* Slide 10-12: Case Study */
+  .case-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    height: 100%;
+  }
+  .case-visual {
+    background: rgba(255,255,255,0.04);
+    border-radius: 20px;
+    height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .case-visual .placeholder {
+    color: var(--gray);
+    font-size: 14px;
+  }
+  .case-info .case-client {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 16px;
+  }
+  .case-info h2 { margin-bottom: 32px; }
+  .case-flow {
+    margin-bottom: 32px;
+  }
+  .case-flow-item {
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .case-flow-item .cfi-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 6px;
+  }
+  .case-flow-item .cfi-text {
+    font-size: 15px;
+    color: var(--gray-light);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+  .case-services {
+    display: flex;
+    gap: 8px;
+  }
+  .case-service-tag {
+    padding: 6px 16px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--gray-light);
+  }
+
+  /* Slide 13: Contact */
+  .slide-contact {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .slide-contact h1 {
+    font-size: 64px;
+    margin-bottom: 40px;
+  }
+  .contact-info {
+    display: flex;
+    gap: 60px;
+    margin-top: 20px;
+  }
+  .contact-item .ci-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 8px;
+  }
+  .contact-item .ci-value {
+    font-size: 16px;
+    color: var(--gray-light);
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Cover -->
+<div class="slide slide-cover active" data-slide="1">
+  <div class="cover-line"></div>
+  <div class="logo">newparade</div>
+  <h1>Creative<br>Boutique</h1>
+  <p class="sub">Company Deck 2026</p>
+  <div class="page-num">01 / 13</div>
+</div>
+
+<!-- SLIDE 2: About -->
+<div class="slide slide-about" data-slide="2">
+  <div class="about-grid">
+    <div>
+      <div class="label">Who We Are</div>
+      <h2>カルチャー・ライフスタイル<br>領域に特化した<br>クリエイティブブティック</h2>
+      <p>カルチャーに精通したクリエイターが、企画からクリエイティブまで一気通貫で手がけます。</p>
+      <div class="culture-tags">
+        <span class="culture-tag">City Culture</span>
+        <span class="culture-tag">Subculture</span>
+        <span class="culture-tag">Entertainment</span>
+        <span class="culture-tag">Street</span>
+      </div>
+    </div>
+    <div>
+      <div class="about-meta">
+        <div class="about-meta-item">
+          <div class="meta-label">Founded</div>
+          <div class="meta-value">2023</div>
+        </div>
+        <div class="about-meta-item">
+          <div class="meta-label">Location</div>
+          <div class="meta-value">Tokyo</div>
+        </div>
+        <div class="about-meta-item">
+          <div class="meta-label">Team</div>
+          <div class="meta-value">Creative Boutique Div.</div>
+        </div>
+        <div class="about-meta-item">
+          <div class="meta-label">Strength</div>
+          <div class="meta-value">Strategy + Creative + Sense</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">02 / 13</div>
+</div>
+
+<!-- SLIDE 3: Concept -->
+<div class="slide slide-concept" data-slide="3">
+  <div class="label">Our Concept</div>
+  <div class="concept-copy">
+    企画する。<span>つくる。</span>届ける。
+  </div>
+  <p class="concept-desc">
+    すべてのプロジェクトに、プロデュース × クリエイティブディレクションで上流から参画。<br>
+    カルチャーの目線で事業課題を再解釈し、企画して、形にします。
+  </p>
+  <div class="concept-pillars">
+    <div class="concept-pillar">
+      <div class="pillar-label">vs Consultant</div>
+      <div class="pillar-text">企画だけでなく「形にする」</div>
+    </div>
+    <div class="concept-pillar">
+      <div class="pillar-label">vs Production</div>
+      <div class="pillar-text">作るだけでなく「上流から企画する」</div>
+    </div>
+    <div class="concept-pillar">
+      <div class="pillar-label">vs Agency</div>
+      <div class="pillar-text">カルチャーの感性で「再解釈する」</div>
+    </div>
+  </div>
+  <div class="page-num">03 / 13</div>
+</div>
+
+<!-- SLIDE 4: Value Flow -->
+<div class="slide" data-slide="4">
+  <div class="label">How We Create Value</div>
+  <h2 style="text-align:center;">価値提供の流れ</h2>
+  <div class="flow-container">
+    <div class="flow-step">
+      <div class="step-num">01</div>
+      <div class="step-title">事業課題</div>
+      <div class="step-desc">クライアントが<br>抱える課題</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step highlight">
+      <div class="step-num">02</div>
+      <div class="step-title">カルチャーの目線で<br>再解釈</div>
+      <div class="step-desc">newparade固有の<br>付加価値</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-num">03</div>
+      <div class="step-title">企画</div>
+      <div class="step-desc">ブランド設計<br>プロモ企画<br>イベント企画</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-num">04</div>
+      <div class="step-title">アウトプット</div>
+      <div class="step-desc">CI / KV / イベント<br>キャンペーン</div>
+    </div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">
+      <div class="step-num">05</div>
+      <div class="step-title">事業インパクト</div>
+      <div class="step-desc">売上・認知・<br>ブランド価値向上</div>
+    </div>
+  </div>
+  <div class="page-num">04 / 13</div>
+</div>
+
+<!-- SLIDE 5: Menu Overview -->
+<div class="slide" data-slide="5">
+  <div class="label">Services</div>
+  <h2>4つのサービス</h2>
+  <div class="menu-grid">
+    <div class="menu-card">
+      <div class="menu-num">01</div>
+      <div class="menu-en">Produce</div>
+      <div class="menu-ja">企画・プロデュース</div>
+      <ul class="menu-items">
+        <li>事業企画</li>
+        <li>キャンペーン企画</li>
+        <li>コンテンツ企画</li>
+        <li>PJ設計・チーム組成</li>
+      </ul>
+    </div>
+    <div class="menu-card">
+      <div class="menu-num">02</div>
+      <div class="menu-en">Branding</div>
+      <div class="menu-ja">ブランドをつくる</div>
+      <ul class="menu-items">
+        <li>ブランドコンセプト</li>
+        <li>CI / VI</li>
+        <li>ガイドライン</li>
+        <li>ネーミング</li>
+      </ul>
+    </div>
+    <div class="menu-card">
+      <div class="menu-num">03</div>
+      <div class="menu-en">Creative Direction</div>
+      <div class="menu-ja">クリエイティブをつくる</div>
+      <ul class="menu-items">
+        <li>KV / メインビジュアル</li>
+        <li>広告クリエイティブ</li>
+        <li>アートディレクション</li>
+        <li>プロモーション</li>
+      </ul>
+    </div>
+    <div class="menu-card">
+      <div class="menu-num">04</div>
+      <div class="menu-en">Experience</div>
+      <div class="menu-ja">体験をつくる</div>
+      <ul class="menu-items">
+        <li>ポップアップ</li>
+        <li>イベント</li>
+        <li>空間デザイン</li>
+        <li>体験設計</li>
+      </ul>
+    </div>
+  </div>
+  <div class="page-num">05 / 13</div>
+</div>
+
+<!-- SLIDE 6: Produce Detail -->
+<div class="slide" data-slide="6">
+  <div class="detail-layout">
+    <div class="detail-left">
+      <div class="label">Service 01</div>
+      <h2>Produce</h2>
+      <p class="detail-ja">企画・プロデュース</p>
+      <ul class="detail-items">
+        <li>事業 / ブランド課題の言語化</li>
+        <li>プロジェクト設計・チーム組成</li>
+        <li>企画立案・コンセプトメイキング</li>
+        <li>プロジェクト進行・品質管理</li>
+      </ul>
+      <p style="font-size:14px; color:var(--gray); line-height:1.8;">
+        カルチャーのセンスを活かし、事業やキャンペーンの<br>
+        企画からクリエイティブの形にするまでを一気通貫で<br>
+        プロデュースします。
+      </p>
+    </div>
+    <div class="detail-right">
+      <div class="placeholder">Work Image<br><br>SEGAFREDO<br>来店体験の全体設計</div>
+    </div>
+  </div>
+  <div class="page-num">06 / 13</div>
+</div>
+
+<!-- SLIDE 7: Branding Detail -->
+<div class="slide" data-slide="7">
+  <div class="detail-layout">
+    <div class="detail-left">
+      <div class="label">Service 02</div>
+      <h2>Branding</h2>
+      <p class="detail-ja">ブランドをつくる</p>
+      <ul class="detail-items">
+        <li>ブランドコンセプト・ストーリー設計</li>
+        <li>CI / VI（ロゴ・カラー・タイポグラフィ）</li>
+        <li>ブランドガイドライン策定</li>
+        <li>ネーミング・コピーライティング</li>
+      </ul>
+      <p style="font-size:14px; color:var(--gray); line-height:1.8;">
+        ブランドの核をつくり、すべての接点に<br>
+        一貫性を持たせます。
+      </p>
+    </div>
+    <div class="detail-right">
+      <div class="placeholder">Work Image<br><br>ego graphica / NEKASÉ-HI<br>ゼロからのブランド構築</div>
+    </div>
+  </div>
+  <div class="page-num">07 / 13</div>
+</div>
+
+<!-- SLIDE 8: Creative Direction Detail -->
+<div class="slide" data-slide="8">
+  <div class="detail-layout">
+    <div class="detail-left">
+      <div class="label">Service 03</div>
+      <h2>Creative Direction</h2>
+      <p class="detail-ja">クリエイティブをつくる</p>
+      <ul class="detail-items">
+        <li>コミュニケーション戦略設計</li>
+        <li>キービジュアル・メインビジュアル開発</li>
+        <li>広告クリエイティブ（OOH / Web / SNS）</li>
+        <li>アートディレクション</li>
+      </ul>
+      <p style="font-size:14px; color:var(--gray); line-height:1.8;">
+        キャンペーンやプロモーションの<br>
+        クリエイティブ全体を統括します。
+      </p>
+    </div>
+    <div class="detail-right">
+      <div class="placeholder">Work Image<br><br>TwitCasting OOH<br>企画からクリエイティブ制作まで</div>
+    </div>
+  </div>
+  <div class="page-num">08 / 13</div>
+</div>
+
+<!-- SLIDE 9: Experience Detail -->
+<div class="slide" data-slide="9">
+  <div class="detail-layout">
+    <div class="detail-left">
+      <div class="label">Service 04</div>
+      <h2>Experience</h2>
+      <p class="detail-ja">体験をつくる</p>
+      <ul class="detail-items">
+        <li>ポップアップストア企画・設計</li>
+        <li>展示・インスタレーション</li>
+        <li>パーティー・ローンチイベント</li>
+        <li>空間デザイン・体験設計</li>
+      </ul>
+      <p style="font-size:14px; color:var(--gray); line-height:1.8;">
+        ブランドの世界観を体感できる<br>
+        場をつくります。
+      </p>
+    </div>
+    <div class="detail-right">
+      <div class="placeholder">Work Image<br><br>Coming Soon</div>
+    </div>
+  </div>
+  <div class="page-num">09 / 13</div>
+</div>
+
+<!-- SLIDE 10: Case Study 1 -->
+<div class="slide" data-slide="10">
+  <div class="case-layout">
+    <div class="case-visual">
+      <div class="placeholder">Project Visual</div>
+    </div>
+    <div class="case-info">
+      <div class="case-client">Case Study 01</div>
+      <h2>SEGAFREDO</h2>
+      <div class="case-flow">
+        <div class="case-flow-item">
+          <div class="cfi-label">Challenge</div>
+          <div class="cfi-text">既存顧客のリピート率・客単価の向上</div>
+        </div>
+        <div class="case-flow-item">
+          <div class="cfi-label">Approach</div>
+          <div class="cfi-text">デザインではなく来店体験全体から再設計。カルチャーの目線でカフェ体験を再解釈</div>
+        </div>
+        <div class="case-flow-item">
+          <div class="cfi-label">Output</div>
+          <div class="cfi-text">来店体験設計 / ブランディング / 店舗デザイン</div>
+        </div>
+      </div>
+      <div class="case-services">
+        <span class="case-service-tag">Produce</span>
+        <span class="case-service-tag">Branding</span>
+        <span class="case-service-tag">Experience</span>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">10 / 13</div>
+</div>
+
+<!-- SLIDE 11: Case Study 2 -->
+<div class="slide" data-slide="11">
+  <div class="case-layout">
+    <div class="case-visual">
+      <div class="placeholder">Project Visual</div>
+    </div>
+    <div class="case-info">
+      <div class="case-client">Case Study 02</div>
+      <h2>ego graphica</h2>
+      <div class="case-flow">
+        <div class="case-flow-item">
+          <div class="cfi-label">Challenge</div>
+          <div class="cfi-text">新規ブランドの世界観構築</div>
+        </div>
+        <div class="case-flow-item">
+          <div class="cfi-label">Approach</div>
+          <div class="cfi-text">ブランドコンセプトの設計からVI・ガイドラインまで一気通貫で構築</div>
+        </div>
+        <div class="case-flow-item">
+          <div class="cfi-label">Output</div>
+          <div class="cfi-text">ブランドコンセプト / CI・VI / ガイドライン</div>
+        </div>
+      </div>
+      <div class="case-services">
+        <span class="case-service-tag">Branding</span>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">11 / 13</div>
+</div>
+
+<!-- SLIDE 12: Case Study 3 -->
+<div class="slide" data-slide="12">
+  <div class="case-layout">
+    <div class="case-visual">
+      <div class="placeholder">Project Visual</div>
+    </div>
+    <div class="case-info">
+      <div class="case-client">Case Study 03</div>
+      <h2>TwitCasting OOH</h2>
+      <div class="case-flow">
+        <div class="case-flow-item">
+          <div class="cfi-label">Challenge</div>
+          <div class="cfi-text">配信サービスの認知拡大・ブランドイメージ刷新</div>
+        </div>
+        <div class="case-flow-item">
+          <div class="cfi-label">Approach</div>
+          <div class="cfi-text">企画立案からクリエイティブ制作までを一気通貫で担当</div>
+        </div>
+        <div class="case-flow-item">
+          <div class="cfi-label">Output</div>
+          <div class="cfi-text">OOHクリエイティブ / キャンペーン企画</div>
+        </div>
+      </div>
+      <div class="case-services">
+        <span class="case-service-tag">Produce</span>
+        <span class="case-service-tag">Creative Direction</span>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">12 / 13</div>
+</div>
+
+<!-- SLIDE 13: Contact -->
+<div class="slide slide-contact" data-slide="13">
+  <div class="label">Get in Touch</div>
+  <h1>Let's Create<br>Together.</h1>
+  <div class="contact-info">
+    <div class="contact-item">
+      <div class="ci-label">Email</div>
+      <div class="ci-value">hello@newparade.jp</div>
+    </div>
+    <div class="contact-item">
+      <div class="ci-label">Web</div>
+      <div class="ci-value">newparade.jp</div>
+    </div>
+    <div class="contact-item">
+      <div class="ci-label">Location</div>
+      <div class="ci-value">Tokyo, Japan</div>
+    </div>
+  </div>
+  <div class="page-num">13 / 13</div>
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <span class="counter"><span id="current">1</span> / 13</span>
+  <button id="prev">&larr;</button>
+  <button id="next">&rarr;</button>
+</div>
+
+<script>
+  let current = 1;
+  const total = 13;
+
+  function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    document.querySelector(`[data-slide="${n}"]`).classList.add('active');
+    document.getElementById('current').textContent = n;
+  }
+
+  document.getElementById('next').addEventListener('click', () => {
+    if (current < total) { current++; showSlide(current); }
+  });
+  document.getElementById('prev').addEventListener('click', () => {
+    if (current > 1) { current--; showSlide(current); }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      if (current < total) { current++; showSlide(current); }
+    }
+    if (e.key === 'ArrowLeft') {
+      if (current > 1) { current--; showSlide(current); }
+    }
+  });
+</script>
+</body>
+</html>
