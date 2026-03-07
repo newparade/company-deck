@@ -342,13 +342,18 @@
     font-weight: 300;
   }
   .detail-right {
-    background: rgba(255,255,255,0.04);
     border-radius: 20px;
     height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    position: relative;
+  }
+  .detail-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .detail-right .placeholder {
     color: var(--gray);
@@ -375,13 +380,18 @@
     height: 100%;
   }
   .case-visual {
-    background: rgba(255,255,255,0.04);
     border-radius: 20px;
     height: 420px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    position: relative;
+  }
+  .case-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .case-visual .placeholder {
     color: var(--gray);
@@ -641,9 +651,10 @@
         企画からクリエイティブの形にするまでを一気通貫で<br>
         プロデュースします。
       </p>
+      <span class="detail-tag">TANP — ブランド再定義プロジェクト</span>
     </div>
     <div class="detail-right">
-      <div class="placeholder">Work Image<br><br>SEGAFREDO<br>来店体験の全体設計</div>
+      <img src="images/tanp-hero.jpg" alt="TANP ギフトブランディング">
     </div>
   </div>
   <div class="page-num">06 / 13</div>
@@ -666,9 +677,10 @@
         ブランドの核をつくり、すべての接点に<br>
         一貫性を持たせます。
       </p>
+      <span class="detail-tag">ego graphica — BI/VI/ガイドライン構築</span>
     </div>
     <div class="detail-right">
-      <div class="placeholder">Work Image<br><br>ego graphica / NEKASÉ-HI<br>ゼロからのブランド構築</div>
+      <img src="images/ego-exhibition.jpg" alt="ego graphica 展示空間">
     </div>
   </div>
   <div class="page-num">07 / 13</div>
@@ -691,9 +703,10 @@
         キャンペーンやプロモーションの<br>
         クリエイティブ全体を統括します。
       </p>
+      <span class="detail-tag">ego graphica — OOH / 広告クリエイティブ</span>
     </div>
     <div class="detail-right">
-      <div class="placeholder">Work Image<br><br>TwitCasting OOH<br>企画からクリエイティブ制作まで</div>
+      <img src="images/ego-ooh-store.jpg" alt="ego graphica OOH広告">
     </div>
   </div>
   <div class="page-num">08 / 13</div>
@@ -716,9 +729,10 @@
         ブランドの世界観を体感できる<br>
         場をつくります。
       </p>
+      <span class="detail-tag">RICHILL — プロダクト&体験設計</span>
     </div>
     <div class="detail-right">
-      <div class="placeholder">Work Image<br><br>Coming Soon</div>
+      <img src="images/richill-model.jpg" alt="RICHILL ブランド体験">
     </div>
   </div>
   <div class="page-num">09 / 13</div>
@@ -728,29 +742,29 @@
 <div class="slide" data-slide="10">
   <div class="case-layout">
     <div class="case-visual">
-      <div class="placeholder">Project Visual</div>
+      <img src="images/tanp-gifts.jpg" alt="TANP ギフトブランディング">
     </div>
     <div class="case-info">
       <div class="case-client">Case Study 01</div>
-      <h2>SEGAFREDO</h2>
+      <h2>TANP</h2>
       <div class="case-flow">
         <div class="case-flow-item">
           <div class="cfi-label">Challenge</div>
-          <div class="cfi-text">既存顧客のリピート率・客単価の向上</div>
+          <div class="cfi-text">事業成長に伴うブランドの一貫性不足。ギフト市場No.1を目指すためのブランド基盤構築</div>
         </div>
         <div class="case-flow-item">
           <div class="cfi-label">Approach</div>
-          <div class="cfi-text">デザインではなく来店体験全体から再設計。カルチャーの目線でカフェ体験を再解釈</div>
+          <div class="cfi-text">ブランドコアの設計からVI策定、サイト内外の展開デザインまでを一気通貫でプロデュース</div>
         </div>
         <div class="case-flow-item">
           <div class="cfi-label">Output</div>
-          <div class="cfi-text">来店体験設計 / ブランディング / 店舗デザイン</div>
+          <div class="cfi-text">BI設計 / CI・VI / ガイドライン / サイトデザイン / 展開物</div>
         </div>
       </div>
       <div class="case-services">
         <span class="case-service-tag">Produce</span>
         <span class="case-service-tag">Branding</span>
-        <span class="case-service-tag">Experience</span>
+        <span class="case-service-tag">Creative Direction</span>
       </div>
     </div>
   </div>
@@ -761,7 +775,7 @@
 <div class="slide" data-slide="11">
   <div class="case-layout">
     <div class="case-visual">
-      <div class="placeholder">Project Visual</div>
+      <img src="images/ego-dialogue.jpg" alt="ego graphica Dialogue Exhibition">
     </div>
     <div class="case-info">
       <div class="case-client">Case Study 02</div>
@@ -769,19 +783,21 @@
       <div class="case-flow">
         <div class="case-flow-item">
           <div class="cfi-label">Challenge</div>
-          <div class="cfi-text">新規ブランドの世界観構築</div>
+          <div class="cfi-text">アート体験を「鑑賞」から「関与」へ再定義する次世代プラットフォームの世界観構築</div>
         </div>
         <div class="case-flow-item">
           <div class="cfi-label">Approach</div>
-          <div class="cfi-text">ブランドコンセプトの設計からVI・ガイドラインまで一気通貫で構築</div>
+          <div class="cfi-text">ブランドの思想構築からVI策定、Web・プラットフォームのデザイン実装、OOH展開まで包括的に支援</div>
         </div>
         <div class="case-flow-item">
           <div class="cfi-label">Output</div>
-          <div class="cfi-text">ブランドコンセプト / CI・VI / ガイドライン</div>
+          <div class="cfi-text">BI / CI・VI / Web / アプリUI / OOH / 展示空間設計</div>
         </div>
       </div>
       <div class="case-services">
+        <span class="case-service-tag">Produce</span>
         <span class="case-service-tag">Branding</span>
+        <span class="case-service-tag">Creative Direction</span>
       </div>
     </div>
   </div>
@@ -792,28 +808,29 @@
 <div class="slide" data-slide="12">
   <div class="case-layout">
     <div class="case-visual">
-      <div class="placeholder">Project Visual</div>
+      <img src="images/richill-product.jpg" alt="RICHILL プロダクトデザイン">
     </div>
     <div class="case-info">
       <div class="case-client">Case Study 03</div>
-      <h2>TwitCasting OOH</h2>
+      <h2>RICHILL</h2>
       <div class="case-flow">
         <div class="case-flow-item">
           <div class="cfi-label">Challenge</div>
-          <div class="cfi-text">配信サービスの認知拡大・ブランドイメージ刷新</div>
+          <div class="cfi-text">CBDベイプブランドのプロダクトデザインおよびブランド視覚体験の設計</div>
         </div>
         <div class="case-flow-item">
           <div class="cfi-label">Approach</div>
-          <div class="cfi-text">企画立案からクリエイティブ制作までを一気通貫で担当</div>
+          <div class="cfi-text">単なる喫煙具ではなく、日常に溶け込む「ライフスタイル・ツール」としての佇まいを追求</div>
         </div>
         <div class="case-flow-item">
           <div class="cfi-label">Output</div>
-          <div class="cfi-text">OOHクリエイティブ / キャンペーン企画</div>
+          <div class="cfi-text">プロダクトデザイン / パッケージ / ブランド体験設計</div>
         </div>
       </div>
       <div class="case-services">
-        <span class="case-service-tag">Produce</span>
+        <span class="case-service-tag">Branding</span>
         <span class="case-service-tag">Creative Direction</span>
+        <span class="case-service-tag">Experience</span>
       </div>
     </div>
   </div>
