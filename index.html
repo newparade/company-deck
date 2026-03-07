@@ -246,89 +246,19 @@
   .contact-item .ci-value { font-size: 16px; color: var(--gray-light); font-weight: 400; }
   .contact-item .ci-value a { color: var(--accent); text-decoration: none; }
 
-  /* ===== Mobile ===== */
+  /* ===== Mobile: Scale-based landscape preservation ===== */
   @media (max-width: 768px) {
-    .slide { padding: 40px 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    .page-num { left: 24px; bottom: 20px; position: sticky; }
-
-    /* Typography */
-    h1 { font-size: 36px; }
-    h2 { font-size: 26px; margin-bottom: 24px; }
-    h3 { font-size: 18px; }
-    p { font-size: 15px; line-height: 1.7; }
-    .label { font-size: 10px; margin-bottom: 12px; }
-
-    /* Nav */
-    .nav { bottom: 16px; right: 16px; gap: 8px; }
-    .nav button { width: 36px; height: 36px; font-size: 14px; }
-    .nav .counter { font-size: 12px; }
-
-    /* Cover */
-    .slide-cover { padding-bottom: 80px; }
-    .slide-cover h1 { font-size: 44px; }
-    .slide-cover .sub { font-size: 16px; }
-    .cover-accent { right: 24px; top: 40px; width: 4px; height: 40px; }
-
-    /* About */
-    .slide-about .about-grid { grid-template-columns: 1fr; gap: 32px; }
-    .about-meta { gap: 16px; }
-    .culture-tags { margin-top: 20px; gap: 8px; }
-    .culture-tag { padding: 6px 14px; font-size: 12px; }
-
-    /* Concept */
-    .concept-copy { font-size: 28px; margin-bottom: 24px; }
-    .concept-desc { font-size: 14px; line-height: 1.8; }
-    .concept-pillars { flex-direction: column; gap: 20px; margin-top: 32px; }
-
-    /* Flow */
-    .flow-container {
-      flex-direction: column; gap: 6px; margin-top: 16px;
+    .slide {
+      width: 1280px;
+      height: 720px;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(var(--slide-scale, 0.3));
+      transform-origin: center center;
     }
-    .flow-step { width: 100%; padding: 12px 16px; border-radius: 8px; }
-    .flow-step .step-title { font-size: 14px; margin-bottom: 4px; }
-    .flow-step .step-desc { font-size: 11px; }
-    .flow-step .step-num { margin-bottom: 4px; }
-    .flow-arrow { transform: rotate(90deg); font-size: 14px; }
-
-    /* Menu Grid */
-    .menu-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-    .menu-card { padding: 16px 12px; border-radius: 10px; }
-    .menu-card .menu-num { font-size: 24px; margin-bottom: 8px; }
-    .menu-card .menu-en { font-size: 14px; margin-bottom: 2px; }
-    .menu-card .menu-ja { font-size: 11px; margin-bottom: 8px; }
-    .menu-card .menu-items { font-size: 11px; line-height: 1.8; }
-
-    /* Detail Layout (Service) */
-    .detail-layout { grid-template-columns: 1fr; gap: 24px; }
-    .detail-right { height: 260px; }
-    .detail-left .detail-ja { font-size: 14px; margin-bottom: 20px; }
-    .detail-items li { font-size: 13px; padding: 10px 0; }
-    .detail-left p { font-size: 13px !important; }
-
-    /* Case Layout */
-    .case-layout { grid-template-columns: 1fr; gap: 24px; }
-    .case-visual { height: 240px; }
-    .case-info h2 { margin-bottom: 16px; }
-    .case-flow-item .cfi-text { font-size: 13px; }
-    .case-services { flex-wrap: wrap; gap: 6px; }
-    .case-service-tag { padding: 4px 12px; font-size: 11px; }
-
-    /* Gallery */
-    .gallery-nav { bottom: -28px; }
-
-    /* Contact */
-    .slide-contact h1 { font-size: 36px; margin-bottom: 24px; }
-    .contact-info { flex-direction: column; gap: 20px; }
-  }
-
-  @media (max-width: 390px) {
-    .slide { padding: 32px 16px; }
-    h1 { font-size: 30px; }
-    h2 { font-size: 22px; }
-    .slide-cover h1 { font-size: 36px; }
-    .concept-copy { font-size: 24px; }
-    .detail-right { height: 220px; }
-    .case-visual { height: 200px; }
+    .nav { bottom: 8px; right: 8px; gap: 6px; }
+    .nav button { width: 32px; height: 32px; font-size: 13px; }
+    .nav .counter { font-size: 11px; }
   }
 </style>
 </head>
@@ -756,6 +686,18 @@
 </div>
 
 <script>
+  // Mobile scale
+  function updateSlideScale() {
+    if (window.innerWidth <= 768) {
+      const scale = window.innerWidth / 1280;
+      document.documentElement.style.setProperty('--slide-scale', scale);
+    } else {
+      document.documentElement.style.removeProperty('--slide-scale');
+    }
+  }
+  updateSlideScale();
+  window.addEventListener('resize', updateSlideScale);
+
   let current = 1;
   const total = 15;
   function showSlide(n) {
