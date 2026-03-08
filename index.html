@@ -91,43 +91,69 @@
   .slide-cover {
     padding: 0; justify-content: flex-end; position: relative; overflow: hidden;
   }
+  /* 左上: サブラベル */
   .cover-top-left {
     position: absolute; top: 48px; left: 60px; z-index: 2;
   }
   .cover-top-left .cover-label {
-    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-    color: rgba(255,255,255,0.6); font-weight: 500; margin-bottom: 8px;
+    font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: rgba(255,255,255,0.45); font-weight: 500; line-height: 1.6;
   }
-  .cover-top-left .cover-tagline {
-    font-size: 22px; font-weight: 700; letter-spacing: -0.01em;
-    line-height: 1.5; color: var(--white); max-width: 420px;
+  /* 右端: 縦書きアクセント */
+  .cover-vertical {
+    position: absolute; top: 48px; right: 48px; z-index: 2;
+    writing-mode: vertical-rl; text-orientation: mixed;
+    display: flex; align-items: center; gap: 16px;
   }
+  .cover-vertical .vert-line {
+    width: 1px; height: 48px; background: rgba(255,255,255,0.2);
+  }
+  .cover-vertical .vert-text {
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: rgba(255,255,255,0.35); font-weight: 400;
+  }
+  /* 左中段: タグラインコピー（大きく太く） */
+  .cover-mid-left {
+    position: absolute; top: 38%; left: 60px; z-index: 2;
+    transform: translateY(-50%);
+  }
+  .cover-tagline {
+    font-size: 32px; font-weight: 800; letter-spacing: -0.01em;
+    line-height: 1.6; color: var(--white); max-width: 500px;
+  }
+  /* 中央右: 説明テキスト */
+  .cover-mid-right {
+    position: absolute; top: 52%; left: 38%; right: 80px; z-index: 2;
+  }
+  .cover-body {
+    font-size: 14px; line-height: 1.9; color: rgba(255,255,255,0.5);
+    font-weight: 300; max-width: 560px;
+  }
+  /* 最下部: ブランド名（超巨大） */
   .cover-bottom {
-    position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
-    padding: 0 60px 36px;
+    position: absolute; bottom: -0.08em; left: 0; right: 0; z-index: 2;
+    padding: 0 60px; overflow: hidden;
   }
   .cover-brand {
-    font-size: clamp(100px, 13vw, 180px); font-weight: 800;
-    letter-spacing: -0.03em; line-height: 0.85;
+    font-size: clamp(120px, 14.5vw, 200px); font-weight: 800;
+    letter-spacing: -0.04em; line-height: 0.85;
     text-transform: uppercase; color: var(--white);
     white-space: nowrap;
   }
+  /* 下部情報バー */
   .cover-sub-row {
     display: flex; justify-content: space-between; align-items: baseline;
-    margin-top: 16px; padding-top: 16px;
-    border-top: 1px solid rgba(255,255,255,0.12);
+    padding: 14px 0 32px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 12px;
   }
   .cover-sub-row .cover-year {
-    font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase;
-    color: rgba(255,255,255,0.5); font-weight: 400;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.4); font-weight: 400;
   }
   .cover-sub-row .cover-desc {
-    font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 300;
-    letter-spacing: 0.05em;
-  }
-  .cover-accent-bar {
-    position: absolute; top: 48px; right: 60px; z-index: 2;
-    width: 4px; height: 48px; background: var(--white); border-radius: 2px;
+    font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 300;
+    letter-spacing: 0.1em;
   }
 
   /* About */
@@ -372,20 +398,23 @@
   /* ===== Animations ===== */
 
   /* Cover */
-  .slide-cover.active .cover-accent-bar {
-    animation: lineGrow 0.8s ease 0.2s both;
-  }
   .slide-cover.active .cover-label {
+    animation: fadeIn 0.6s ease 0.2s both;
+  }
+  .slide-cover.active .cover-vertical {
     animation: fadeIn 0.6s ease 0.3s both;
   }
   .slide-cover.active .cover-tagline {
-    animation: fadeUp 0.7s ease 0.5s both;
+    animation: fadeUp 0.7s ease 0.4s both;
+  }
+  .slide-cover.active .cover-body {
+    animation: fadeUp 0.6s ease 0.7s both;
   }
   .slide-cover.active .cover-brand {
-    animation: coverBrandReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+    animation: coverBrandReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
   }
   .slide-cover.active .cover-sub-row {
-    animation: fadeIn 0.6s ease 0.9s both;
+    animation: fadeIn 0.6s ease 0.8s both;
   }
 
   /* About */
@@ -587,15 +616,23 @@
 
 <!-- SLIDE 1: Cover -->
 <div class="slide slide-cover active" data-slide="1">
-  <div class="cover-accent-bar"></div>
   <div class="cover-top-left">
-    <div class="cover-label">Creative Boutique</div>
+    <div class="cover-label">Creative Boutique<br>Company Deck 2026</div>
+  </div>
+  <div class="cover-vertical">
+    <div class="vert-line"></div>
+    <div class="vert-text">Tokyo, Japan</div>
+  </div>
+  <div class="cover-mid-left">
     <div class="cover-tagline">カルチャーの目線で、<br>企画して、つくる。</div>
+  </div>
+  <div class="cover-mid-right">
+    <p class="cover-body">カルチャーに精通したクリエイターが、企画からクリエイティブまで一気通貫。ブランディング、クリエイティブディレクション、イベント体験設計まで、上流から手がけます。</p>
   </div>
   <div class="cover-bottom">
     <div class="cover-brand">newparade</div>
     <div class="cover-sub-row">
-      <span class="cover-year">Company Deck 2026</span>
+      <span class="cover-year">Est. 2023</span>
       <span class="cover-desc">Strategy × Creative × Culture</span>
     </div>
   </div>
