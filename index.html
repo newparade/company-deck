@@ -91,33 +91,9 @@
   .slide-cover {
     padding: 0; justify-content: flex-end; position: relative; overflow: hidden;
   }
-  /* Photo stack */
-  .photo-stack {
-    position: absolute; top: 50%; left: 55%; z-index: 0;
-    transform: translate(-50%, -50%);
-    width: 340px; height: 420px;
-    perspective: 1200px;
-  }
-  .photo-stack .photo-card {
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
-    transform-origin: 50% 100%;
-    will-change: transform, opacity;
-    backface-visibility: hidden;
-  }
-  .photo-stack .photo-card img {
-    width: 100%; height: 100%; object-fit: cover;
-    display: block; pointer-events: none;
-  }
-  .photo-card.flipping {
-    animation: flipAway 0.8s ease-in forwards;
-  }
-  @keyframes flipAway {
-    0% { transform: rotate(0deg) scale(1); opacity: 1; }
-    30% { transform: rotate(-6deg) translateY(-30px) scale(1.02); opacity: 1; }
-    100% { transform: rotate(-25deg) translateX(-120%) translateY(-80px) scale(0.85); opacity: 0; }
+  /* Chrome text canvas */
+  #cover-chrome {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
   }
   /* 左上: サブラベル */
   .cover-top-left {
@@ -679,7 +655,7 @@
 
 <!-- SLIDE 1: Cover -->
 <div class="slide slide-cover active" data-slide="1">
-  <div class="photo-stack" id="photoStack"></div>
+  <canvas id="cover-chrome"></canvas>
   <div class="cover-top-left">
     <div class="cover-label">Company Deck 2026</div>
   </div>
@@ -1553,90 +1529,218 @@
 })();
 </script>
 
-<!-- Photo stack animation -->
+<!-- Chrome text morph animation -->
 <script>
+(function initChromeText() {
+  const canvas = document.getElementById('cover-chrome');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, dpr;
+  let particles = [];
+  let targetPositions = [];
+  let startTime = performance.now();
+  const MORPH_DURATION = 4000; // 4 seconds to fully form
+  const HOLD_DURATION = 3000;  // hold for 3s then loop
+  const TOTAL_CYCLE = MORPH_DURATION + HOLD_DURATION;
 
-// Photo stack: stacked photos that flip away one by one
-(function initPhotoStack() {
-  const stack = document.getElementById('photoStack');
-  if (!stack) return;
-
-  const photos = [
-    'images/tokio-1.jpg', 'images/ego-1.jpg', 'images/yoicha-1.jpg',
-    'images/nekasehai-1.jpg', 'images/matcha-1.jpg', 'images/charm-1.jpg',
-    'images/curry-1.jpg', 'images/parallel-1.jpg', 'images/tokio-3.jpg',
-    'images/ego-2.jpg', 'images/yoicha-2.jpg', 'images/nekasehai-2.jpg',
-  ];
-
-  // Random rotation offsets for stacked look
-  const rotations = photos.map(() => (Math.random() - 0.5) * 16);
-
-  let cards = [];
-
-  function buildStack() {
-    stack.innerHTML = '';
-    cards = [];
-    photos.forEach((src, i) => {
-      const card = document.createElement('div');
-      card.className = 'photo-card';
-      card.style.zIndex = photos.length - i;
-      card.style.transform = `rotate(${rotations[i]}deg)`;
-      const img = document.createElement('img');
-      img.src = src;
-      img.alt = '';
-      img.loading = i < 3 ? 'eager' : 'lazy';
-      card.appendChild(img);
-      stack.appendChild(card);
-      cards.push(card);
-    });
+  function resize() {
+    const slide = canvas.parentElement;
+    if (!slide) return;
+    W = slide.clientWidth;
+    H = slide.clientHeight;
+    dpr = Math.min(window.devicePixelRatio, 2);
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    sampleText();
   }
-  buildStack();
 
-  let currentIndex = 0;
-  let flipping = false;
+  function sampleText() {
+    // Draw text offscreen to sample positions
+    const offCanvas = document.createElement('canvas');
+    const offCtx = offCanvas.getContext('2d');
+    offCanvas.width = W;
+    offCanvas.height = H;
 
-  function flipNext() {
-    if (flipping) return;
-    if (currentIndex >= cards.length) {
-      // Reset: rebuild stack
-      currentIndex = 0;
-      buildStack();
-      return;
+    // Chrome balloon text style
+    const fontSize = Math.min(W * 0.1, 120);
+    offCtx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+    offCtx.textAlign = 'center';
+    offCtx.textBaseline = 'middle';
+    offCtx.fillStyle = '#fff';
+    offCtx.fillText('newparade', W / 2, H / 2);
+
+    // Sample pixels
+    const imageData = offCtx.getImageData(0, 0, W, H);
+    const data = imageData.data;
+    targetPositions = [];
+    const step = 3; // sample density
+    for (let y = 0; y < H; y += step) {
+      for (let x = 0; x < W; x += step) {
+        const idx = (y * W + x) * 4;
+        if (data[idx + 3] > 128) {
+          targetPositions.push({ x, y });
+        }
+      }
     }
-    flipping = true;
-    const card = cards[currentIndex];
-    card.classList.add('flipping');
 
-    card.addEventListener('animationend', () => {
-      card.style.display = 'none';
-      currentIndex++;
-      flipping = false;
-    }, { once: true });
+    // Create particles at random positions
+    particles = targetPositions.map(target => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      tx: target.x,
+      ty: target.y,
+      // Random velocity for initial chaos
+      vx: (Math.random() - 0.5) * 4,
+      vy: (Math.random() - 0.5) * 4,
+      size: 1.5 + Math.random() * 1.5,
+      delay: Math.random() * 0.4, // stagger
+    }));
+
+    startTime = performance.now();
   }
 
-  // Auto-flip every 2.5 seconds
-  let flipInterval = setInterval(flipNext, 2500);
+  // Chrome gradient colors (simulate metallic reflection bands)
+  function getChromeColor(y, normalizedY, time) {
+    // Multiple light bands like chrome reflection
+    const band1 = Math.sin(normalizedY * Math.PI * 3.0 + time * 0.3) * 0.5 + 0.5;
+    const band2 = Math.sin(normalizedY * Math.PI * 7.0 - time * 0.5) * 0.3 + 0.5;
+    const shimmer = Math.sin(normalizedY * Math.PI * 12.0 + time * 1.5) * 0.15;
 
-  // Also flip on click
-  stack.addEventListener('click', () => {
-    clearInterval(flipInterval);
-    flipNext();
-    flipInterval = setInterval(flipNext, 2500);
-  });
+    const brightness = (band1 * 0.5 + band2 * 0.3 + shimmer) * 255;
+    const base = 60;
+    const val = Math.min(255, Math.max(base, brightness));
 
-  // Pause when not on cover slide
-  const observer = new MutationObserver(() => {
+    // Slight warm tint in highlights
+    const r = Math.min(255, val + 8);
+    const g = Math.min(255, val + 4);
+    const b = Math.min(255, val - 2);
+    return `rgb(${r|0},${g|0},${b|0})`;
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
     const coverSlide = document.querySelector('[data-slide="1"]');
-    if (coverSlide && coverSlide.classList.contains('active')) {
-      if (!flipInterval) flipInterval = setInterval(flipNext, 2500);
+    if (!coverSlide || !coverSlide.classList.contains('active')) return;
+
+    ctx.clearRect(0, 0, W, H);
+
+    const elapsed = performance.now() - startTime;
+    const cycleTime = elapsed % (TOTAL_CYCLE + 2000); // +2s for scatter
+    const time = elapsed * 0.001;
+
+    // Phase: 0→MORPH = forming, MORPH→TOTAL = hold, TOTAL→TOTAL+2000 = scatter
+    let morphProgress;
+    if (cycleTime < MORPH_DURATION) {
+      morphProgress = cycleTime / MORPH_DURATION;
+    } else if (cycleTime < TOTAL_CYCLE) {
+      morphProgress = 1.0;
     } else {
-      clearInterval(flipInterval);
-      flipInterval = null;
+      // Scatter phase: reverse
+      const scatterT = (cycleTime - TOTAL_CYCLE) / 2000;
+      morphProgress = 1.0 - scatterT;
+      if (morphProgress <= 0) {
+        // Reassign random start positions
+        particles.forEach(p => {
+          p.x = Math.random() * W;
+          p.y = Math.random() * H;
+          p.delay = Math.random() * 0.4;
+        });
+        startTime = performance.now();
+        return;
+      }
     }
-  });
-  document.querySelectorAll('.slide').forEach(s => {
-    observer.observe(s, { attributes: true, attributeFilter: ['class'] });
-  });
+
+    // Bounding box for normalization
+    let minY = H, maxY = 0;
+    targetPositions.forEach(t => {
+      if (t.y < minY) minY = t.y;
+      if (t.y > maxY) maxY = t.y;
+    });
+    const rangeY = maxY - minY || 1;
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      const individualProgress = Math.max(0, Math.min(1,
+        (morphProgress - p.delay) / (1 - p.delay)
+      ));
+
+      // Easing: cubic ease-in-out
+      const t = individualProgress < 0.5
+        ? 4 * individualProgress * individualProgress * individualProgress
+        : 1 - Math.pow(-2 * individualProgress + 2, 3) / 2;
+
+      const cx = p.x + (p.tx - p.x) * t;
+      const cy = p.y + (p.ty - p.y) * t;
+
+      // When formed, add slight noise wobble
+      const noiseX = morphProgress > 0.8 ? Math.sin(time * 2 + i * 0.1) * 0.3 * (1 - morphProgress) : 0;
+      const noiseY = morphProgress > 0.8 ? Math.cos(time * 1.5 + i * 0.15) * 0.3 * (1 - morphProgress) : 0;
+
+      const drawX = cx + noiseX;
+      const drawY = cy + noiseY;
+
+      // Chrome color based on Y position within text
+      const normalizedY = (p.ty - minY) / rangeY;
+      const alpha = 0.3 + t * 0.7;
+
+      // During chaos phase: white-ish particles; during form: chrome
+      if (t < 0.3) {
+        const brightness = 120 + Math.random() * 80;
+        ctx.fillStyle = `rgba(${brightness|0},${brightness|0},${brightness|0},${alpha})`;
+      } else {
+        ctx.fillStyle = getChromeColor(drawY, normalizedY, time);
+        ctx.globalAlpha = alpha;
+      }
+
+      const size = p.size * (0.5 + t * 0.5);
+      ctx.fillRect(drawX, drawY, size, size);
+      ctx.globalAlpha = 1;
+    }
+
+    // Once fully formed, overlay the chrome text with gradient for polish
+    if (morphProgress > 0.85) {
+      const textAlpha = (morphProgress - 0.85) / 0.15;
+      ctx.save();
+      ctx.globalAlpha = textAlpha * 0.6;
+
+      const fontSize = Math.min(W * 0.1, 120);
+      ctx.font = `900 ${fontSize}px 'Inter', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Chrome gradient fill
+      const grad = ctx.createLinearGradient(0, H/2 - fontSize/2, 0, H/2 + fontSize/2);
+      grad.addColorStop(0, '#999');
+      grad.addColorStop(0.15, '#fff');
+      grad.addColorStop(0.3, '#888');
+      grad.addColorStop(0.5, '#eee');
+      grad.addColorStop(0.65, '#666');
+      grad.addColorStop(0.8, '#ddd');
+      grad.addColorStop(1, '#777');
+
+      // Stroke outline for embossed look
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeText('newparade', W/2, H/2);
+
+      ctx.fillStyle = grad;
+      ctx.fillText('newparade', W/2, H/2);
+
+      // Inner highlight stroke
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 0.5;
+      ctx.strokeText('newparade', W/2, H/2 - 1);
+
+      ctx.restore();
+    }
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  animate();
 })();
 </script>
 </body>
