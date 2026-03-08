@@ -175,17 +175,6 @@
   .slide-concept .label,
   .slide-concept .concept-copy,
   .slide-concept .concept-desc { position: relative; z-index: 2; text-shadow: 0 0 30px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.7), 0 0 100px rgba(0,0,0,0.4); }
-  .slide-concept::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 70%;
-    height: 60%;
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.5) 40%, transparent 70%);
-    z-index: 1;
-    pointer-events: none;
-  }
   #concept-particles {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
   }
