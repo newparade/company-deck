@@ -1498,16 +1498,20 @@
   gl.clearColor(0, 0, 0, 0);
 
   let time = 0;
-  function animate() {
+  let lastFrame = 0;
+  function animate(now) {
     requestAnimationFrame(animate);
 
     const conceptSlide = document.querySelector('[data-slide="3"]');
-    if (!conceptSlide || !conceptSlide.classList.contains('active')) return;
+    if (!conceptSlide || !conceptSlide.classList.contains('active')) { lastFrame = now; return; }
+
+    const dt = Math.min((now - lastFrame) / 1000, 0.05); // cap at 50ms
+    lastFrame = now;
 
     mouse.x += (mouse.tx - mouse.x) * 0.03;
     mouse.y += (mouse.ty - mouse.y) * 0.03;
 
-    time += 0.016;
+    time += dt;
     const aspect = canvas.width / canvas.height;
 
     gl.clear(gl.COLOR_BUFFER_BIT);
