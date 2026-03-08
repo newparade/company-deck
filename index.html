@@ -1325,9 +1325,9 @@
       // Wobble the radius slightly for organic feel
       float r = a_radius + sin(angle * 3.0 + a_phase * 6.28) * 0.03;
 
-      // Position in clip space, corrected for aspect ratio
-      float x = cos(angle) * r / u_aspect;
-      float y = sin(angle) * r;
+      // Position in clip space — nearly circular, slight horizontal stretch
+      float x = cos(angle) * r / u_aspect * 1.6;
+      float y = sin(angle) * r * 1.6;
 
       // Mouse interaction — smooth repulsion
       vec2 mPos = vec2(u_mouse.x / u_aspect, u_mouse.y);
@@ -1341,8 +1341,8 @@
       gl_PointSize = a_size;
 
       // Fade: hard inner void, soft outer edge
-      float innerFade = smoothstep(0.25, 0.5, r);
-      float outerFade = smoothstep(1.6, 1.1, r);
+      float innerFade = smoothstep(0.15, 0.4, r);
+      float outerFade = smoothstep(1.1, 0.75, r);
       v_alpha = a_brightness * innerFade * outerFade;
     }
   `;
@@ -1394,17 +1394,17 @@
   for (let i = 0; i < COUNT; i++) {
     angleArr[i] = Math.random() * Math.PI * 2;
 
-    // Donut: inner void at ~0.35, peak at ~0.7-0.9, extends to ~1.5
+    // Donut: clear inner void at ~0.25, peak around ~0.55, extends to ~1.0
     const g = (Math.random() + Math.random() + Math.random()) / 3;
-    radiusArr[i] = 0.35 + g * 1.15; // range 0.35 to 1.5
+    radiusArr[i] = 0.25 + g * 0.75; // range 0.25 to 1.0
 
     const baseSpeed = 0.006 + Math.random() * 0.02;
     speedArr[i] = baseSpeed * (Math.random() < 0.3 ? -1 : 1);
 
     brightArr[i] = 0.1 + Math.random() * 0.9;
 
-    const distFactor = 1.0 - Math.abs(radiusArr[i] - 0.8) / 0.7;
-    sizeArr[i] = (0.5 + Math.random() * 1.5 + distFactor * 0.8) * dpr;
+    const distFactor = 1.0 - Math.abs(radiusArr[i] - 0.55) / 0.45;
+    sizeArr[i] = (0.6 + Math.random() * 1.8 + Math.max(0, distFactor) * 1.0) * dpr;
 
     phaseArr[i] = Math.random();
   }
