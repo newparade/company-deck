@@ -1602,22 +1602,16 @@
     startTime = performance.now();
   }
 
-  // Chrome gradient colors (simulate metallic reflection bands)
-  function getChromeColor(y, normalizedY, time) {
-    // Multiple light bands like chrome reflection
-    const band1 = Math.sin(normalizedY * Math.PI * 3.0 + time * 0.3) * 0.5 + 0.5;
-    const band2 = Math.sin(normalizedY * Math.PI * 7.0 - time * 0.5) * 0.3 + 0.5;
-    const shimmer = Math.sin(normalizedY * Math.PI * 12.0 + time * 1.5) * 0.15;
-
-    const brightness = (band1 * 0.5 + band2 * 0.3 + shimmer) * 255;
-    const base = 60;
-    const val = Math.min(255, Math.max(base, brightness));
-
-    // Slight warm tint in highlights
-    const r = Math.min(255, val + 8);
-    const g = Math.min(255, val + 4);
-    const b = Math.min(255, val - 2);
-    return `rgb(${r|0},${g|0},${b|0})`;
+  // Chrome gradient colors (3D metallic reflection bands)
+  function getChromeColor(normalizedY, time) {
+    // Sharp chrome bands: dark-bright-dark-bright like real chrome
+    const band = Math.sin(normalizedY * Math.PI * 5.0 + time * 0.3);
+    const band2 = Math.sin(normalizedY * Math.PI * 11.0 - time * 0.5) * 0.4;
+    const raw = band * 0.5 + band2 * 0.25 + 0.5;
+    // Remap: emphasize contrast between dark and bright
+    const curved = raw * raw * (3 - 2 * raw); // smoothstep
+    const val = Math.min(255, Math.max(30, curved * 280));
+    return `rgb(${val|0},${val|0},${val|0})`;
   }
 
   function animate() {
@@ -1691,7 +1685,7 @@
         const brightness = 120 + Math.random() * 80;
         ctx.fillStyle = `rgba(${brightness|0},${brightness|0},${brightness|0},${alpha})`;
       } else {
-        ctx.fillStyle = getChromeColor(drawY, normalizedY, time);
+        ctx.fillStyle = getChromeColor(normalizedY, time);
         ctx.globalAlpha = alpha;
       }
 
@@ -1700,39 +1694,76 @@
       ctx.globalAlpha = 1;
     }
 
-    // Once fully formed, overlay the chrome text with gradient for polish
-    if (morphProgress > 0.85) {
-      const textAlpha = (morphProgress - 0.85) / 0.15;
-      ctx.save();
-      ctx.globalAlpha = textAlpha * 0.6;
-
+    // Once fully formed, overlay 3D chrome text
+    if (morphProgress > 0.7) {
+      const textAlpha = Math.min(1, (morphProgress - 0.7) / 0.3);
       const fontSize = Math.min(W * 0.1, 120);
+      const tx = W / 2, ty = H / 2;
+
+      ctx.save();
       ctx.font = `900 ${fontSize}px 'Inter', sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      ctx.globalAlpha = textAlpha;
 
-      // Chrome gradient fill
-      const grad = ctx.createLinearGradient(0, H/2 - fontSize/2, 0, H/2 + fontSize/2);
-      grad.addColorStop(0, '#999');
-      grad.addColorStop(0.15, '#fff');
-      grad.addColorStop(0.3, '#888');
-      grad.addColorStop(0.5, '#eee');
-      grad.addColorStop(0.65, '#666');
-      grad.addColorStop(0.8, '#ddd');
-      grad.addColorStop(1, '#777');
+      // Layer 1: Deep shadow for 3D depth
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetX = 4;
+      ctx.shadowOffsetY = 6;
+      ctx.fillStyle = '#222';
+      ctx.fillText('newparade', tx, ty);
+      ctx.shadowColor = 'transparent';
 
-      // Stroke outline for embossed look
-      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-      ctx.lineWidth = 1.5;
-      ctx.strokeText('newparade', W/2, H/2);
+      // Layer 2: Dark base with thick outline (3D edge)
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = '#333';
+      ctx.strokeText('newparade', tx, ty);
 
+      // Layer 3: Main chrome gradient fill
+      const grad = ctx.createLinearGradient(0, ty - fontSize * 0.6, 0, ty + fontSize * 0.6);
+      grad.addColorStop(0.00, '#4a4a4a');
+      grad.addColorStop(0.08, '#9a9a9a');
+      grad.addColorStop(0.15, '#fafafa');
+      grad.addColorStop(0.22, '#e0e0e0');
+      grad.addColorStop(0.30, '#707070');
+      grad.addColorStop(0.40, '#b0b0b0');
+      grad.addColorStop(0.50, '#f5f5f5');
+      grad.addColorStop(0.58, '#c8c8c8');
+      grad.addColorStop(0.65, '#606060');
+      grad.addColorStop(0.75, '#a0a0a0');
+      grad.addColorStop(0.85, '#e8e8e8');
+      grad.addColorStop(0.92, '#808080');
+      grad.addColorStop(1.00, '#505050');
       ctx.fillStyle = grad;
-      ctx.fillText('newparade', W/2, H/2);
+      ctx.fillText('newparade', tx, ty);
 
-      // Inner highlight stroke
-      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-      ctx.lineWidth = 0.5;
-      ctx.strokeText('newparade', W/2, H/2 - 1);
+      // Layer 4: Top highlight (simulates overhead light)
+      const highlightGrad = ctx.createLinearGradient(0, ty - fontSize * 0.55, 0, ty);
+      highlightGrad.addColorStop(0, 'rgba(255,255,255,0.5)');
+      highlightGrad.addColorStop(0.4, 'rgba(255,255,255,0.2)');
+      highlightGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = highlightGrad;
+      ctx.fillText('newparade', tx, ty);
+
+      // Layer 5: Bright edge highlight (top-left light source)
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+      ctx.strokeText('newparade', tx - 0.5, ty - 1);
+
+      // Layer 6: Dark bottom edge for depth
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.strokeText('newparade', tx + 0.5, ty + 1.5);
+
+      // Layer 7: Moving specular highlight sweep
+      const sweepX = tx + Math.sin(time * 0.4) * fontSize * 2;
+      const specGrad = ctx.createRadialGradient(sweepX, ty - fontSize * 0.2, 0, sweepX, ty, fontSize * 1.5);
+      specGrad.addColorStop(0, 'rgba(255,255,255,0.25)');
+      specGrad.addColorStop(0.3, 'rgba(255,255,255,0.08)');
+      specGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = specGrad;
+      ctx.fillText('newparade', tx, ty);
 
       ctx.restore();
     }
