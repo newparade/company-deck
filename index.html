@@ -241,7 +241,10 @@
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     z-index: 10; pointer-events: none;
-    opacity: 0; animation: promptFade 2.4s ease 0.6s both;
+    opacity: 0;
+  }
+  .slide-case.active .case-scroll-prompt {
+    animation: promptFade 2.4s ease 0.6s both;
   }
   .case-scroll-prompt .prompt-mouse {
     width: 26px; height: 42px; border: 1.5px solid rgba(255,255,255,0.7);
