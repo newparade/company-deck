@@ -186,10 +186,36 @@
     grid-auto-rows: 48px;
     grid-auto-flow: dense;
     gap: 5px;
-    animation: mosaicDrift 25s linear infinite;
   }
   .concept-mosaic img {
     width: 100%; height: 100%; object-fit: cover; display: block;
+    animation: var(--mosaic-anim) ease-in-out infinite alternate;
+  }
+  .concept-mosaic img:nth-child(10n+1) { --mosaic-anim: puzzleA 6s; animation-delay: 0s; }
+  .concept-mosaic img:nth-child(10n+2) { --mosaic-anim: puzzleB 8s; animation-delay: -2s; }
+  .concept-mosaic img:nth-child(10n+3) { --mosaic-anim: puzzleC 7s; animation-delay: -4s; }
+  .concept-mosaic img:nth-child(10n+4) { --mosaic-anim: puzzleD 9s; animation-delay: -1s; }
+  .concept-mosaic img:nth-child(10n+5) { --mosaic-anim: puzzleA 7.5s; animation-delay: -3s; }
+  .concept-mosaic img:nth-child(10n+6) { --mosaic-anim: puzzleC 6.5s; animation-delay: -5s; }
+  .concept-mosaic img:nth-child(10n+7) { --mosaic-anim: puzzleB 8.5s; animation-delay: -1.5s; }
+  .concept-mosaic img:nth-child(10n+8) { --mosaic-anim: puzzleD 7s; animation-delay: -3.5s; }
+  .concept-mosaic img:nth-child(10n+9) { --mosaic-anim: puzzleA 9s; animation-delay: -2.5s; }
+  .concept-mosaic img:nth-child(10n)   { --mosaic-anim: puzzleC 8s; animation-delay: -4.5s; }
+  @keyframes puzzleA {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(8px, -6px); }
+  }
+  @keyframes puzzleB {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-6px, 10px); }
+  }
+  @keyframes puzzleC {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(10px, 5px); }
+  }
+  @keyframes puzzleD {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-8px, -8px); }
   }
   /* Varying spans for organic layout */
   .concept-mosaic img:nth-child(10n+1) { grid-row: span 3; }
@@ -202,11 +228,6 @@
   .concept-mosaic img:nth-child(10n+8) { grid-row: span 2; }
   .concept-mosaic img:nth-child(10n+9) { grid-row: span 4; }
   .concept-mosaic img:nth-child(10n)   { grid-row: span 2; }
-  @keyframes mosaicDrift {
-    0% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(-4%) translateX(-1.5%); }
-    100% { transform: translateY(0) translateX(0); }
-  }
   /* Dark vignette over mosaic */
   .concept-vignette {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1;
