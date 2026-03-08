@@ -1340,9 +1340,10 @@
       gl_Position = vec4(pos, 0.0, 1.0);
       gl_PointSize = a_size;
 
-      // Fade edges and vary brightness
-      float edgeFade = smoothstep(1.15, 0.85, r) * smoothstep(0.15, 0.35, r);
-      v_alpha = a_brightness * edgeFade;
+      // Fade: hard inner void, soft outer edge
+      float innerFade = smoothstep(0.25, 0.5, r);
+      float outerFade = smoothstep(1.6, 1.1, r);
+      v_alpha = a_brightness * innerFade * outerFade;
     }
   `;
 
@@ -1381,8 +1382,8 @@
   }
   gl.useProgram(program);
 
-  // 120k particles for dense coverage
-  const COUNT = 120000;
+  // 200k particles for very dense coverage
+  const COUNT = 200000;
   const angleArr = new Float32Array(COUNT);
   const radiusArr = new Float32Array(COUNT);
   const speedArr = new Float32Array(COUNT);
@@ -1393,20 +1394,17 @@
   for (let i = 0; i < COUNT; i++) {
     angleArr[i] = Math.random() * Math.PI * 2;
 
-    // Donut distribution: inner void at ~0.2, peak density at ~0.5, fade out at ~1.1
-    // Use sum of randoms for Gaussian-like bell around the ring center
-    const g = (Math.random() + Math.random() + Math.random() + Math.random()) / 4; // 0-1, bell-shaped
-    radiusArr[i] = 0.2 + g * 0.9; // range 0.2 to 1.1
+    // Donut: inner void at ~0.35, peak at ~0.7-0.9, extends to ~1.5
+    const g = (Math.random() + Math.random() + Math.random()) / 3;
+    radiusArr[i] = 0.35 + g * 1.15; // range 0.35 to 1.5
 
-    // Slower = more realistic, slight variation in direction
-    const baseSpeed = 0.008 + Math.random() * 0.025;
+    const baseSpeed = 0.006 + Math.random() * 0.02;
     speedArr[i] = baseSpeed * (Math.random() < 0.3 ? -1 : 1);
 
-    brightArr[i] = 0.15 + Math.random() * 0.85;
+    brightArr[i] = 0.1 + Math.random() * 0.9;
 
-    // Tiny particles, vary by distance (closer to center = slightly bigger for density)
-    const distFactor = 1.0 - Math.abs(radiusArr[i] - 0.55) / 0.55;
-    sizeArr[i] = (0.6 + Math.random() * 1.4 + distFactor * 0.5) * dpr;
+    const distFactor = 1.0 - Math.abs(radiusArr[i] - 0.8) / 0.7;
+    sizeArr[i] = (0.5 + Math.random() * 1.5 + distFactor * 0.8) * dpr;
 
     phaseArr[i] = Math.random();
   }
