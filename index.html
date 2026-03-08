@@ -241,32 +241,33 @@
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     z-index: 10; pointer-events: none;
+    background: rgba(0,0,0,0.4);
     opacity: 0;
   }
   .slide-case.active .case-scroll-prompt {
-    animation: promptFade 2.4s ease 0.6s both;
+    animation: promptFade 2.8s ease 0.5s both;
   }
   .case-scroll-prompt .prompt-mouse {
-    width: 26px; height: 42px; border: 1.5px solid rgba(255,255,255,0.7);
-    border-radius: 13px; position: relative; margin-bottom: 14px;
+    width: 30px; height: 48px; border: 2px solid rgba(255,255,255,0.9);
+    border-radius: 15px; position: relative; margin-bottom: 16px;
   }
   .case-scroll-prompt .prompt-mouse::after {
     content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-    width: 3px; height: 8px; background: rgba(255,255,255,0.8); border-radius: 2px;
-    animation: mouseScroll 1.2s ease-in-out infinite;
+    width: 3px; height: 10px; background: #fff; border-radius: 2px;
+    animation: mouseScroll 1.4s ease-in-out infinite;
   }
   .case-scroll-prompt .prompt-text {
-    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
-    color: rgba(255,255,255,0.6); font-weight: 400;
+    font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.85); font-weight: 400;
   }
   @keyframes mouseScroll {
     0% { opacity: 1; transform: translateX(-50%) translateY(0); }
-    100% { opacity: 0; transform: translateX(-50%) translateY(12px); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(14px); }
   }
   @keyframes promptFade {
     0% { opacity: 0; }
-    12% { opacity: 1; }
-    75% { opacity: 1; }
+    10% { opacity: 1; }
+    72% { opacity: 1; }
     100% { opacity: 0; }
   }
 
