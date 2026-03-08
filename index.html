@@ -175,10 +175,10 @@
   /* Photo Grid (Service slides) */
   .photo-grid {
     display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
-    gap: 8px; width: 100%; height: 100%;
+    gap: 8px; width: 100%; height: calc(100vh - 160px); overflow: hidden;
   }
   .photo-grid img {
-    width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px;
+    width: 100%; height: 100%; min-height: 0; object-fit: cover; display: block; border-radius: 12px;
   }
 
   /* Case Study */
@@ -212,11 +212,10 @@
   }
   .case-right {
     display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
-    gap: 8px; align-self: stretch;
+    gap: 8px; align-self: center; height: calc(100vh - 160px); overflow: hidden;
   }
   .case-right img {
-    width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px;
-    min-height: 0; min-width: 0;
+    width: 100%; height: 100%; min-height: 0; object-fit: cover; display: block; border-radius: 12px;
   }
 
   /* Contact */
@@ -509,7 +508,7 @@
       </div>
       <div class="case-services"><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
     </div>
-    <div class="case-right" style="grid-template-rows: 1fr;">
+    <div class="case-right">
       <img src="images/matcha-1.jpg" alt="">
       <img src="images/matcha-2.jpg" alt="">
     </div>
