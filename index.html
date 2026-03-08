@@ -191,7 +191,7 @@
   .case-scroll { width: 100%; min-height: 100vh; }
 
   /* ① FV Hero */
-  .case-fv { width: 100%; height: 85vh; position: relative; overflow: hidden; }
+  .case-fv { width: 100%; height: 78vh; position: relative; overflow: hidden; }
   .case-fv img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .case-fv-overlay {
     position: absolute; bottom: 0; left: 0; right: 0;
@@ -211,29 +211,25 @@
 
   /* Scroll indicator */
   .case-scroll-hint {
-    position: absolute; bottom: 32px; right: 80px;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    opacity: 1; transition: opacity 0.4s ease;
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    opacity: 1; transition: opacity 0.5s ease;
     z-index: 5;
   }
   .case-scroll-hint.is-hidden { opacity: 0; pointer-events: none; }
   .case-scroll-hint span {
-    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
-    color: rgba(255,255,255,0.5); font-weight: 400;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.6); font-weight: 400;
   }
-  .case-scroll-hint .scroll-line {
-    width: 1px; height: 40px; background: rgba(255,255,255,0.15); position: relative; overflow: hidden;
+  .case-scroll-hint .scroll-chevron {
+    width: 20px; height: 20px; border-right: 1.5px solid rgba(255,255,255,0.6);
+    border-bottom: 1.5px solid rgba(255,255,255,0.6);
+    transform: rotate(45deg); margin-top: -4px;
+    animation: bounceDown 1.6s ease-in-out infinite;
   }
-  .case-scroll-hint .scroll-line::after {
-    content: ''; position: absolute; top: -100%; left: 0;
-    width: 1px; height: 100%; background: rgba(255,255,255,0.7);
-    animation: scrollLine 1.8s ease-in-out infinite;
-  }
-  @keyframes scrollLine {
-    0% { top: -100%; }
-    50% { top: 100%; }
-    50.01% { top: -100%; }
-    100% { top: 100%; }
+  @keyframes bounceDown {
+    0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.6; }
+    50% { transform: rotate(45deg) translateY(6px); opacity: 1; }
   }
 
   /* ② Project Info Bar */
@@ -641,7 +637,7 @@
         <h2>ego graphica</h2>
         <p class="case-fv-summary">カジュアルなアート体験をひらく次世代プラットフォーム</p>
       </div>
-      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-chevron"></div></div>
     </div>
     <!-- ② Project Info Bar -->
     <div class="case-info-bar">
@@ -705,7 +701,7 @@
         <h2>寝かせハイ</h2>
         <p class="case-fv-summary">クラフト酒キットの新ブランド立ち上げ</p>
       </div>
-      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-chevron"></div></div>
     </div>
     <div class="case-info-bar">
       <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">寝かせハイ</div></div>
@@ -762,7 +758,7 @@
         <h2>MATCHA STYLE</h2>
         <p class="case-fv-summary">海外向け抹茶ブランドのクリエイティブ全般</p>
       </div>
-      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-chevron"></div></div>
     </div>
     <div class="case-info-bar">
       <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">MATCHA STYLE</div></div>
@@ -816,7 +812,7 @@
         <h2>YOICHA</h2>
         <p class="case-fv-summary">CBDボトリングティーのトータルデザイン</p>
       </div>
-      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-chevron"></div></div>
     </div>
     <div class="case-info-bar">
       <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">YOICHA</div></div>
@@ -873,7 +869,7 @@
         <h2>TOKIOTOKYO</h2>
         <p class="case-fv-summary">パートナー型ライブハウスのフライヤー制作</p>
       </div>
-      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-chevron"></div></div>
     </div>
     <div class="case-info-bar">
       <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">TOKIOTOKYO</div></div>
