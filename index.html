@@ -1306,57 +1306,101 @@
   resize();
   window.addEventListener('resize', resize);
 
+  // ── Shaders ──
+  // Story: stars gather inward (企画) → brighten at center (つくる) → radiate outward (届ける)
   const vsSource = `
-    attribute float a_angle;
-    attribute float a_radius;
-    attribute float a_speed;
+    attribute vec2 a_pos;
     attribute float a_brightness;
     attribute float a_size;
-    attribute float a_phase;
+    attribute float a_twinkleSpeed;
+    attribute float a_twinklePhase;
+    attribute float a_depth;
     uniform float u_time;
     uniform vec2 u_mouse;
     uniform float u_aspect;
     varying float v_alpha;
+    varying float v_temp;
+    varying float v_dist;
 
     void main() {
-      // Orbital angle changes over time
-      float angle = a_angle + u_time * a_speed;
+      // Lifecycle: each particle has its own cycle phase
+      // Phase 0-0.4: drift inward (企画する — gathering ideas)
+      // Phase 0.4-0.6: glow at center (つくる — creating)
+      // Phase 0.6-1.0: radiate outward (届ける — delivering)
+      float cycle = fract(u_time * 0.02 + a_twinklePhase);
+      float origDist = length(a_pos);
 
-      // Wobble the radius slightly for organic feel
-      float r = a_radius + sin(angle * 3.0 + a_phase * 6.28) * 0.03;
+      vec2 pos = a_pos;
+      float sizeMul = 1.0;
+      float brightMul = 1.0;
 
-      // Position in clip space — nearly circular, slight horizontal stretch
-      float x = cos(angle) * r / u_aspect * 1.6;
-      float y = sin(angle) * r * 1.6;
+      if (cycle < 0.4) {
+        // Gather inward
+        float t = cycle / 0.4;
+        float ease = t * t; // ease-in
+        pos = a_pos * (1.0 - ease * 0.6);
+        brightMul = 0.5 + 0.5 * t;
+      } else if (cycle < 0.6) {
+        // Glow at gathered position
+        float t = (cycle - 0.4) / 0.2;
+        pos = a_pos * 0.4;
+        float pulse = 0.5 + 0.5 * sin(t * 3.14159);
+        brightMul = 1.0 + pulse * 1.5;
+        sizeMul = 1.0 + pulse * 0.8;
+      } else {
+        // Radiate outward
+        float t = (cycle - 0.6) / 0.4;
+        float ease = 1.0 - (1.0 - t) * (1.0 - t); // ease-out
+        pos = a_pos * (0.4 + ease * 0.8);
+        brightMul = 1.5 * (1.0 - t * 0.7);
+        sizeMul = 1.0 + (1.0 - t) * 0.3;
+      }
 
-      // Mouse interaction — smooth repulsion
-      vec2 mPos = vec2(u_mouse.x / u_aspect, u_mouse.y);
-      vec2 pos = vec2(x, y);
-      vec2 diff = pos - mPos;
-      float md = length(diff);
-      float repulse = smoothstep(0.35, 0.0, md) * 0.15;
-      pos += diff * repulse / max(md, 0.001);
+      // Twinkle
+      float twinkle = 0.5 + 0.5 * sin(u_time * a_twinkleSpeed + a_twinklePhase);
+      float brightness = a_brightness * (0.4 + 0.6 * twinkle) * brightMul;
+
+      // Parallax from mouse
+      float parallax = a_depth * 0.05;
+      pos.x += u_mouse.x * parallax / u_aspect;
+      pos.y += u_mouse.y * parallax;
+
+      // Gentle cosmic drift
+      pos.x += sin(u_time * 0.08 + a_twinklePhase * 3.0) * 0.004 * a_depth;
+      pos.y += cos(u_time * 0.06 + a_twinklePhase * 2.0) * 0.003 * a_depth;
 
       gl_Position = vec4(pos, 0.0, 1.0);
-      gl_PointSize = a_size;
-
-      // Fade: soft outer edge only, no inner void
-      float outerFade = smoothstep(1.1, 0.6, r);
-      v_alpha = a_brightness * outerFade;
+      gl_PointSize = a_size * sizeMul * (0.7 + 0.3 * twinkle);
+      v_alpha = min(brightness, 1.0);
+      v_temp = a_depth;
+      v_dist = length(pos);
     }
   `;
 
   const fsSource = `
     precision mediump float;
     varying float v_alpha;
+    varying float v_temp;
+    varying float v_dist;
 
     void main() {
       float d = length(gl_PointCoord - 0.5);
       if (d > 0.5) discard;
-      float soft = smoothstep(0.5, 0.05, d);
-      // Warm white-gold color
-      vec3 col = vec3(0.97, 0.93, 0.82);
-      gl_FragColor = vec4(col, soft * v_alpha);
+
+      // Star shape: bright core + soft halo
+      float core = smoothstep(0.5, 0.0, d);
+      float glow = exp(-d * 5.0);
+      float shape = core * 0.5 + glow * 0.5;
+
+      // Color: warm gold (near) → neutral white → cool blue-white (far)
+      vec3 warm = vec3(1.0, 0.9, 0.65);
+      vec3 neutral = vec3(0.97, 0.95, 0.9);
+      vec3 cool = vec3(0.82, 0.9, 1.0);
+      vec3 col = v_temp < 0.5
+        ? mix(warm, neutral, v_temp * 2.0)
+        : mix(neutral, cool, (v_temp - 0.5) * 2.0);
+
+      gl_FragColor = vec4(col, shape * v_alpha);
     }
   `;
 
@@ -1364,9 +1408,7 @@
     const s = gl.createShader(type);
     gl.shaderSource(s, source);
     gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-      console.error(gl.getShaderInfoLog(s));
-    }
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
     return s;
   }
 
@@ -1376,54 +1418,63 @@
   gl.attachShader(program, vs);
   gl.attachShader(program, fs);
   gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error(gl.getProgramInfoLog(program));
-  }
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
   gl.useProgram(program);
 
-  // 200k particles for very dense coverage
-  const COUNT = 200000;
-  const angleArr = new Float32Array(COUNT);
-  const radiusArr = new Float32Array(COUNT);
-  const speedArr = new Float32Array(COUNT);
+  // ── Star field data ──
+  const COUNT = 12000;
+  const posArr = new Float32Array(COUNT * 2);
   const brightArr = new Float32Array(COUNT);
   const sizeArr = new Float32Array(COUNT);
-  const phaseArr = new Float32Array(COUNT);
+  const twinkleSpeedArr = new Float32Array(COUNT);
+  const twinklePhaseArr = new Float32Array(COUNT);
+  const depthArr = new Float32Array(COUNT);
 
   for (let i = 0; i < COUNT; i++) {
-    angleArr[i] = Math.random() * Math.PI * 2;
+    // Spread across entire screen with slight center concentration
+    const cx = (Math.random() + Math.random()) / 2; // mild center bias
+    const cy = (Math.random() + Math.random()) / 2;
+    posArr[i * 2] = (cx * 2 - 1) * 1.15;     // x: -1.15 to 1.15
+    posArr[i * 2 + 1] = (cy * 2 - 1) * 1.15;  // y: -1.15 to 1.15
 
-    // Filled circle: center to edge, density peaks mid-range
-    const g = (Math.random() + Math.random() + Math.random()) / 3;
-    radiusArr[i] = g * 1.0; // range 0.0 to 1.0
+    // Depth layer (0=far, 1=near) — affects parallax, size, brightness
+    const depth = Math.random();
+    depthArr[i] = depth;
 
-    const baseSpeed = 0.006 + Math.random() * 0.02;
-    speedArr[i] = baseSpeed * (Math.random() < 0.3 ? -1 : 1);
+    // Most stars dim, few bright — exponential distribution
+    const rawBright = Math.pow(Math.random(), 2.5);
+    brightArr[i] = 0.15 + rawBright * 0.85;
 
-    brightArr[i] = 0.1 + Math.random() * 0.9;
+    // Size: far stars tiny, near stars can be larger; rare big bright stars
+    const isBright = Math.random() < 0.02; // 2% chance of being a prominent star
+    if (isBright) {
+      sizeArr[i] = (3.0 + Math.random() * 4.0) * dpr;
+      brightArr[i] = 0.7 + Math.random() * 0.3;
+    } else {
+      sizeArr[i] = (0.5 + depth * 1.5 + Math.random() * 1.0) * dpr;
+    }
 
-    const distFactor = 1.0 - Math.abs(radiusArr[i] - 0.55) / 0.45;
-    sizeArr[i] = (0.6 + Math.random() * 1.8 + Math.max(0, distFactor) * 1.0) * dpr;
-
-    phaseArr[i] = Math.random();
+    // Twinkle: each star has its own frequency and phase
+    twinkleSpeedArr[i] = 0.5 + Math.random() * 3.0;
+    twinklePhaseArr[i] = Math.random() * Math.PI * 2;
   }
 
-  function createBuffer(data, attrib, size) {
+  function createBuffer(data, attrib, perVertex) {
     const loc = gl.getAttribLocation(program, attrib);
     if (loc === -1) return;
     const buf = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(loc, perVertex, gl.FLOAT, false, 0, 0);
   }
 
-  createBuffer(angleArr, 'a_angle', 1);
-  createBuffer(radiusArr, 'a_radius', 1);
-  createBuffer(speedArr, 'a_speed', 1);
+  createBuffer(posArr, 'a_pos', 2);
   createBuffer(brightArr, 'a_brightness', 1);
   createBuffer(sizeArr, 'a_size', 1);
-  createBuffer(phaseArr, 'a_phase', 1);
+  createBuffer(twinkleSpeedArr, 'a_twinkleSpeed', 1);
+  createBuffer(twinklePhaseArr, 'a_twinklePhase', 1);
+  createBuffer(depthArr, 'a_depth', 1);
 
   const uTime = gl.getUniformLocation(program, 'u_time');
   const uMouse = gl.getUniformLocation(program, 'u_mouse');
@@ -1436,7 +1487,7 @@
   });
 
   gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE); // Additive for star glow
   gl.clearColor(0, 0, 0, 0);
 
   let time = 0;
@@ -1446,11 +1497,10 @@
     const conceptSlide = document.querySelector('[data-slide="3"]');
     if (!conceptSlide || !conceptSlide.classList.contains('active')) return;
 
-    // Smooth mouse interpolation
-    mouse.x += (mouse.tx - mouse.x) * 0.05;
-    mouse.y += (mouse.ty - mouse.y) * 0.05;
+    mouse.x += (mouse.tx - mouse.x) * 0.03;
+    mouse.y += (mouse.ty - mouse.y) * 0.03;
 
-    time += 0.004;
+    time += 0.016;
     const aspect = canvas.width / canvas.height;
 
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -1460,8 +1510,6 @@
     gl.drawArrays(gl.POINTS, 0, COUNT);
   }
   animate();
-
-  window.addEventListener('resize', resize);
 })();
 </script>
 </body>
