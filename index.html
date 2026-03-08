@@ -1705,7 +1705,7 @@
       ctx.globalAlpha = 1;
     }
 
-    // Once fully formed, overlay 3D chrome text
+    // Once fully formed, overlay extruded 3D chrome text
     if (morphProgress > 0.7 && fontReady) {
       const textAlpha = Math.min(1, (morphProgress - 0.7) / 0.3);
       const fontSize = getLogoFontSize();
@@ -1717,76 +1717,75 @@
       ctx.font = fontStr;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-
-      // Layer 1: Drop shadow for depth
-      ctx.shadowColor = 'rgba(0,0,0,0.85)';
-      ctx.shadowBlur = 25;
-      ctx.shadowOffsetX = 3;
-      ctx.shadowOffsetY = 6;
-      ctx.fillStyle = '#111';
-      ctx.fillText(LOGO_TEXT, tx, ty);
-      ctx.shadowColor = 'transparent';
-
-      // Layer 2: Dark outline (thick stroke for 3D edge)
-      ctx.lineWidth = 6;
       ctx.lineJoin = 'round';
-      ctx.strokeStyle = '#1a1a1a';
+
+      // ── Extrusion: stack 20 layers going down-right for 3D depth ──
+      const extrudeDepth = 12;
+      const extrudeLayers = 20;
+      for (let d = extrudeLayers; d >= 1; d--) {
+        const t = d / extrudeLayers;
+        const ox = t * extrudeDepth * 0.3;  // slight rightward
+        const oy = t * extrudeDepth;        // downward depth
+
+        // Side face gradient: darker at back, lighter near front
+        const sideVal = Math.floor(25 + t * 40);
+        ctx.fillStyle = `rgb(${sideVal},${sideVal},${sideVal})`;
+        ctx.fillText(LOGO_TEXT, tx + ox, ty + oy);
+
+        // Side edge
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = `rgb(${Math.floor(sideVal * 0.6)},${Math.floor(sideVal * 0.6)},${Math.floor(sideVal * 0.6)})`;
+        ctx.strokeText(LOGO_TEXT, tx + ox, ty + oy);
+      }
+
+      // ── Front face outline (dark border) ──
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = '#111';
       ctx.strokeText(LOGO_TEXT, tx, ty);
 
-      // Layer 3: Slightly lighter outline (bevel edge)
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#444';
-      ctx.strokeText(LOGO_TEXT, tx, ty);
-
-      // Layer 4: Chrome gradient fill (sharp horizontal bands)
+      // ── Front face: chrome gradient ──
       const top = ty - fontSize * 0.55;
       const bot = ty + fontSize * 0.45;
       const chromeGrad = ctx.createLinearGradient(0, top, 0, bot);
-      chromeGrad.addColorStop(0.00, '#2a2a2a');
-      chromeGrad.addColorStop(0.05, '#4a4a4a');
-      chromeGrad.addColorStop(0.10, '#aaa');
-      chromeGrad.addColorStop(0.15, '#f0f0f0');
-      chromeGrad.addColorStop(0.20, '#ffffff'); // highlight 1
-      chromeGrad.addColorStop(0.25, '#d0d0d0');
-      chromeGrad.addColorStop(0.30, '#666');
-      chromeGrad.addColorStop(0.35, '#2a2a2a'); // dark band
+      chromeGrad.addColorStop(0.00, '#3a3a3a');
+      chromeGrad.addColorStop(0.06, '#888');
+      chromeGrad.addColorStop(0.12, '#e8e8e8');
+      chromeGrad.addColorStop(0.17, '#ffffff'); // sharp highlight 1
+      chromeGrad.addColorStop(0.22, '#e0e0e0');
+      chromeGrad.addColorStop(0.28, '#666');
+      chromeGrad.addColorStop(0.34, '#222');    // deep dark band
       chromeGrad.addColorStop(0.40, '#444');
-      chromeGrad.addColorStop(0.48, '#bbb');
-      chromeGrad.addColorStop(0.53, '#f5f5f5');
-      chromeGrad.addColorStop(0.57, '#ffffff'); // highlight 2
-      chromeGrad.addColorStop(0.62, '#ccc');
-      chromeGrad.addColorStop(0.68, '#555');
-      chromeGrad.addColorStop(0.73, '#222'); // dark band
-      chromeGrad.addColorStop(0.78, '#555');
-      chromeGrad.addColorStop(0.85, '#999');
-      chromeGrad.addColorStop(0.92, '#666');
+      chromeGrad.addColorStop(0.47, '#bbb');
+      chromeGrad.addColorStop(0.52, '#f0f0f0');
+      chromeGrad.addColorStop(0.56, '#ffffff'); // sharp highlight 2
+      chromeGrad.addColorStop(0.61, '#d0d0d0');
+      chromeGrad.addColorStop(0.67, '#555');
+      chromeGrad.addColorStop(0.73, '#1a1a1a'); // deep dark band
+      chromeGrad.addColorStop(0.80, '#555');
+      chromeGrad.addColorStop(0.87, '#999');
+      chromeGrad.addColorStop(0.93, '#555');
       chromeGrad.addColorStop(1.00, '#2a2a2a');
       ctx.fillStyle = chromeGrad;
       ctx.fillText(LOGO_TEXT, tx, ty);
 
-      // Layer 5: Top highlight for balloon/inflated feel
-      const topGrad = ctx.createLinearGradient(0, top, 0, top + (bot - top) * 0.4);
-      topGrad.addColorStop(0, 'rgba(255,255,255,0.45)');
-      topGrad.addColorStop(0.3, 'rgba(255,255,255,0.15)');
+      // ── Highlight: top-half light for balloon roundness ──
+      const topGrad = ctx.createLinearGradient(0, top, 0, top + (bot - top) * 0.35);
+      topGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
+      topGrad.addColorStop(0.4, 'rgba(255,255,255,0.12)');
       topGrad.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = topGrad;
       ctx.fillText(LOGO_TEXT, tx, ty);
 
-      // Layer 6: Bright top-edge highlight stroke
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-      ctx.strokeText(LOGO_TEXT, tx - 0.5, ty - 1.5);
+      // ── Bright edge on top ──
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+      ctx.strokeText(LOGO_TEXT, tx, ty - 1.5);
 
-      // Layer 7: Dark bottom-edge for depth
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-      ctx.strokeText(LOGO_TEXT, tx + 0.5, ty + 2);
-
-      // Layer 8: Moving specular sweep
+      // ── Moving specular sweep ──
       const sweepX = tx + Math.sin(time * 0.35) * fontSize * 3;
-      const specGrad = ctx.createRadialGradient(sweepX, ty - fontSize * 0.15, 0, sweepX, ty, fontSize * 1.2);
-      specGrad.addColorStop(0, 'rgba(255,255,255,0.3)');
-      specGrad.addColorStop(0.15, 'rgba(255,255,255,0.1)');
+      const specGrad = ctx.createRadialGradient(sweepX, ty - fontSize * 0.1, 0, sweepX, ty, fontSize * 1.0);
+      specGrad.addColorStop(0, 'rgba(255,255,255,0.25)');
+      specGrad.addColorStop(0.12, 'rgba(255,255,255,0.08)');
       specGrad.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = specGrad;
       ctx.fillText(LOGO_TEXT, tx, ty);
