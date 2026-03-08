@@ -1353,7 +1353,7 @@
 
       // ── Story wave: brightness ripple ──
       // Slow cycle ~25s. Wave travels: outer→center (企画), center bloom (つくる), center→outer (届ける)
-      float cycle = fract(u_time * 0.04);
+      float cycle = fract(u_time * 0.06);
       float dist = length(a_pos); // original distance from center (0~1.6)
       float normDist = dist / 1.2; // normalize to ~0-1
 
