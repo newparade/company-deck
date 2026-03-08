@@ -88,20 +88,59 @@
   }
 
   /* Cover */
-  .slide-cover { justify-content: flex-end; padding-bottom: 120px; }
-  .slide-cover .logo {
-    font-size: 14px; letter-spacing: 0.3em; text-transform: uppercase;
-    font-weight: 500; margin-bottom: 24px; color: var(--gray-light);
+  .slide-cover {
+    padding: 0; justify-content: flex-end; position: relative; overflow: hidden;
   }
-  .slide-cover h1 { font-size: 80px; margin-bottom: 16px; }
-  .slide-cover .sub { font-size: 20px; color: var(--gray); font-weight: 300; letter-spacing: 0.02em; }
-  .cover-line {
-    position: absolute; top: 0; right: 30%; width: 1px; height: 100%;
-    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.06), transparent);
+  .cover-bg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0;
   }
-  .cover-accent {
-    position: absolute; top: 60px; right: 80px; width: 6px; height: 60px;
-    background: var(--accent); border-radius: 3px;
+  .cover-bg img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    filter: brightness(0.55) contrast(1.1);
+  }
+  .cover-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to top, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.2) 40%, rgba(10,10,10,0.15) 100%);
+    z-index: 1;
+  }
+  .cover-top-left {
+    position: absolute; top: 48px; left: 60px; z-index: 2;
+  }
+  .cover-top-left .cover-label {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.6); font-weight: 500; margin-bottom: 8px;
+  }
+  .cover-top-left .cover-tagline {
+    font-size: 22px; font-weight: 700; letter-spacing: -0.01em;
+    line-height: 1.5; color: var(--white); max-width: 420px;
+  }
+  .cover-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+    padding: 0 60px 36px;
+  }
+  .cover-brand {
+    font-size: clamp(100px, 13vw, 180px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 0.85;
+    text-transform: uppercase; color: var(--white);
+    white-space: nowrap;
+  }
+  .cover-sub-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 16px; padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .cover-sub-row .cover-year {
+    font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: rgba(255,255,255,0.5); font-weight: 400;
+  }
+  .cover-sub-row .cover-desc {
+    font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+  .cover-accent-bar {
+    position: absolute; top: 48px; right: 60px; z-index: 2;
+    width: 4px; height: 48px; background: var(--white); border-radius: 2px;
   }
 
   /* About */
@@ -346,20 +385,23 @@
   /* ===== Animations ===== */
 
   /* Cover */
-  .slide-cover.active .cover-line {
-    animation: lineGrow 1.2s ease both;
+  .slide-cover.active .cover-bg img {
+    animation: slowZoom 10s ease-out both;
   }
-  .slide-cover.active .cover-accent {
-    animation: fadeIn 0.6s ease 0.2s both;
+  .slide-cover.active .cover-accent-bar {
+    animation: lineGrow 0.8s ease 0.2s both;
   }
-  .slide-cover.active .logo {
-    animation: fadeUp 0.6s ease 0.3s both;
+  .slide-cover.active .cover-label {
+    animation: fadeIn 0.6s ease 0.3s both;
   }
-  .slide-cover.active h1 {
+  .slide-cover.active .cover-tagline {
     animation: fadeUp 0.7s ease 0.5s both;
   }
-  .slide-cover.active .sub {
-    animation: fadeUp 0.6s ease 0.8s both;
+  .slide-cover.active .cover-brand {
+    animation: coverBrandReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+  }
+  .slide-cover.active .cover-sub-row {
+    animation: fadeIn 0.6s ease 0.9s both;
   }
 
   /* About */
@@ -525,6 +567,10 @@
     from { opacity: 0; transform: scaleY(0); transform-origin: top; }
     to { opacity: 1; transform: scaleY(1); transform-origin: top; }
   }
+  @keyframes coverBrandReveal {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
   /* Contact */
   .slide-contact { justify-content: center; align-items: center; text-align: center; }
@@ -557,12 +603,20 @@
 
 <!-- SLIDE 1: Cover -->
 <div class="slide slide-cover active" data-slide="1">
-  <div class="cover-line"></div>
-  <div class="cover-accent"></div>
-  <div class="logo">newparade</div>
-  <h1>Creative<br>Boutique</h1>
-  <p class="sub">Company Deck 2026</p>
-  <div class="page-num">01 / 15</div>
+  <div class="cover-bg"><img src="images/ego-1.jpg" alt=""></div>
+  <div class="cover-overlay"></div>
+  <div class="cover-accent-bar"></div>
+  <div class="cover-top-left">
+    <div class="cover-label">Creative Boutique</div>
+    <div class="cover-tagline">カルチャーの目線で、<br>企画して、つくる。</div>
+  </div>
+  <div class="cover-bottom">
+    <div class="cover-brand">newparade</div>
+    <div class="cover-sub-row">
+      <span class="cover-year">Company Deck 2026</span>
+      <span class="cover-desc">Strategy × Creative × Culture</span>
+    </div>
+  </div>
 </div>
 
 <!-- SLIDE 2: About -->
