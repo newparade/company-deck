@@ -91,19 +91,6 @@
   .slide-cover {
     padding: 0; justify-content: flex-end; position: relative; overflow: hidden;
   }
-  .cover-bg {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 0;
-  }
-  .cover-bg img {
-    width: 100%; height: 100%; object-fit: cover; display: block;
-    filter: brightness(0.55) contrast(1.1);
-  }
-  .cover-overlay {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(to top, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.2) 40%, rgba(10,10,10,0.15) 100%);
-    z-index: 1;
-  }
   .cover-top-left {
     position: absolute; top: 48px; left: 60px; z-index: 2;
   }
@@ -385,9 +372,6 @@
   /* ===== Animations ===== */
 
   /* Cover */
-  .slide-cover.active .cover-bg img {
-    animation: slowZoom 10s ease-out both;
-  }
   .slide-cover.active .cover-accent-bar {
     animation: lineGrow 0.8s ease 0.2s both;
   }
@@ -603,8 +587,6 @@
 
 <!-- SLIDE 1: Cover -->
 <div class="slide slide-cover active" data-slide="1">
-  <div class="cover-bg"><img src="images/ego-1.jpg" alt=""></div>
-  <div class="cover-overlay"></div>
   <div class="cover-accent-bar"></div>
   <div class="cover-top-left">
     <div class="cover-label">Creative Boutique</div>
