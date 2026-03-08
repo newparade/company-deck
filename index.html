@@ -289,6 +289,89 @@
     font-size: 11px; color: var(--accent); white-space: nowrap;
   }
 
+  /* ===== Animations ===== */
+
+  /* Service slide stagger */
+  .slide.active .detail-left .label,
+  .slide.active .detail-left h2,
+  .slide.active .detail-left .detail-ja,
+  .slide.active .detail-left .detail-items li,
+  .slide.active .detail-left > p {
+    animation: fadeUp 0.6s ease both;
+  }
+  .slide.active .detail-left .label { animation-delay: 0.1s; }
+  .slide.active .detail-left h2 { animation-delay: 0.2s; }
+  .slide.active .detail-left .detail-ja { animation-delay: 0.3s; }
+  .slide.active .detail-left .detail-items li:nth-child(1) { animation-delay: 0.35s; }
+  .slide.active .detail-left .detail-items li:nth-child(2) { animation-delay: 0.4s; }
+  .slide.active .detail-left .detail-items li:nth-child(3) { animation-delay: 0.45s; }
+  .slide.active .detail-left .detail-items li:nth-child(4) { animation-delay: 0.5s; }
+  .slide.active .detail-left > p { animation-delay: 0.6s; }
+  .slide.active .photo-grid img {
+    animation: scaleIn 0.5s ease both;
+  }
+  .slide.active .photo-grid img:nth-child(1) { animation-delay: 0.2s; }
+  .slide.active .photo-grid img:nth-child(2) { animation-delay: 0.35s; }
+  .slide.active .photo-grid img:nth-child(3) { animation-delay: 0.5s; }
+  .slide.active .photo-grid img:nth-child(4) { animation-delay: 0.65s; }
+
+  /* Case Study FV */
+  .slide-case.active .case-fv img {
+    animation: slowZoom 8s ease-out both;
+  }
+  .slide-case.active .case-fv-overlay {
+    animation: fadeUp 0.8s ease 0.3s both;
+  }
+  .slide-case.active .case-info-bar {
+    animation: fadeIn 0.6s ease 0.5s both;
+  }
+
+  /* Case Study scroll-triggered */
+  .case-reveal {
+    opacity: 0; transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .case-reveal.is-visible {
+    opacity: 1; transform: translateY(0);
+  }
+  .case-reveal-img {
+    opacity: 0; transform: scale(0.96);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .case-reveal-img.is-visible {
+    opacity: 1; transform: scale(1);
+  }
+  /* Stagger children in grid */
+  .case-img-grid.is-visible img { animation: scaleIn 0.5s ease both; }
+  .case-img-grid.is-visible img:nth-child(1) { animation-delay: 0s; }
+  .case-img-grid.is-visible img:nth-child(2) { animation-delay: 0.12s; }
+  .case-img-grid.is-visible img:nth-child(3) { animation-delay: 0.24s; }
+  .case-img-grid.is-visible img:nth-child(4) { animation-delay: 0.36s; }
+  .case-img-grid img {
+    opacity: 0; transform: scale(0.92);
+  }
+  /* Two-col stagger */
+  .case-two-col.is-visible > div:nth-child(1) { animation: fadeUp 0.6s ease 0s both; }
+  .case-two-col.is-visible > div:nth-child(2) { animation: fadeUp 0.6s ease 0.15s both; }
+  .case-two-col > div { opacity: 0; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slowZoom {
+    from { transform: scale(1); }
+    to { transform: scale(1.06); }
+  }
+
   /* Contact */
   .slide-contact { justify-content: center; align-items: center; text-align: center; }
   .slide-contact h1 { font-size: 64px; margin-bottom: 40px; }
@@ -542,15 +625,15 @@
     </div>
     <!-- ③ Overview -->
     <div class="case-body">
-      <p class="case-overview">
+      <p class="case-overview case-reveal">
         BI策定からCI・VI、Web、アプリUI、OOHまでトータルで担当。<br>
         ブランドの根幹となるコンセプトの言語化から、すべての接点に一貫性をもたせるビジュアルシステムを構築しました。<br>
         「アートをもっとカジュアルに」という理念を、見た人が直感的に感じ取れるブランド体験へと落とし込んでいます。
       </p>
       <!-- ④ Full-width Image -->
-      <div class="case-img-full"><img src="images/ego-1.jpg" alt=""></div>
+      <div class="case-img-full case-reveal-img"><img src="images/ego-1.jpg" alt=""></div>
       <!-- ⑤ Challenge & Approach 2-column -->
-      <div class="case-two-col">
+      <div class="case-two-col case-reveal">
         <div>
           <div class="case-col-label">Challenge</div>
           <p class="case-col-text">新規アートプラットフォームのブランドを、既存のアート業界とは異なる「カジュアルさ」で設計する必要がありました。アートに馴染みのないユーザーにも手に取りやすく、かつアート本来の価値を損なわないブランド体験をゼロから構築する挑戦。ギャラリーやオークションといった従来のアート流通とは異なる文脈で、「日常の中でアートに触れる」という新しい体験価値をブランドとして表現することが求められました。</p>
@@ -561,14 +644,14 @@
         </div>
       </div>
       <!-- ⑥ Image Grid (2x2) -->
-      <div class="case-img-grid">
+      <div class="case-img-grid case-reveal-img">
         <img src="images/ego-logo.jpg" alt="">
         <img src="images/ego-1.jpg" alt="">
         <img src="images/ego-2.jpg" alt="">
         <img src="images/ego-3.jpg" alt="">
       </div>
       <!-- ⑦ Footer -->
-      <div class="case-footer">
+      <div class="case-footer case-reveal">
         <div class="case-footer-row">
           <div><div class="case-footer-label">Output</div><div class="case-footer-value">ロゴ / カラーシステム / タイポグラフィ / Webサイト / アプリUI / OOH</div></div>
         </div>
@@ -602,13 +685,13 @@
       </div>
     </div>
     <div class="case-body">
-      <p class="case-overview">
+      <p class="case-overview case-reveal">
         ブランドコンセプトの策定からパッケージ・ラベル・Webサイトまで一貫して設計。<br>
         「自宅で寝かせて完成する」という体験そのものをブランドの核に据え、すべてのクリエイティブに展開しました。<br>
         プロダクトの手に取りやすさと特別感を両立させ、ギフト需要にも対応するパッケージ体験を実現しています。
       </p>
-      <div class="case-img-full"><img src="images/nekasehai-2.jpg" alt=""></div>
-      <div class="case-two-col">
+      <div class="case-img-full case-reveal-img"><img src="images/nekasehai-2.jpg" alt=""></div>
+      <div class="case-two-col case-reveal">
         <div>
           <div class="case-col-label">Challenge</div>
           <p class="case-col-text">「自宅で寝かせて完成する」という新しい体験を、パッケージとブランドで直感的に伝える必要がありました。まだ世の中にないカテゴリのため、既存の酒類やキット商品の文脈では語れない。手に取った瞬間にワクワクし、完成までのプロセス自体が楽しめるプロダクトにするために、パッケージそのものがブランド体験の入口となる設計が求められました。</p>
@@ -618,13 +701,13 @@
           <p class="case-col-text">プロデュースとして企画段階から参画し、ブランドストーリーの策定からパッケージデザイン、ラベル、Webサイトまで上流から設計。「寝かせる時間」そのものをブランド体験に変換するコンセプトを軸に据え、待つ楽しさ・育てる喜びを視覚的に伝えるトーン&マナーを構築しました。パッケージは開封体験まで含めた設計を行い、Webサイトでは寝かせ方ガイドをコンテンツの軸に据えています。</p>
         </div>
       </div>
-      <div class="case-img-grid">
+      <div class="case-img-grid case-reveal-img">
         <img src="images/nekasehai-1.jpg" alt="">
         <img src="images/nekasehai-2.jpg" alt="">
         <img src="images/nekasehai-3.jpg" alt="">
         <img src="images/nekasehai-4.jpg" alt="">
       </div>
-      <div class="case-footer">
+      <div class="case-footer case-reveal">
         <div class="case-footer-row">
           <div><div class="case-footer-label">Output</div><div class="case-footer-value">ブランドコンセプト / ロゴ / パッケージ / ラベル / Webサイト</div></div>
         </div>
@@ -658,12 +741,12 @@
       </div>
     </div>
     <div class="case-body">
-      <p class="case-overview">
+      <p class="case-overview case-reveal">
         パッケージ・ラベルをアートディレクションで統括。<br>
         日本の抹茶をグローバルに展開するための、モダンで洗練されたブランドビジュアルを構築しました。<br>
         海外市場における「日本品質」の信頼性と、現代的なライフスタイルブランドとしての魅力を一つのビジュアルに凝縮しています。
       </p>
-      <div class="case-two-col">
+      <div class="case-two-col case-reveal">
         <div>
           <div class="case-col-label">Challenge</div>
           <p class="case-col-text">日本の抹茶を海外市場に向けて「モダンで洗練された」ブランドとして展開する。従来の和風デザインでは海外消費者に届きにくく、かといって和のエッセンスを排除すれば抹茶の本質が失われる。この両立が最大の設計課題でした。競合ひしめく海外の棚で、一目で「日本の本物」と認識されるビジュアルアイデンティティの構築が求められました。</p>
@@ -677,7 +760,7 @@
         <img src="images/matcha-1.jpg" alt="">
         <img src="images/matcha-2.jpg" alt="">
       </div>
-      <div class="case-footer">
+      <div class="case-footer case-reveal">
         <div class="case-footer-row">
           <div><div class="case-footer-label">Output</div><div class="case-footer-value">ブランドVI / パッケージ / ラベル / 販促物</div></div>
         </div>
@@ -711,13 +794,13 @@
       </div>
     </div>
     <div class="case-body">
-      <p class="case-overview">
+      <p class="case-overview case-reveal">
         ロゴ・パッケージ・KVをトータルデザイン。<br>
         新カテゴリのプロダクトに、クリーンかつ洗練されたブランドイメージを付与しました。<br>
         CBD市場が成長する中で、日本発のプレミアムティーブランドとしての独自のポジションを確立するビジュアル戦略を設計しています。
       </p>
-      <div class="case-img-full"><img src="images/yoicha-2.jpg" alt=""></div>
-      <div class="case-two-col">
+      <div class="case-img-full case-reveal-img"><img src="images/yoicha-2.jpg" alt=""></div>
+      <div class="case-two-col case-reveal">
         <div>
           <div class="case-col-label">Challenge</div>
           <p class="case-col-text">CBD飲料という新カテゴリのプロダクトを、怪しさを排除しつつ興味を引くデザインに仕上げること。日本市場ではCBDに対する認知がまだ低く、「健康食品」でも「嗜好品」でもない新しいポジションの視覚言語をゼロから開発する必要がありました。店頭で手に取るハードルを下げながらも、プレミアム感と信頼性を担保するバランスが鍵でした。</p>
@@ -727,13 +810,13 @@
           <p class="case-col-text">「お茶」のカルチャーとCBDのウェルネス性を融合し、クリーンかつ洗練されたトーンで設計。ロゴタイプには日本茶の落ち着きとモダンさを共存させ、パッケージカラーには自然由来の穏やかなパレットを採用。KVではライフスタイルシーンを軸に、「日常の中のリラクゼーション」というブランドメッセージを視覚化しました。手に取りやすさと上質さを両立するパッケージデザインを追求しています。</p>
         </div>
       </div>
-      <div class="case-img-grid">
+      <div class="case-img-grid case-reveal-img">
         <img src="images/yoicha-1.jpg" alt="">
         <img src="images/yoicha-2.jpg" alt="">
         <img src="images/yoicha-3.jpg" alt="">
         <img src="images/yoicha-4.jpg" alt="">
       </div>
-      <div class="case-footer">
+      <div class="case-footer case-reveal">
         <div class="case-footer-row">
           <div><div class="case-footer-label">Output</div><div class="case-footer-value">ロゴ / パッケージ / KV / 販促物</div></div>
         </div>
@@ -766,13 +849,13 @@
       </div>
     </div>
     <div class="case-body">
-      <p class="case-overview">
+      <p class="case-overview case-reveal">
         多彩なビジュアル表現で月次更新し、統一感と個性を両立するシリーズデザインを展開。<br>
         共通のフレームワークの中でアーティストごとの世界観を表現しています。<br>
         フライヤーが単なる告知ツールではなく、コレクションしたくなるアートピースとして機能することを目指しました。
       </p>
-      <div class="case-img-full"><img src="images/tokio-4.jpg" alt=""></div>
-      <div class="case-two-col">
+      <div class="case-img-full case-reveal-img"><img src="images/tokio-4.jpg" alt=""></div>
+      <div class="case-two-col case-reveal">
         <div>
           <div class="case-col-label">Challenge</div>
           <p class="case-col-text">毎月異なるアーティストのフライヤーを、統一感を保ちつつ個性を表現すること。ライブハウスとしてのブランド認知を継続的に積み上げながら、毎回の新鮮さも欠かせない。出演者のジャンルもロック、エレクトロ、ジャズと幅広く、あらゆる音楽性に対応できる柔軟なデザインフレームワークの構築が課題でした。</p>
@@ -782,13 +865,13 @@
           <p class="case-col-text">フォーマットとトーンの一貫性を軸に、アーティストごとのビジュアル表現を変化させる設計。共通のグリッドシステムとタイポグラフィルールを維持しながら、色・写真・グラフィック要素で個性を演出。毎月のリリースがSNS上でシリーズとして認知されるよう、「違うのに同じ」というバランスを意識した連作ビジュアルを展開しています。</p>
         </div>
       </div>
-      <div class="case-img-grid">
+      <div class="case-img-grid case-reveal-img">
         <img src="images/tokio-3.jpg" alt="">
         <img src="images/tokio-4.jpg" alt="">
         <img src="images/tokio-5.jpg" alt="">
         <img src="images/tokio-6.jpg" alt="">
       </div>
-      <div class="case-footer">
+      <div class="case-footer case-reveal">
         <div class="case-footer-row">
           <div><div class="case-footer-label">Output</div><div class="case-footer-value">月次フライヤー / イベントビジュアル</div></div>
         </div>
@@ -840,8 +923,14 @@
     const slide = document.querySelector(`[data-slide="${n}"]`);
     slide.classList.add('active');
     document.getElementById('current').textContent = n;
-    // Reset scroll for case study slides
-    if (slide.classList.contains('slide-case')) slide.scrollTop = 0;
+    // Reset scroll and reveal states for case study slides
+    if (slide.classList.contains('slide-case')) {
+      slide.scrollTop = 0;
+      slide.querySelectorAll('.case-reveal.is-visible').forEach(el => el.classList.remove('is-visible'));
+      slide.querySelectorAll('.case-reveal-img.is-visible').forEach(el => el.classList.remove('is-visible'));
+      slide.querySelectorAll('.case-img-grid.is-visible').forEach(el => el.classList.remove('is-visible'));
+      slide.querySelectorAll('.case-two-col.is-visible').forEach(el => el.classList.remove('is-visible'));
+    }
   }
   document.getElementById('next').addEventListener('click', () => { if (current < total) { current++; showSlide(current); } });
   document.getElementById('prev').addEventListener('click', () => { if (current > 1) { current--; showSlide(current); } });
@@ -876,11 +965,35 @@
     if (dx > 0 && current > 1) { current--; showSlide(current); }
   }, { passive: true });
 
-  // Reset scroll position when entering a case study slide
-  function resetCaseScroll() {
-    const activeSlide = document.querySelector('.slide.active.slide-case');
-    if (activeSlide) activeSlide.scrollTop = 0;
-  }
+  // IntersectionObserver for scroll-triggered animations in Case Study slides
+  (function initCaseReveal() {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.case-reveal, .case-reveal-img, .case-img-grid, .case-two-col').forEach(el => {
+      revealObserver.observe(el);
+    });
+
+    // Also observe within each case slide's scroll container
+    document.querySelectorAll('.slide-case').forEach(slide => {
+      const slideObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          }
+        });
+      }, { root: slide, threshold: 0.15 });
+
+      slide.querySelectorAll('.case-reveal, .case-reveal-img, .case-img-grid, .case-two-col').forEach(el => {
+        slideObserver.observe(el);
+      });
+    });
+  })();
 
 </script>
 </body>
