@@ -172,13 +172,15 @@
 
   /* Concept */
   .slide-concept { text-align: center; align-items: center; overflow: hidden; }
-  .concept-copy { font-size: 48px; font-weight: 700; line-height: 1.5; letter-spacing: -0.01em; margin-bottom: 48px; position: relative; z-index: 2; }
+  .slide-concept .label,
+  .slide-concept .concept-copy,
+  .slide-concept .concept-desc { position: relative; z-index: 2; }
+  .concept-copy { font-size: 48px; font-weight: 700; line-height: 1.5; letter-spacing: -0.01em; margin-bottom: 48px; }
   .concept-copy span { color: var(--accent); }
-  .concept-desc { max-width: 700px; text-align: center; font-size: 16px; line-height: 2; position: relative; z-index: 2; }
-  .slide-concept .label { position: relative; z-index: 2; }
+  .concept-desc { max-width: 700px; text-align: center; font-size: 16px; line-height: 2; }
 
   /* Concept background image mosaic */
-  .concept-mosaic {
+  .mosaic-bg {
     position: absolute; top: -20%; left: -5%; right: -5%; bottom: -20%;
     z-index: 0; opacity: 0.3;
     display: grid;
@@ -187,20 +189,20 @@
     grid-auto-flow: dense;
     gap: 3px;
   }
-  .concept-mosaic img {
+  .mosaic-bg img {
     width: 100%; height: 100%; object-fit: cover; display: block;
     animation: var(--mosaic-anim) ease-in-out infinite alternate;
   }
-  .concept-mosaic img:nth-child(10n+1) { --mosaic-anim: puzzleA 2.5s; animation-delay: 0s; }
-  .concept-mosaic img:nth-child(10n+2) { --mosaic-anim: puzzleB 3s; animation-delay: -0.8s; }
-  .concept-mosaic img:nth-child(10n+3) { --mosaic-anim: puzzleC 2.8s; animation-delay: -1.5s; }
-  .concept-mosaic img:nth-child(10n+4) { --mosaic-anim: puzzleD 3.5s; animation-delay: -0.4s; }
-  .concept-mosaic img:nth-child(10n+5) { --mosaic-anim: puzzleA 3.2s; animation-delay: -1.2s; }
-  .concept-mosaic img:nth-child(10n+6) { --mosaic-anim: puzzleC 2.6s; animation-delay: -2s; }
-  .concept-mosaic img:nth-child(10n+7) { --mosaic-anim: puzzleB 3.3s; animation-delay: -0.6s; }
-  .concept-mosaic img:nth-child(10n+8) { --mosaic-anim: puzzleD 2.7s; animation-delay: -1.4s; }
-  .concept-mosaic img:nth-child(10n+9) { --mosaic-anim: puzzleA 3.5s; animation-delay: -1s; }
-  .concept-mosaic img:nth-child(10n)   { --mosaic-anim: puzzleC 3s; animation-delay: -1.8s; }
+  .mosaic-bg img:nth-child(10n+1) { --mosaic-anim: puzzleA 2.5s; animation-delay: 0s; }
+  .mosaic-bg img:nth-child(10n+2) { --mosaic-anim: puzzleB 3s; animation-delay: -0.8s; }
+  .mosaic-bg img:nth-child(10n+3) { --mosaic-anim: puzzleC 2.8s; animation-delay: -1.5s; }
+  .mosaic-bg img:nth-child(10n+4) { --mosaic-anim: puzzleD 3.5s; animation-delay: -0.4s; }
+  .mosaic-bg img:nth-child(10n+5) { --mosaic-anim: puzzleA 3.2s; animation-delay: -1.2s; }
+  .mosaic-bg img:nth-child(10n+6) { --mosaic-anim: puzzleC 2.6s; animation-delay: -2s; }
+  .mosaic-bg img:nth-child(10n+7) { --mosaic-anim: puzzleB 3.3s; animation-delay: -0.6s; }
+  .mosaic-bg img:nth-child(10n+8) { --mosaic-anim: puzzleD 2.7s; animation-delay: -1.4s; }
+  .mosaic-bg img:nth-child(10n+9) { --mosaic-anim: puzzleA 3.5s; animation-delay: -1s; }
+  .mosaic-bg img:nth-child(10n)   { --mosaic-anim: puzzleC 3s; animation-delay: -1.8s; }
   @keyframes puzzleA {
     0% { transform: translate(0, 0); }
     100% { transform: translate(8px, -6px); }
@@ -218,18 +220,18 @@
     100% { transform: translate(-8px, -8px); }
   }
   /* Varying spans for organic layout */
-  .concept-mosaic img:nth-child(10n+1) { grid-row: span 3; }
-  .concept-mosaic img:nth-child(10n+2) { grid-row: span 2; }
-  .concept-mosaic img:nth-child(10n+3) { grid-row: span 3; }
-  .concept-mosaic img:nth-child(10n+4) { grid-row: span 2; }
-  .concept-mosaic img:nth-child(10n+5) { grid-row: span 3; }
-  .concept-mosaic img:nth-child(10n+6) { grid-row: span 2; }
-  .concept-mosaic img:nth-child(10n+7) { grid-row: span 2; }
-  .concept-mosaic img:nth-child(10n+8) { grid-row: span 3; }
-  .concept-mosaic img:nth-child(10n+9) { grid-row: span 2; }
-  .concept-mosaic img:nth-child(10n)   { grid-row: span 3; }
+  .mosaic-bg img:nth-child(10n+1) { grid-row: span 3; }
+  .mosaic-bg img:nth-child(10n+2) { grid-row: span 2; }
+  .mosaic-bg img:nth-child(10n+3) { grid-row: span 3; }
+  .mosaic-bg img:nth-child(10n+4) { grid-row: span 2; }
+  .mosaic-bg img:nth-child(10n+5) { grid-row: span 3; }
+  .mosaic-bg img:nth-child(10n+6) { grid-row: span 2; }
+  .mosaic-bg img:nth-child(10n+7) { grid-row: span 2; }
+  .mosaic-bg img:nth-child(10n+8) { grid-row: span 3; }
+  .mosaic-bg img:nth-child(10n+9) { grid-row: span 2; }
+  .mosaic-bg img:nth-child(10n)   { grid-row: span 3; }
   /* Dark vignette over mosaic */
-  .concept-vignette {
+  .mosaic-vignette {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1;
     background: radial-gradient(ellipse at center, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.85) 70%, rgba(10,10,10,0.95) 100%);
   }
@@ -250,12 +252,20 @@
   .flow-arrow { color: var(--accent); font-size: 20px; }
 
   /* Menu Overview */
+  .slide-menu { overflow: hidden; }
+  .slide-menu .label,
+  .slide-menu h2,
+  .slide-menu .menu-grid { position: relative; z-index: 2; }
   .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
   .menu-card {
-    padding: 40px 32px; background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; transition: all 0.3s;
+    padding: 40px 32px;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(24px) saturate(1.4); -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px; transition: all 0.3s;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
   }
-  .menu-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
+  .menu-card:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12); }
   .menu-card .menu-num {
     font-size: 48px; font-weight: 800; color: rgba(255,255,255,0.08);
     margin-bottom: 20px; line-height: 1;
@@ -717,7 +727,7 @@
 
 <!-- SLIDE 3: Concept -->
 <div class="slide slide-concept" data-slide="3">
-  <div class="concept-mosaic">
+  <div class="mosaic-bg">
     <img src="images/ego-logo.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/tokio-4.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/nekasehai-2.jpg" alt="">
     <img src="images/matcha-2.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/yoicha-4.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/ego-3.jpg" alt="">
     <img src="images/nekasehai-4.jpg" alt=""><img src="images/tokio-6.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/ego-logo.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt="">
@@ -728,7 +738,7 @@
     <img src="images/ego-1.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/tokio-4.jpg" alt="">
     <img src="images/nekasehai-4.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/ego-logo.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/ego-3.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/nekasehai-2.jpg" alt="">
   </div>
-  <div class="concept-vignette"></div>
+  <div class="mosaic-vignette"></div>
   <div class="label">Our Concept</div>
   <div class="concept-copy">企画する。<span>つくる。</span>届ける。</div>
   <p class="concept-desc">
@@ -757,7 +767,19 @@
 </div>
 
 <!-- SLIDE 5: Menu Overview -->
-<div class="slide" data-slide="5">
+<div class="slide slide-menu" data-slide="5">
+  <div class="mosaic-bg">
+    <img src="images/ego-logo.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/tokio-4.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/nekasehai-2.jpg" alt="">
+    <img src="images/matcha-2.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/yoicha-4.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/ego-3.jpg" alt="">
+    <img src="images/nekasehai-4.jpg" alt=""><img src="images/tokio-6.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/ego-logo.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt="">
+    <img src="images/tokio-4.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/nekasehai-2.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/charm-2.jpg" alt="">
+    <img src="images/richill-pine.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/ego-3.jpg" alt=""><img src="images/yoicha-4.jpg" alt=""><img src="images/tokio-6.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/nekasehai-4.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/ego-logo.jpg" alt="">
+    <img src="images/charm-1.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/tokio-4.jpg" alt=""><img src="images/ego-2.jpg" alt="">
+    <img src="images/nekasehai-2.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/ego-3.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/tokio-6.jpg" alt=""><img src="images/yoicha-4.jpg" alt="">
+    <img src="images/ego-1.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/tokio-4.jpg" alt="">
+    <img src="images/nekasehai-4.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/ego-logo.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/ego-3.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/nekasehai-2.jpg" alt="">
+  </div>
+  <div class="mosaic-vignette"></div>
   <div class="label">Menu</div>
   <h2>4つのメニュー</h2>
   <div class="menu-grid">
