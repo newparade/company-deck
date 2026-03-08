@@ -1351,26 +1351,30 @@
       float dist = length(a_pos); // original distance from center (0~1.6)
       float normDist = dist / 1.2; // normalize to ~0-1
 
+      // ── Ripple wave (さざなみ) ──
+      // Gentle cosine ripple that spreads softly instead of a sharp ring
       float wave = 0.0;
       if (cycle < 0.35) {
-        // 企画: inward wave — brightness ring sweeps from outside to center
-        float wavePos = 1.0 - cycle / 0.35; // 1→0
-        wave = 1.0 - smoothstep(0.0, 0.25, abs(normDist - wavePos));
+        // 企画: gentle ripple flows inward
+        float wavePos = 1.0 - cycle / 0.35;
+        float d = abs(normDist - wavePos);
+        wave = max(0.0, cos(d * 3.14159) * 0.5 + 0.5) * smoothstep(0.6, 0.0, d);
       } else if (cycle < 0.55) {
-        // つくる: center bloom — particles near center glow
+        // つくる: soft center glow that breathes
         float t = (cycle - 0.35) / 0.2;
         float pulse = sin(t * 3.14159);
-        wave = pulse * smoothstep(0.5, 0.0, normDist);
+        wave = pulse * smoothstep(0.7, 0.0, normDist);
       } else {
-        // 届ける: outward wave — brightness ring sweeps from center to outside
-        float wavePos = (cycle - 0.55) / 0.45; // 0→1
-        wave = 1.0 - smoothstep(0.0, 0.25, abs(normDist - wavePos));
+        // 届ける: gentle ripple flows outward
+        float wavePos = (cycle - 0.55) / 0.45;
+        float d = abs(normDist - wavePos);
+        wave = max(0.0, cos(d * 3.14159) * 0.5 + 0.5) * smoothstep(0.6, 0.0, d);
       }
 
       // Twinkle
       float twinkle = 0.5 + 0.5 * sin(u_time * a_twinkleSpeed + a_twinklePhase);
 
-      float brightness = a_brightness * (0.4 + 0.6 * twinkle) + wave * 0.5;
+      float brightness = a_brightness * (0.45 + 0.55 * twinkle) + wave * 0.35;
       float sizeMul = 1.0 + wave * 0.4;
 
       gl_Position = vec4(pos, 0.0, 1.0);
