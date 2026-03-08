@@ -112,14 +112,14 @@
     font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
     color: rgba(255,255,255,0.35); font-weight: 400;
   }
-  /* 左中段: タグラインコピー（大きく太く） */
+  /* 中段: 社名 */
   .cover-mid-left {
-    position: absolute; top: 38%; left: 60px; z-index: 2;
+    position: absolute; top: 45%; left: 60px; z-index: 2;
     transform: translateY(-50%);
   }
   .cover-tagline {
-    font-size: 32px; font-weight: 800; letter-spacing: -0.01em;
-    line-height: 1.6; color: var(--white); max-width: 500px;
+    font-size: clamp(36px, 4.5vw, 64px); font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.1; color: var(--white);
   }
   /* 中央右: 説明テキスト */
   .cover-mid-right {
@@ -129,14 +129,14 @@
     font-size: 14px; line-height: 1.9; color: rgba(255,255,255,0.5);
     font-weight: 300; max-width: 560px;
   }
-  /* 最下部: ブランド名（超巨大） */
+  /* 最下部: 事業名 */
   .cover-bottom {
-    position: absolute; bottom: -0.08em; left: 0; right: 0; z-index: 2;
-    padding: 0 60px; overflow: hidden;
+    position: absolute; bottom: 32px; left: 0; right: 0; z-index: 2;
+    padding: 0 60px;
   }
   .cover-brand {
-    font-size: clamp(80px, 10vw, 140px); font-weight: 800;
-    letter-spacing: -0.04em; line-height: 0.85;
+    font-size: clamp(56px, 7.5vw, 108px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 0.9;
     text-transform: uppercase; color: var(--white);
     white-space: nowrap;
   }
