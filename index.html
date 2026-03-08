@@ -1369,7 +1369,7 @@
       if (d > 0.5) discard;
       float soft = smoothstep(0.5, 0.05, d);
       vec3 col = vec3(0.97, 0.93, 0.82);
-      gl_FragColor = vec4(col, soft * v_alpha);
+      gl_FragColor = vec4(col, soft * v_alpha * 0.9);
     }
   `;
 
@@ -1409,9 +1409,10 @@
     const baseSpeed = 0.006 + Math.random() * 0.02;
     speedArr[i] = baseSpeed * (Math.random() < 0.3 ? -1 : 1);
 
-    brightArr[i] = 0.15 + Math.random() * 0.7;
+    brightArr[i] = 0.2 + Math.random() * 0.8;
 
-    sizeArr[i] = (0.5 + Math.random() * 1.5) * dpr;
+    const distFactor = 1.0 - Math.abs(radiusArr[i] - 0.5) / 0.5;
+    sizeArr[i] = (0.6 + Math.random() * 1.8 + Math.max(0, distFactor) * 1.0) * dpr;
 
     phaseArr[i] = Math.random();
   }
