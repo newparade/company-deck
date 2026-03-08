@@ -1340,10 +1340,9 @@
       gl_Position = vec4(pos, 0.0, 1.0);
       gl_PointSize = a_size;
 
-      // Fade: hard inner void, soft outer edge
-      float innerFade = smoothstep(0.15, 0.4, r);
-      float outerFade = smoothstep(1.1, 0.75, r);
-      v_alpha = a_brightness * innerFade * outerFade;
+      // Fade: soft outer edge only, no inner void
+      float outerFade = smoothstep(1.1, 0.6, r);
+      v_alpha = a_brightness * outerFade;
     }
   `;
 
@@ -1394,9 +1393,9 @@
   for (let i = 0; i < COUNT; i++) {
     angleArr[i] = Math.random() * Math.PI * 2;
 
-    // Donut: clear inner void at ~0.25, peak around ~0.55, extends to ~1.0
+    // Filled circle: center to edge, density peaks mid-range
     const g = (Math.random() + Math.random() + Math.random()) / 3;
-    radiusArr[i] = 0.25 + g * 0.75; // range 0.25 to 1.0
+    radiusArr[i] = g * 1.0; // range 0.0 to 1.0
 
     const baseSpeed = 0.006 + Math.random() * 0.02;
     speedArr[i] = baseSpeed * (Math.random() < 0.3 ? -1 : 1);
