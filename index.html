@@ -1715,10 +1715,21 @@
       offC.width = W; offC.height = H;
       const oc = offC.getContext('2d');
 
-      // Draw logo as mask source (white text on transparent)
+      // Draw logo, then remove black background (keep only white text)
       oc.drawImage(logoImg, dp.drawX, dp.drawY, dp.drawW, dp.drawH);
+      const maskData = oc.getImageData(0, 0, W, H);
+      const md = maskData.data;
+      for (let j = 0; j < md.length; j += 4) {
+        const brightness = (md[j] + md[j+1] + md[j+2]) / 3;
+        if (brightness < 100) {
+          md[j+3] = 0; // make dark pixels transparent
+        } else {
+          md[j+3] = Math.min(255, (brightness - 100) * 255 / 155);
+        }
+      }
+      oc.putImageData(maskData, 0, 0);
 
-      // Use 'source-in' to paint chrome ONLY where logo pixels exist
+      // Use 'source-in' to paint chrome ONLY where white text pixels exist
       oc.globalCompositeOperation = 'source-in';
 
       // Chrome gradient: sharp horizontal bands (matching reference)
@@ -1768,18 +1779,30 @@
       // Main chrome layer (drawn again without shadow for crispness)
       ctx.drawImage(offC, 0, 0);
 
-      // Outline: draw logo slightly scaled up, dark, behind
-      // Use a second offscreen for outline
+      // Outline: create a pre-processed mask canvas (no black bg)
+      const maskC = document.createElement('canvas');
+      maskC.width = W; maskC.height = H;
+      const mCtx = maskC.getContext('2d');
+      mCtx.drawImage(logoImg, dp.drawX, dp.drawY, dp.drawW, dp.drawH);
+      const mData = mCtx.getImageData(0, 0, W, H);
+      const mPx = mData.data;
+      for (let j = 0; j < mPx.length; j += 4) {
+        const b = (mPx[j] + mPx[j+1] + mPx[j+2]) / 3;
+        mPx[j] = mPx[j+1] = mPx[j+2] = 255;
+        mPx[j+3] = b < 100 ? 0 : Math.min(255, (b - 100) * 255 / 155);
+      }
+      mCtx.putImageData(mData, 0, 0);
+
+      // Draw outline using mask at offsets
       const outC = document.createElement('canvas');
       outC.width = W; outC.height = H;
       const outCtx = outC.getContext('2d');
       const outlineSize = 2;
-      // Draw logo at 8 offsets for outline
       outCtx.globalAlpha = 0.6;
       for (let ox = -outlineSize; ox <= outlineSize; ox++) {
         for (let oy = -outlineSize; oy <= outlineSize; oy++) {
           if (ox === 0 && oy === 0) continue;
-          outCtx.drawImage(logoImg, dp.drawX + ox, dp.drawY + oy, dp.drawW, dp.drawH);
+          outCtx.drawImage(maskC, ox, oy);
         }
       }
       outCtx.globalCompositeOperation = 'source-in';
