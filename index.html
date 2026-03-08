@@ -1545,8 +1545,8 @@ import * as THREE from 'three';
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-  camera.position.set(0, 0.8, 4.5);
-  camera.lookAt(0, 0, 0);
+  camera.position.set(0, 0.5, 3.8);
+  camera.lookAt(0, 0.3, 0);
 
   // Simplex noise
   const perm = new Uint8Array(512);
@@ -1575,129 +1575,172 @@ import * as THREE from 'three';
     return 32*(n0+n1+n2+n3);
   }
 
-  // Chrome shader (pure silver)
+  // Pastel pattern shader (rabbit mask style)
   const mat = new THREE.ShaderMaterial({
     uniforms: {
-      u_lightDir: { value: new THREE.Vector3(0.5, 0.5, 1).normalize() },
+      u_time: { value: 0 },
+      u_lightDir: { value: new THREE.Vector3(0.5, 0.8, 1).normalize() },
     },
     vertexShader: `
       varying vec3 vNormal;
       varying vec3 vViewPosition;
+      varying vec3 vWorldPosition;
+      varying vec2 vUv;
       void main() {
         vNormal = normalize(normalMatrix * normal);
         vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
         vViewPosition = -mvPos.xyz;
+        vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+        vUv = uv;
         gl_Position = projectionMatrix * mvPos;
       }
     `,
     fragmentShader: `
+      uniform float u_time;
       uniform vec3 u_lightDir;
       varying vec3 vNormal;
       varying vec3 vViewPosition;
+      varying vec3 vWorldPosition;
 
-      vec3 envMap(vec3 r) {
-        vec3 env = vec3(0.02);
-        env += vec3(3.0) * pow(max(dot(r, normalize(vec3(1.0, 1.2, 0.6))), 0.0), 4.0);
-        env += vec3(1.5) * pow(max(dot(r, normalize(vec3(-0.8, 1.0, 0.4))), 0.0), 5.0);
-        env += vec3(2.0) * pow(1.0 - abs(r.y), 25.0);
-        env += vec3(0.1) * pow(max(dot(r, normalize(vec3(0.0, -1.0, 0.3))), 0.0), 3.0);
-        env += vec3(2.0) * pow(max(dot(r, normalize(vec3(0.0, 0.3, -1.0))), 0.0), 8.0);
-        env += vec3(1.0) * pow(max(dot(r, normalize(vec3(1.0, 0.0, -0.5))), 0.0), 12.0);
-        return env;
+      // Pastel palette: light blue, soft yellow, lavender, mint
+      vec3 palette(float t) {
+        vec3 a = vec3(0.65, 0.72, 0.85); // base: light blue
+        vec3 b = vec3(0.20, 0.18, 0.15); // amplitude
+        vec3 c = vec3(1.0, 1.0, 1.0);    // frequency
+        vec3 d = vec3(0.0, 0.15, 0.45);  // phase
+        return a + b * cos(6.28318 * (c * t + d));
       }
 
       void main() {
         vec3 n = normalize(vNormal);
         vec3 v = normalize(vViewPosition);
-        vec3 r = reflect(-v, n);
-        float cosTheta = max(dot(n, v), 0.0);
-        float fresnel = 0.95 + 0.05 * pow(1.0 - cosTheta, 5.0);
-        vec3 env = envMap(r);
-        float s1 = pow(max(dot(n, normalize(u_lightDir + v)), 0.0), 600.0) * 5.0;
-        float s2 = pow(max(dot(n, normalize(normalize(vec3(-1.5, 2.0, -0.5)) + v)), 0.0), 400.0) * 3.0;
-        float s3 = pow(max(dot(n, normalize(normalize(vec3(0.5, -0.5, 2.0)) + v)), 0.0), 300.0) * 2.0;
-        float rim = pow(1.0 - cosTheta, 3.5) * 0.4;
-        vec3 color = vec3(fresnel) * env * 2.0 + vec3(s1 + s2 + s3 + rim);
-        vec3 x = color;
-        color = clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0);
-        color = pow(color, vec3(0.88));
-        gl_FragColor = vec4(color, 1.0);
+        vec3 p = vWorldPosition;
+
+        // Flower/starburst pattern from reference
+        float angle = atan(p.z, p.x);
+        float r = length(p.xz);
+        float petals = sin(angle * 6.0 + u_time * 0.3) * 0.5 + 0.5;
+        float radial = smoothstep(0.0, 1.5, r);
+        float pattern = petals * radial;
+
+        // Secondary swirl pattern
+        float swirl = sin(angle * 4.0 - r * 3.0 + u_time * 0.5 + p.y * 2.0) * 0.5 + 0.5;
+
+        // Mix patterns
+        float combined = mix(pattern, swirl, 0.4);
+
+        // Color from palette
+        vec3 baseColor = palette(combined + u_time * 0.05);
+
+        // Soft yellow accent (like reference)
+        vec3 yellow = vec3(0.92, 0.88, 0.55);
+        vec3 blue = vec3(0.68, 0.78, 0.92);
+        vec3 patternColor = mix(blue, yellow, smoothstep(0.35, 0.65, combined));
+
+        // Blend with palette
+        vec3 finalColor = mix(patternColor, baseColor, 0.3);
+
+        // Soft lighting
+        float diff = max(dot(n, u_lightDir), 0.0) * 0.5 + 0.5;
+        float spec = pow(max(dot(reflect(-u_lightDir, n), v), 0.0), 30.0) * 0.6;
+
+        // Fresnel rim for glossy feel
+        float fresnel = pow(1.0 - max(dot(n, v), 0.0), 3.0);
+        vec3 rimColor = vec3(0.85, 0.80, 0.95); // lavender rim
+
+        finalColor = finalColor * diff + vec3(spec) + rimColor * fresnel * 0.35;
+
+        // Slight tone mapping
+        finalColor = pow(finalColor, vec3(0.92));
+
+        gl_FragColor = vec4(finalColor, 1.0);
       }
     `,
   });
 
-  // ── Blob sphere deformed into car silhouette ──
+  // ── Rabbit head shape ──
   const geo = new THREE.IcosahedronGeometry(1.0, 128);
   const basePositions = geo.attributes.position.array.slice();
 
-  // Pre-deform sphere into abstract car shape
-  const carPositions = new Float32Array(basePositions.length);
+  // Pre-deform sphere into rabbit head
+  const rabbitPositions = new Float32Array(basePositions.length);
   for (let i = 0; i < basePositions.length; i += 3) {
     let x = basePositions[i], y = basePositions[i+1], z = basePositions[i+2];
     const len = Math.sqrt(x*x + y*y + z*z);
     const nx = x/len, ny = y/len, nz = z/len;
 
-    // Stretch into elongated flat body
-    let sx = nx * 2.2;  // longer
-    let sy = ny * 0.4;  // flatter
-    let sz = nz * 0.85;
+    // Base head: slightly tall oval
+    let sx = nx * 0.75;  // narrower
+    let sy = ny * 1.0;   // taller
+    let sz = nz * 0.7;   // thinner front-to-back
 
-    // Strong cabin: big raised bump in center-rear
-    const cabinCenterX = -0.15; // slightly rear-biased
-    const cabinDist = (sx - cabinCenterX);
-    const cabinProfile = Math.exp(-cabinDist*cabinDist * 0.8);
-    const isTop = Math.max(0, ny);
-    sy += isTop * cabinProfile * 0.55;
+    // Cheeks: widen the lower-mid section
+    const cheekY = Math.exp(-(ny + 0.2) * (ny + 0.2) * 4.0);
+    sx *= (1.0 + cheekY * 0.25);
+    sz *= (1.0 + cheekY * 0.15);
 
-    // Hood: front slopes down from cabin
-    if (sx > 0.4 && ny > 0) {
-      const hoodFactor = Math.pow(Math.max(0, (sx - 0.4) / 1.8), 1.2);
-      sy -= hoodFactor * isTop * 0.45;
+    // Slight chin taper
+    if (ny < -0.4) {
+      const chinFactor = Math.max(0, (-ny - 0.4) / 0.6);
+      sx *= (1.0 - chinFactor * 0.35);
+      sz *= (1.0 - chinFactor * 0.3);
     }
 
-    // Trunk: rear drops more steeply
-    if (sx < -1.0 && ny > 0) {
-      const trunkFactor = Math.pow(Math.max(0, (-sx - 1.0) / 1.2), 1.3);
-      sy -= trunkFactor * isTop * 0.4;
-    }
-
-    // Hard flat bottom
-    if (ny < -0.15) {
-      sy = Math.max(sy, -0.32);
-    }
-
-    // Wheel arches: strong indents at 4 corners
-    const wheelPositions = [
-      { wx: 1.3, wz: 0.6 }, { wx: 1.3, wz: -0.6 },
-      { wx: -1.2, wz: 0.6 }, { wx: -1.2, wz: -0.6 }
-    ];
-    wheelPositions.forEach(({ wx, wz }) => {
-      const dx = sx - wx;
-      const dz = sz - wz * 0.85;
-      const dist = Math.sqrt(dx*dx + dz*dz + (sy+0.25)*(sy+0.25));
-      const archR = 0.45;
-      if (dist < archR && ny < 0) {
-        const indent = (archR - dist) * 0.4;
-        sy += indent;
-        sz *= (1.0 - indent * 0.3);
+    // Snout: slight forward bump at lower-center
+    if (ny < 0.1 && ny > -0.5) {
+      const snoutY = Math.exp(-(ny + 0.15) * (ny + 0.15) * 8.0);
+      const snoutX = Math.exp(-nx * nx * 6.0);
+      if (nz < 0) {
+        sz -= snoutY * snoutX * 0.12;
       }
-    });
+    }
 
-    // Fenders: slight width bulge at wheel areas
-    const fenderX1 = Math.exp(-(sx-1.3)*(sx-1.3)*2.0);
-    const fenderX2 = Math.exp(-(sx+1.2)*(sx+1.2)*2.0);
-    const fenderEffect = (fenderX1 + fenderX2) * Math.max(0, -ny) * 0.12;
-    sz *= (1.0 + fenderEffect);
+    // ── Ears ──
+    // Left ear: upper-left region
+    const earLAngle = Math.atan2(nx - 0.35, ny - 0.5);
+    const earLDist = Math.sqrt((nx - 0.35) * (nx - 0.35) + Math.max(0, ny - 0.5) * Math.max(0, ny - 0.5));
+    const earLProfile = Math.exp(-earLDist * earLDist * 8.0);
 
-    const finalLen = Math.sqrt(sx*sx + sy*sy + sz*sz);
-    carPositions[i] = sx;
-    carPositions[i+1] = sy;
-    carPositions[i+2] = sz;
+    // Right ear: upper-right region
+    const earRAngle = Math.atan2(nx + 0.35, ny - 0.5);
+    const earRDist = Math.sqrt((nx + 0.35) * (nx + 0.35) + Math.max(0, ny - 0.5) * Math.max(0, ny - 0.5));
+    const earRProfile = Math.exp(-earRDist * earRDist * 8.0);
+
+    // Grow ears upward and outward
+    if (ny > 0.3) {
+      // Left ear
+      const earLStrength = earLProfile * Math.max(0, ny - 0.3);
+      sy += earLStrength * 1.8;  // tall ears
+      sx += earLStrength * 0.3;  // slight outward lean
+
+      // Right ear
+      const earRStrength = earRProfile * Math.max(0, ny - 0.3);
+      sy += earRStrength * 1.8;
+      sx -= earRStrength * 0.3;
+
+      // Thin the ears (flatten Z)
+      const earAny = Math.max(earLProfile, earRProfile);
+      if (earAny > 0.1 && ny > 0.5) {
+        sz *= (1.0 - earAny * 0.5);
+        // Taper ear tips
+        const tipFactor = Math.max(0, (ny - 0.7) / 0.3);
+        sx *= (1.0 - earAny * tipFactor * 0.3);
+      }
+    }
+
+    // Flatten back of head slightly
+    if (nz > 0.3) {
+      sz *= 0.85;
+    }
+
+    rabbitPositions[i] = sx;
+    rabbitPositions[i+1] = sy;
+    rabbitPositions[i+2] = sz;
   }
 
   // Set initial positions
   const pos = geo.attributes.position.array;
-  for (let i = 0; i < pos.length; i++) pos[i] = carPositions[i];
+  for (let i = 0; i < pos.length; i++) pos[i] = rabbitPositions[i];
   geo.attributes.position.needsUpdate = true;
   geo.computeVertexNormals();
 
@@ -1733,15 +1776,18 @@ import * as THREE from 'three';
     mouse.x += (mouse.tx - mouse.x) * 0.05;
     mouse.y += (mouse.ty - mouse.y) * 0.05;
 
-    // Wobble vertices with noise (on top of car shape)
+    // Update time uniform for pattern animation
+    mat.uniforms.u_time.value = time;
+
+    // Wobble vertices with noise (on top of rabbit shape)
     for (let i = 0; i < pos.length; i += 3) {
-      const cx = carPositions[i], cy = carPositions[i+1], cz = carPositions[i+2];
+      const cx = rabbitPositions[i], cy = rabbitPositions[i+1], cz = rabbitPositions[i+2];
       const len = Math.sqrt(cx*cx + cy*cy + cz*cz) || 1;
       const nx = cx/len, ny = cy/len, nz = cz/len;
 
-      const n1 = noise3(nx*1.2 + time*0.35, ny*1.2 + time*0.25, nz*1.2 + time*0.3);
-      const n2 = noise3(nx*2.2 + time*0.5, ny*2.2 - time*0.35, nz*2.2 + time*0.45) * 0.25;
-      const disp = (n1 + n2) * 0.035;
+      const n1 = noise3(nx*1.5 + time*0.3, ny*1.5 + time*0.25, nz*1.5 + time*0.3);
+      const n2 = noise3(nx*2.5 + time*0.45, ny*2.5 - time*0.3, nz*2.5 + time*0.4) * 0.2;
+      const disp = (n1 + n2) * 0.025;
 
       pos[i] = cx + nx * disp;
       pos[i+1] = cy + ny * disp;
@@ -1750,9 +1796,10 @@ import * as THREE from 'three';
     geo.attributes.position.needsUpdate = true;
     geo.computeVertexNormals();
 
-    // Slow rotation + mouse
-    mesh.rotation.y = time * 0.2 + mouse.x * 0.4;
-    mesh.rotation.x = -mouse.y * 0.15 + 0.1;
+    // Gentle sway + mouse follow (face forward)
+    mesh.rotation.y = Math.sin(time * 0.5) * 0.15 + mouse.x * 0.3;
+    mesh.rotation.x = -mouse.y * 0.1;
+    mesh.rotation.z = Math.sin(time * 0.3) * 0.05;
 
     renderer.render(scene, camera);
   }
