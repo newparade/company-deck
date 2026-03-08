@@ -1616,44 +1616,29 @@ import * as THREE from 'three';
       varying vec3 vNormal;
       varying vec3 vViewPosition;
 
-      // HSV to RGB
-      vec3 hsv2rgb(vec3 c) {
-        vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0);
-        vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-      }
-
-      // Rich studio HDRI with colored light sources
+      // Neutral white studio HDRI (no color, pure silver reflections)
       vec3 envMap(vec3 r) {
-        vec3 env = vec3(0.005, 0.005, 0.015); // deep dark blue-black base
+        vec3 env = vec3(0.01);
 
-        // Large key light: top-right warm white soft box
+        // Key light: top-right (bright white)
         float key = max(dot(r, normalize(vec3(1.0, 1.2, 0.6))), 0.0);
-        env += vec3(2.5, 2.3, 2.0) * pow(key, 5.0);
+        env += vec3(2.5) * pow(key, 5.0);
 
-        // Secondary key: top-left cool blue
-        float key2 = max(dot(r, normalize(vec3(-0.8, 1.0, 0.4))), 0.0);
-        env += vec3(0.6, 0.8, 2.0) * pow(key2, 6.0);
+        // Fill light: top-left
+        float fill = max(dot(r, normalize(vec3(-0.8, 1.0, 0.4))), 0.0);
+        env += vec3(1.2) * pow(fill, 6.0);
 
-        // Bright horizontal strip (studio cyclorama edge)
+        // Bright horizontal strip
         float strip = 1.0 - abs(r.y);
-        env += vec3(1.5, 1.5, 1.8) * pow(strip, 30.0);
+        env += vec3(1.8) * pow(strip, 30.0);
 
-        // Warm amber from below-right
-        float warm = max(dot(r, normalize(vec3(0.8, -0.6, 0.5))), 0.0);
-        env += vec3(1.2, 0.5, 0.15) * pow(warm, 8.0);
+        // Bottom fill (dim)
+        float bottom = max(dot(r, normalize(vec3(0.0, -1.0, 0.3))), 0.0);
+        env += vec3(0.15) * pow(bottom, 4.0);
 
-        // Cool purple from below-left
-        float cool = max(dot(r, normalize(vec3(-0.7, -0.5, 0.6))), 0.0);
-        env += vec3(0.5, 0.2, 1.0) * pow(cool, 8.0);
-
-        // Back rim (bright blue-white)
+        // Back rim (white)
         float back = max(dot(r, normalize(vec3(0.0, 0.3, -1.0))), 0.0);
-        env += vec3(1.0, 1.2, 2.0) * pow(back, 10.0);
-
-        // Pink/magenta accent from side
-        float pink = max(dot(r, normalize(vec3(-1.0, 0.0, 0.2))), 0.0);
-        env += vec3(0.8, 0.15, 0.5) * pow(pink, 10.0);
+        env += vec3(1.5) * pow(back, 10.0);
 
         return env;
       }
@@ -1661,37 +1646,18 @@ import * as THREE from 'three';
       void main() {
         vec3 n = normalize(vNormal);
         vec3 v = normalize(vViewPosition);
+        vec3 r = reflect(-v, n);
 
-        // ── Iridescence: chromatic dispersion per "wavelength" ──
-        // Shift reflection direction slightly per color channel
         float cosTheta = max(dot(n, v), 0.0);
-        float iriAngle = acos(cosTheta);
 
-        // Three slightly offset reflection vectors (RGB dispersion)
-        vec3 rR = reflect(-v, n + vec3(0.03, 0.0, 0.0) * (1.0 - cosTheta));
-        vec3 rG = reflect(-v, n);
-        vec3 rB = reflect(-v, n - vec3(0.03, 0.0, 0.0) * (1.0 - cosTheta));
-        rR = normalize(rR); rB = normalize(rB);
+        // Schlick fresnel for silver (F0 = 0.95 neutral)
+        float F0 = 0.95;
+        float fresnel = F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 
-        // Sample environment per channel
-        float envR = envMap(rR).r;
-        float envG = envMap(rG).g;
-        float envB = envMap(rB).b;
-        vec3 envReflection = vec3(envR, envG, envB);
+        // Environment reflection
+        vec3 envReflection = envMap(r);
 
-        // ── Thin-film iridescence (soap bubble / oil slick effect) ──
-        float thinFilm = fract(iriAngle * 2.5 + 0.3);
-        vec3 iriColor = hsv2rgb(vec3(thinFilm, 0.35, 1.0));
-
-        // ── Schlick fresnel (high F0 for silver metal) ──
-        vec3 F0 = vec3(0.9, 0.9, 0.92);
-        vec3 fresnel = F0 + (vec3(1.0) - F0) * pow(1.0 - cosTheta, 5.0);
-
-        // Mix iridescence into fresnel at grazing angles
-        float iriStrength = pow(1.0 - cosTheta, 2.5) * 0.5;
-        fresnel = mix(fresnel, fresnel * iriColor, iriStrength);
-
-        // ── Sharp specular highlights (mirror chrome) ──
+        // Sharp specular highlights (4 lights, all white)
         vec3 h1 = normalize(u_lightDir + v);
         float spec1 = pow(max(dot(n, h1), 0.0), 500.0) * 4.0;
 
@@ -1701,32 +1667,25 @@ import * as THREE from 'three';
         vec3 h3 = normalize(normalize(vec3(0.5, -0.5, 2.0)) + v);
         float spec3 = pow(max(dot(n, h3), 0.0), 250.0) * 1.8;
 
-        // Back specular (creates that bright outline)
         vec3 h4 = normalize(normalize(vec3(0.0, 0.3, -1.5)) + v);
         float spec4 = pow(max(dot(n, h4), 0.0), 150.0) * 1.5;
 
         float specTotal = spec1 + spec2 + spec3 + spec4;
 
-        // ── Rim: bright iridescent edge ──
-        float rim = pow(1.0 - cosTheta, 3.0);
+        // Rim highlight (white)
+        float rim = pow(1.0 - cosTheta, 3.0) * 0.5;
 
-        // ── Compose ──
-        // Chrome reflection (main)
-        vec3 color = fresnel * envReflection * 2.0;
-        // Specular (pure white, blown out)
-        color += specTotal * vec3(1.0, 0.98, 0.96);
-        // Iridescent rim glow
-        color += rim * iriColor * 0.4;
-        // Purple-tinted shadow fill (for dark areas)
-        color += vec3(0.02, 0.01, 0.04);
+        // Compose: pure silver chrome
+        vec3 color = vec3(fresnel) * envReflection * 2.0;
+        color += vec3(specTotal);
+        color += vec3(rim);
 
-        // ── Tone mapping: preserve bright highlights ──
-        // ACES-ish filmic for that punchy look
+        // ACES tone mapping
         vec3 x = color;
         color = (x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14);
         color = clamp(color, 0.0, 1.0);
 
-        // Final contrast boost
+        // Contrast boost
         color = pow(color, vec3(0.9));
 
         gl_FragColor = vec4(color, 1.0);
