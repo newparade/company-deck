@@ -1554,37 +1554,49 @@
     canvas.style.width = W + 'px';
     canvas.style.height = H + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    sampleText();
+    sampleLogo();
   }
 
-  function sampleText() {
-    // Draw text offscreen to sample positions
+  // Load logo image and sample when ready
+  const logoImg = new Image();
+  logoImg.src = 'images/logo-typo.png';
+  let logoReady = false;
+  logoImg.onload = () => { logoReady = true; sampleLogo(); };
+
+  function sampleLogo() {
+    if (!logoReady || !W) return;
+
+    // Draw logo offscreen, scaled to fit center
     const offCanvas = document.createElement('canvas');
     const offCtx = offCanvas.getContext('2d');
     offCanvas.width = W;
     offCanvas.height = H;
 
-    // Chrome balloon text style
-    const fontSize = Math.min(W * 0.1, 120);
-    offCtx.font = `900 ${fontSize}px 'Inter', sans-serif`;
-    offCtx.textAlign = 'center';
-    offCtx.textBaseline = 'middle';
-    offCtx.fillStyle = '#fff';
-    offCtx.fillText('newparade', W / 2, H / 2);
+    // Scale logo to ~70% of slide width, centered
+    const logoAspect = logoImg.width / logoImg.height;
+    const drawW = W * 0.65;
+    const drawH = drawW / logoAspect;
+    const drawX = (W - drawW) / 2;
+    const drawY = (H - drawH) / 2;
+    offCtx.drawImage(logoImg, drawX, drawY, drawW, drawH);
 
-    // Sample pixels
+    // Sample white pixels from the logo (logo is white on black)
     const imageData = offCtx.getImageData(0, 0, W, H);
     const data = imageData.data;
     targetPositions = [];
-    const step = 3; // sample density
+    const step = 3;
     for (let y = 0; y < H; y += step) {
       for (let x = 0; x < W; x += step) {
         const idx = (y * W + x) * 4;
-        if (data[idx + 3] > 128) {
+        // White pixels (the letter shapes) have high R value
+        if (data[idx] > 180 && data[idx + 3] > 128) {
           targetPositions.push({ x, y });
         }
       }
     }
+
+    // Store logo draw params for chrome overlay
+    sampleLogo.drawParams = { drawX, drawY, drawW, drawH };
 
     // Create particles at random positions
     particles = targetPositions.map(target => ({
@@ -1592,11 +1604,10 @@
       y: Math.random() * H,
       tx: target.x,
       ty: target.y,
-      // Random velocity for initial chaos
       vx: (Math.random() - 0.5) * 4,
       vy: (Math.random() - 0.5) * 4,
       size: 1.5 + Math.random() * 1.5,
-      delay: Math.random() * 0.4, // stagger
+      delay: Math.random() * 0.4,
     }));
 
     startTime = performance.now();
@@ -1694,76 +1705,91 @@
       ctx.globalAlpha = 1;
     }
 
-    // Once fully formed, overlay 3D chrome text
-    if (morphProgress > 0.7) {
+    // Once fully formed, overlay 3D chrome logo
+    if (morphProgress > 0.7 && logoReady && sampleLogo.drawParams) {
       const textAlpha = Math.min(1, (morphProgress - 0.7) / 0.3);
-      const fontSize = Math.min(W * 0.1, 120);
-      const tx = W / 2, ty = H / 2;
+      const dp = sampleLogo.drawParams;
 
+      // Use offscreen canvas to create chrome-textured logo
+      const offC = document.createElement('canvas');
+      offC.width = W; offC.height = H;
+      const oc = offC.getContext('2d');
+
+      // Draw logo as mask source (white text on transparent)
+      oc.drawImage(logoImg, dp.drawX, dp.drawY, dp.drawW, dp.drawH);
+
+      // Use 'source-in' to paint chrome ONLY where logo pixels exist
+      oc.globalCompositeOperation = 'source-in';
+
+      // Chrome gradient: sharp horizontal bands (matching reference)
+      const chromeGrad = oc.createLinearGradient(0, dp.drawY, 0, dp.drawY + dp.drawH);
+      chromeGrad.addColorStop(0.00, '#3a3a3a');
+      chromeGrad.addColorStop(0.06, '#555');
+      chromeGrad.addColorStop(0.12, '#ccc');
+      chromeGrad.addColorStop(0.18, '#fff');  // bright highlight 1
+      chromeGrad.addColorStop(0.24, '#ddd');
+      chromeGrad.addColorStop(0.30, '#555');
+      chromeGrad.addColorStop(0.36, '#333');  // dark band
+      chromeGrad.addColorStop(0.42, '#666');
+      chromeGrad.addColorStop(0.50, '#eee');
+      chromeGrad.addColorStop(0.56, '#fff');  // bright highlight 2
+      chromeGrad.addColorStop(0.62, '#ccc');
+      chromeGrad.addColorStop(0.68, '#555');
+      chromeGrad.addColorStop(0.74, '#333');  // dark band
+      chromeGrad.addColorStop(0.80, '#888');
+      chromeGrad.addColorStop(0.88, '#bbb');
+      chromeGrad.addColorStop(0.94, '#666');
+      chromeGrad.addColorStop(1.00, '#3a3a3a');
+      oc.fillStyle = chromeGrad;
+      oc.fillRect(0, 0, W, H);
+
+      // Add specular highlight sweep (moving bright band)
+      oc.globalCompositeOperation = 'source-atop';
+      const sweepX = dp.drawX + dp.drawW * 0.5 + Math.sin(time * 0.35) * dp.drawW * 0.4;
+      const specGrad = oc.createRadialGradient(sweepX, dp.drawY + dp.drawH * 0.35, 0, sweepX, dp.drawY + dp.drawH * 0.5, dp.drawH * 0.8);
+      specGrad.addColorStop(0, 'rgba(255,255,255,0.35)');
+      specGrad.addColorStop(0.2, 'rgba(255,255,255,0.15)');
+      specGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      oc.fillStyle = specGrad;
+      oc.fillRect(0, 0, W, H);
+
+      // Draw to main canvas
       ctx.save();
-      ctx.font = `900 ${fontSize}px 'Inter', sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
       ctx.globalAlpha = textAlpha;
 
-      // Layer 1: Deep shadow for 3D depth
-      ctx.shadowColor = 'rgba(0,0,0,0.8)';
-      ctx.shadowBlur = 20;
-      ctx.shadowOffsetX = 4;
-      ctx.shadowOffsetY = 6;
-      ctx.fillStyle = '#222';
-      ctx.fillText('newparade', tx, ty);
+      // Shadow layer
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetX = 3;
+      ctx.shadowOffsetY = 5;
+      ctx.drawImage(offC, 0, 0);
       ctx.shadowColor = 'transparent';
 
-      // Layer 2: Dark base with thick outline (3D edge)
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = '#333';
-      ctx.strokeText('newparade', tx, ty);
+      // Main chrome layer (drawn again without shadow for crispness)
+      ctx.drawImage(offC, 0, 0);
 
-      // Layer 3: Main chrome gradient fill
-      const grad = ctx.createLinearGradient(0, ty - fontSize * 0.6, 0, ty + fontSize * 0.6);
-      grad.addColorStop(0.00, '#4a4a4a');
-      grad.addColorStop(0.08, '#9a9a9a');
-      grad.addColorStop(0.15, '#fafafa');
-      grad.addColorStop(0.22, '#e0e0e0');
-      grad.addColorStop(0.30, '#707070');
-      grad.addColorStop(0.40, '#b0b0b0');
-      grad.addColorStop(0.50, '#f5f5f5');
-      grad.addColorStop(0.58, '#c8c8c8');
-      grad.addColorStop(0.65, '#606060');
-      grad.addColorStop(0.75, '#a0a0a0');
-      grad.addColorStop(0.85, '#e8e8e8');
-      grad.addColorStop(0.92, '#808080');
-      grad.addColorStop(1.00, '#505050');
-      ctx.fillStyle = grad;
-      ctx.fillText('newparade', tx, ty);
+      // Outline: draw logo slightly scaled up, dark, behind
+      // Use a second offscreen for outline
+      const outC = document.createElement('canvas');
+      outC.width = W; outC.height = H;
+      const outCtx = outC.getContext('2d');
+      const outlineSize = 2;
+      // Draw logo at 8 offsets for outline
+      outCtx.globalAlpha = 0.6;
+      for (let ox = -outlineSize; ox <= outlineSize; ox++) {
+        for (let oy = -outlineSize; oy <= outlineSize; oy++) {
+          if (ox === 0 && oy === 0) continue;
+          outCtx.drawImage(logoImg, dp.drawX + ox, dp.drawY + oy, dp.drawW, dp.drawH);
+        }
+      }
+      outCtx.globalCompositeOperation = 'source-in';
+      outCtx.fillStyle = '#1a1a1a';
+      outCtx.fillRect(0, 0, W, H);
 
-      // Layer 4: Top highlight (simulates overhead light)
-      const highlightGrad = ctx.createLinearGradient(0, ty - fontSize * 0.55, 0, ty);
-      highlightGrad.addColorStop(0, 'rgba(255,255,255,0.5)');
-      highlightGrad.addColorStop(0.4, 'rgba(255,255,255,0.2)');
-      highlightGrad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = highlightGrad;
-      ctx.fillText('newparade', tx, ty);
-
-      // Layer 5: Bright edge highlight (top-left light source)
-      ctx.lineWidth = 1.2;
-      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-      ctx.strokeText('newparade', tx - 0.5, ty - 1);
-
-      // Layer 6: Dark bottom edge for depth
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-      ctx.strokeText('newparade', tx + 0.5, ty + 1.5);
-
-      // Layer 7: Moving specular highlight sweep
-      const sweepX = tx + Math.sin(time * 0.4) * fontSize * 2;
-      const specGrad = ctx.createRadialGradient(sweepX, ty - fontSize * 0.2, 0, sweepX, ty, fontSize * 1.5);
-      specGrad.addColorStop(0, 'rgba(255,255,255,0.25)');
-      specGrad.addColorStop(0.3, 'rgba(255,255,255,0.08)');
-      specGrad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = specGrad;
-      ctx.fillText('newparade', tx, ty);
+      // Draw outline behind chrome
+      ctx.globalCompositeOperation = 'destination-over';
+      ctx.drawImage(outC, 0, 0);
+      ctx.globalCompositeOperation = 'source-over';
 
       ctx.restore();
     }
