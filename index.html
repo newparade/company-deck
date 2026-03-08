@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>newparade - Company Deck</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800&family=Pacifico&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1554,33 +1554,38 @@
     canvas.style.width = W + 'px';
     canvas.style.height = H + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    sampleLogo();
+    sampleFont();
   }
 
-  // Load logo image and sample when ready
-  const logoImg = new Image();
-  logoImg.src = 'images/logo-typo.png';
-  let logoReady = false;
-  logoImg.onload = () => { logoReady = true; sampleLogo(); };
+  // Font-based sampling (Pacifico script font)
+  let fontReady = false;
+  const LOGO_FONT = 'Pacifico';
+  const LOGO_TEXT = 'newparade';
 
-  function sampleLogo() {
-    if (!logoReady || !W) return;
+  // Wait for font to load
+  document.fonts.ready.then(() => {
+    fontReady = true;
+    sampleFont();
+  });
 
-    // Draw logo offscreen, scaled to fit center
+  function getLogoFontSize() { return Math.min(W * 0.09, 110); }
+
+  function sampleFont() {
+    if (!fontReady || !W) return;
+
     const offCanvas = document.createElement('canvas');
     const offCtx = offCanvas.getContext('2d');
     offCanvas.width = W;
     offCanvas.height = H;
 
-    // Scale logo to ~70% of slide width, centered
-    const logoAspect = logoImg.width / logoImg.height;
-    const drawW = W * 0.65;
-    const drawH = drawW / logoAspect;
-    const drawX = (W - drawW) / 2;
-    const drawY = (H - drawH) / 2;
-    offCtx.drawImage(logoImg, drawX, drawY, drawW, drawH);
+    const fontSize = getLogoFontSize();
+    offCtx.font = `${fontSize}px '${LOGO_FONT}', cursive`;
+    offCtx.textAlign = 'center';
+    offCtx.textBaseline = 'middle';
+    offCtx.fillStyle = '#fff';
+    offCtx.fillText(LOGO_TEXT, W / 2, H / 2);
 
-    // Sample white pixels from the logo (logo is white on black)
+    // Sample pixels
     const imageData = offCtx.getImageData(0, 0, W, H);
     const data = imageData.data;
     targetPositions = [];
@@ -1588,17 +1593,12 @@
     for (let y = 0; y < H; y += step) {
       for (let x = 0; x < W; x += step) {
         const idx = (y * W + x) * 4;
-        // White pixels (the letter shapes) have high R value
-        if (data[idx] > 180 && data[idx + 3] > 128) {
+        if (data[idx + 3] > 128) {
           targetPositions.push({ x, y });
         }
       }
     }
 
-    // Store logo draw params for chrome overlay
-    sampleLogo.drawParams = { drawX, drawY, drawW, drawH };
-
-    // Create particles at random positions
     particles = targetPositions.map(target => ({
       x: Math.random() * W,
       y: Math.random() * H,
@@ -1705,114 +1705,91 @@
       ctx.globalAlpha = 1;
     }
 
-    // Once fully formed, overlay 3D chrome logo
-    if (morphProgress > 0.7 && logoReady && sampleLogo.drawParams) {
+    // Once fully formed, overlay 3D chrome text
+    if (morphProgress > 0.7 && fontReady) {
       const textAlpha = Math.min(1, (morphProgress - 0.7) / 0.3);
-      const dp = sampleLogo.drawParams;
+      const fontSize = getLogoFontSize();
+      const tx = W / 2, ty = H / 2;
+      const fontStr = `${fontSize}px '${LOGO_FONT}', cursive`;
 
-      // Use offscreen canvas to create chrome-textured logo
-      const offC = document.createElement('canvas');
-      offC.width = W; offC.height = H;
-      const oc = offC.getContext('2d');
-
-      // Draw logo, then remove black background (keep only white text)
-      oc.drawImage(logoImg, dp.drawX, dp.drawY, dp.drawW, dp.drawH);
-      const maskData = oc.getImageData(0, 0, W, H);
-      const md = maskData.data;
-      for (let j = 0; j < md.length; j += 4) {
-        const brightness = (md[j] + md[j+1] + md[j+2]) / 3;
-        if (brightness < 100) {
-          md[j+3] = 0; // make dark pixels transparent
-        } else {
-          md[j+3] = Math.min(255, (brightness - 100) * 255 / 155);
-        }
-      }
-      oc.putImageData(maskData, 0, 0);
-
-      // Use 'source-in' to paint chrome ONLY where white text pixels exist
-      oc.globalCompositeOperation = 'source-in';
-
-      // Chrome gradient: sharp horizontal bands (matching reference)
-      const chromeGrad = oc.createLinearGradient(0, dp.drawY, 0, dp.drawY + dp.drawH);
-      chromeGrad.addColorStop(0.00, '#3a3a3a');
-      chromeGrad.addColorStop(0.06, '#555');
-      chromeGrad.addColorStop(0.12, '#ccc');
-      chromeGrad.addColorStop(0.18, '#fff');  // bright highlight 1
-      chromeGrad.addColorStop(0.24, '#ddd');
-      chromeGrad.addColorStop(0.30, '#555');
-      chromeGrad.addColorStop(0.36, '#333');  // dark band
-      chromeGrad.addColorStop(0.42, '#666');
-      chromeGrad.addColorStop(0.50, '#eee');
-      chromeGrad.addColorStop(0.56, '#fff');  // bright highlight 2
-      chromeGrad.addColorStop(0.62, '#ccc');
-      chromeGrad.addColorStop(0.68, '#555');
-      chromeGrad.addColorStop(0.74, '#333');  // dark band
-      chromeGrad.addColorStop(0.80, '#888');
-      chromeGrad.addColorStop(0.88, '#bbb');
-      chromeGrad.addColorStop(0.94, '#666');
-      chromeGrad.addColorStop(1.00, '#3a3a3a');
-      oc.fillStyle = chromeGrad;
-      oc.fillRect(0, 0, W, H);
-
-      // Add specular highlight sweep (moving bright band)
-      oc.globalCompositeOperation = 'source-atop';
-      const sweepX = dp.drawX + dp.drawW * 0.5 + Math.sin(time * 0.35) * dp.drawW * 0.4;
-      const specGrad = oc.createRadialGradient(sweepX, dp.drawY + dp.drawH * 0.35, 0, sweepX, dp.drawY + dp.drawH * 0.5, dp.drawH * 0.8);
-      specGrad.addColorStop(0, 'rgba(255,255,255,0.35)');
-      specGrad.addColorStop(0.2, 'rgba(255,255,255,0.15)');
-      specGrad.addColorStop(1, 'rgba(255,255,255,0)');
-      oc.fillStyle = specGrad;
-      oc.fillRect(0, 0, W, H);
-
-      // Draw to main canvas
       ctx.save();
       ctx.globalAlpha = textAlpha;
+      ctx.font = fontStr;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
 
-      // Shadow layer
-      ctx.shadowColor = 'rgba(0,0,0,0.7)';
-      ctx.shadowBlur = 18;
+      // Layer 1: Drop shadow for depth
+      ctx.shadowColor = 'rgba(0,0,0,0.85)';
+      ctx.shadowBlur = 25;
       ctx.shadowOffsetX = 3;
-      ctx.shadowOffsetY = 5;
-      ctx.drawImage(offC, 0, 0);
+      ctx.shadowOffsetY = 6;
+      ctx.fillStyle = '#111';
+      ctx.fillText(LOGO_TEXT, tx, ty);
       ctx.shadowColor = 'transparent';
 
-      // Main chrome layer (drawn again without shadow for crispness)
-      ctx.drawImage(offC, 0, 0);
+      // Layer 2: Dark outline (thick stroke for 3D edge)
+      ctx.lineWidth = 6;
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.strokeText(LOGO_TEXT, tx, ty);
 
-      // Outline: create a pre-processed mask canvas (no black bg)
-      const maskC = document.createElement('canvas');
-      maskC.width = W; maskC.height = H;
-      const mCtx = maskC.getContext('2d');
-      mCtx.drawImage(logoImg, dp.drawX, dp.drawY, dp.drawW, dp.drawH);
-      const mData = mCtx.getImageData(0, 0, W, H);
-      const mPx = mData.data;
-      for (let j = 0; j < mPx.length; j += 4) {
-        const b = (mPx[j] + mPx[j+1] + mPx[j+2]) / 3;
-        mPx[j] = mPx[j+1] = mPx[j+2] = 255;
-        mPx[j+3] = b < 100 ? 0 : Math.min(255, (b - 100) * 255 / 155);
-      }
-      mCtx.putImageData(mData, 0, 0);
+      // Layer 3: Slightly lighter outline (bevel edge)
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#444';
+      ctx.strokeText(LOGO_TEXT, tx, ty);
 
-      // Draw outline using mask at offsets
-      const outC = document.createElement('canvas');
-      outC.width = W; outC.height = H;
-      const outCtx = outC.getContext('2d');
-      const outlineSize = 2;
-      outCtx.globalAlpha = 0.6;
-      for (let ox = -outlineSize; ox <= outlineSize; ox++) {
-        for (let oy = -outlineSize; oy <= outlineSize; oy++) {
-          if (ox === 0 && oy === 0) continue;
-          outCtx.drawImage(maskC, ox, oy);
-        }
-      }
-      outCtx.globalCompositeOperation = 'source-in';
-      outCtx.fillStyle = '#1a1a1a';
-      outCtx.fillRect(0, 0, W, H);
+      // Layer 4: Chrome gradient fill (sharp horizontal bands)
+      const top = ty - fontSize * 0.55;
+      const bot = ty + fontSize * 0.45;
+      const chromeGrad = ctx.createLinearGradient(0, top, 0, bot);
+      chromeGrad.addColorStop(0.00, '#2a2a2a');
+      chromeGrad.addColorStop(0.05, '#4a4a4a');
+      chromeGrad.addColorStop(0.10, '#aaa');
+      chromeGrad.addColorStop(0.15, '#f0f0f0');
+      chromeGrad.addColorStop(0.20, '#ffffff'); // highlight 1
+      chromeGrad.addColorStop(0.25, '#d0d0d0');
+      chromeGrad.addColorStop(0.30, '#666');
+      chromeGrad.addColorStop(0.35, '#2a2a2a'); // dark band
+      chromeGrad.addColorStop(0.40, '#444');
+      chromeGrad.addColorStop(0.48, '#bbb');
+      chromeGrad.addColorStop(0.53, '#f5f5f5');
+      chromeGrad.addColorStop(0.57, '#ffffff'); // highlight 2
+      chromeGrad.addColorStop(0.62, '#ccc');
+      chromeGrad.addColorStop(0.68, '#555');
+      chromeGrad.addColorStop(0.73, '#222'); // dark band
+      chromeGrad.addColorStop(0.78, '#555');
+      chromeGrad.addColorStop(0.85, '#999');
+      chromeGrad.addColorStop(0.92, '#666');
+      chromeGrad.addColorStop(1.00, '#2a2a2a');
+      ctx.fillStyle = chromeGrad;
+      ctx.fillText(LOGO_TEXT, tx, ty);
 
-      // Draw outline behind chrome
-      ctx.globalCompositeOperation = 'destination-over';
-      ctx.drawImage(outC, 0, 0);
-      ctx.globalCompositeOperation = 'source-over';
+      // Layer 5: Top highlight for balloon/inflated feel
+      const topGrad = ctx.createLinearGradient(0, top, 0, top + (bot - top) * 0.4);
+      topGrad.addColorStop(0, 'rgba(255,255,255,0.45)');
+      topGrad.addColorStop(0.3, 'rgba(255,255,255,0.15)');
+      topGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = topGrad;
+      ctx.fillText(LOGO_TEXT, tx, ty);
+
+      // Layer 6: Bright top-edge highlight stroke
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.strokeText(LOGO_TEXT, tx - 0.5, ty - 1.5);
+
+      // Layer 7: Dark bottom-edge for depth
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+      ctx.strokeText(LOGO_TEXT, tx + 0.5, ty + 2);
+
+      // Layer 8: Moving specular sweep
+      const sweepX = tx + Math.sin(time * 0.35) * fontSize * 3;
+      const specGrad = ctx.createRadialGradient(sweepX, ty - fontSize * 0.15, 0, sweepX, ty, fontSize * 1.2);
+      specGrad.addColorStop(0, 'rgba(255,255,255,0.3)');
+      specGrad.addColorStop(0.15, 'rgba(255,255,255,0.1)');
+      specGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = specGrad;
+      ctx.fillText(LOGO_TEXT, tx, ty);
 
       ctx.restore();
     }
