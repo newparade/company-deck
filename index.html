@@ -121,6 +121,11 @@
     font-size: clamp(36px, 4.5vw, 64px); font-weight: 800; letter-spacing: -0.02em;
     line-height: 1.1; color: var(--white);
   }
+  .cover-logo {
+    height: clamp(80px, 10vw, 140px);
+    width: auto;
+    object-fit: contain;
+  }
   /* 中央右: 説明テキスト */
   .cover-mid-right {
     position: absolute; top: 52%; left: 38%; right: 80px; z-index: 2;
@@ -426,7 +431,8 @@
   .slide-cover.active .cover-vertical {
     animation: fadeIn 0.6s ease 0.3s both;
   }
-  .slide-cover.active .cover-tagline {
+  .slide-cover.active .cover-tagline,
+  .slide-cover.active .cover-logo {
     animation: fadeUp 0.7s ease 0.4s both;
   }
   .slide-cover.active .cover-body {
@@ -646,7 +652,7 @@
     <div class="vert-text">Tokyo, Japan</div>
   </div>
   <div class="cover-mid-left">
-    <div class="cover-tagline">newparade</div>
+    <img class="cover-logo" src="Logo_Typo_Square_Black.png" alt="newparade">
   </div>
   <div class="cover-mid-right">
   </div>
