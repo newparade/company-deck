@@ -181,42 +181,79 @@
     width: 100%; height: 100%; min-height: 0; object-fit: cover; display: block; border-radius: 12px;
   }
 
-  /* Case Study */
-  .case-layout {
-    display: flex; flex-direction: column; height: 100%; padding: 10px 0;
+  /* Case Study - Vertical Scroll */
+  .slide-case { padding: 0; overflow-y: auto; overflow-x: hidden; }
+  .slide-case::-webkit-scrollbar { width: 4px; }
+  .slide-case::-webkit-scrollbar-track { background: transparent; }
+  .slide-case::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+  .case-scroll {
+    width: 100%; min-height: 100vh;
   }
-  .case-images {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 8px; flex: 1; min-height: 0; overflow: hidden;
+  .case-fv {
+    width: 100%; height: 80vh; position: relative; overflow: hidden;
   }
-  .case-images--2col { grid-template-columns: 1fr 1fr; }
-  .case-images img {
-    width: 100%; height: 100%; min-height: 0; object-fit: cover; display: block; border-radius: 12px;
+  .case-fv img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
   }
-  .case-info {
-    display: grid; grid-template-columns: auto 1fr auto; gap: 32px;
-    align-items: start; padding-top: 20px; margin-top: 16px;
-    border-top: 1px solid rgba(255,255,255,0.08);
+  .case-fv-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 60px 80px 40px;
+    background: linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.6) 50%, transparent 100%);
   }
-  .case-info-header .case-num {
+  .case-fv-overlay .case-num {
     font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--gray); margin-bottom: 6px;
+    color: var(--gray); margin-bottom: 8px;
   }
-  .case-info-header h2 { font-size: 28px; margin-bottom: 0; font-weight: 700; }
-  .case-info-body {
-    display: grid; grid-template-columns: auto 1fr 1fr 1fr; gap: 24px; align-items: start;
+  .case-fv-overlay h2 {
+    font-size: 48px; font-weight: 700; margin-bottom: 0; letter-spacing: -0.02em;
   }
-  .case-info-body .case-desc {
-    font-size: 14px; color: var(--gray-light); font-weight: 300; line-height: 1.7;
+
+  .case-body { padding: 60px 80px 80px; max-width: 1200px; }
+  .case-overview {
+    font-size: 17px; line-height: 2; color: var(--gray-light); font-weight: 300;
+    margin-bottom: 64px; max-width: 800px;
   }
-  .case-detail-item .case-detail-label {
-    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 4px; font-weight: 500;
+  .case-section-img {
+    width: calc(100% + 160px); margin-left: -80px;
+    margin-bottom: 64px; overflow: hidden;
   }
-  .case-detail-item .case-detail-text {
-    font-size: 13px; color: var(--gray-light); font-weight: 300; line-height: 1.6;
+  .case-section-img img {
+    width: 100%; height: auto; display: block; max-height: 70vh; object-fit: cover;
   }
-  .case-services { display: flex; gap: 8px; flex-wrap: wrap; align-self: center; }
+  .case-section-img--pair {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    padding: 0 80px;
+    width: calc(100% + 160px); margin-left: -80px;
+    margin-bottom: 64px;
+  }
+  .case-section-img--pair img {
+    width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px;
+  }
+  .case-section {
+    margin-bottom: 56px;
+  }
+  .case-section-label {
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 12px; font-weight: 500;
+  }
+  .case-section-title {
+    font-size: 22px; font-weight: 600; margin-bottom: 16px; letter-spacing: -0.01em;
+  }
+  .case-section-text {
+    font-size: 15px; color: var(--gray-light); font-weight: 300; line-height: 1.9;
+    max-width: 700px;
+  }
+  .case-credits {
+    padding-top: 40px; margin-top: 40px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; gap: 32px; align-items: center; flex-wrap: wrap;
+  }
+  .case-credits-label {
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gray); font-weight: 500;
+  }
+  .case-services { display: flex; gap: 8px; flex-wrap: wrap; }
   .case-service-tag {
     padding: 6px 16px; background: var(--accent-dim);
     border: 1px solid rgba(255,255,255,0.12); border-radius: 100px;
@@ -451,129 +488,243 @@
   <div class="page-num">09 / 15</div>
 </div>
 
-<!-- SLIDE 10: Case Study 1 -->
-<div class="slide" data-slide="10">
-  <div class="case-layout">
-    <div class="case-images">
-      <img src="images/ego-logo.jpg" alt="">
-      <img src="images/ego-1.jpg" alt="">
-      <img src="images/ego-2.jpg" alt="">
-      <img src="images/ego-3.jpg" alt="">
-    </div>
-    <div class="case-info">
-      <div class="case-info-header">
+<!-- SLIDE 10: Case Study 1 - ego graphica -->
+<div class="slide slide-case" data-slide="10">
+  <div class="case-scroll">
+    <div class="case-fv">
+      <img src="images/ego-logo.jpg" alt="ego graphica">
+      <div class="case-fv-overlay">
         <div class="case-num">Case 01</div>
         <h2>ego graphica</h2>
       </div>
-      <div class="case-info-body">
-        <div class="case-desc">カジュアルなアート体験をひらく次世代プラットフォーム。BI / CI・VI / Web / アプリUI / OOHをトータルで担当。</div>
-        <div class="case-detail-item"><div class="case-detail-label">Challenge</div><div class="case-detail-text">新規アートプラットフォームのブランドを、既存のアート業界とは異なる「カジュアルさ」で設計する必要があった。</div></div>
-        <div class="case-detail-item"><div class="case-detail-label">Approach</div><div class="case-detail-text">BI策定から入り、CI・VIを核にWeb・アプリUI・OOHまで全接点を一貫設計。</div></div>
-        <div class="case-detail-item"><div class="case-detail-label">Output</div><div class="case-detail-text">ロゴ / カラー / タイポグラフィ / Webサイト / アプリUI / OOH</div></div>
+    </div>
+    <div class="case-body">
+      <p class="case-overview">
+        カジュアルなアート体験をひらく次世代プラットフォーム。<br>
+        BI / CI・VI / Web / アプリUI / OOHをトータルで担当。ブランドの根幹から全接点を一貫して設計しました。
+      </p>
+
+      <div class="case-section-img"><img src="images/ego-1.jpg" alt=""></div>
+
+      <div class="case-section">
+        <div class="case-section-label">Challenge</div>
+        <p class="case-section-text">新規アートプラットフォームのブランドを、既存のアート業界とは異なる「カジュアルさ」で設計する必要があった。アートに馴染みのないユーザーにも手に取りやすく、かつアート本来の価値を損なわないブランド体験をゼロから構築する挑戦。</p>
       </div>
-      <div class="case-services"><span class="case-service-tag">Produce</span><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
+
+      <div class="case-section-img"><img src="images/ego-2.jpg" alt=""></div>
+
+      <div class="case-section">
+        <div class="case-section-label">Approach</div>
+        <p class="case-section-text">BI策定から入り、CI・VIを核にWeb・アプリUI・OOHまで全接点を一貫設計。ブランドコンセプトの言語化からビジュアルシステムの構築、各タッチポイントへの展開までをワンチームで手がけました。</p>
+      </div>
+
+      <div class="case-section-img"><img src="images/ego-3.jpg" alt=""></div>
+
+      <div class="case-section">
+        <div class="case-section-label">Output</div>
+        <p class="case-section-text">ロゴ / カラーシステム / タイポグラフィ / Webサイト / アプリUI / OOH</p>
+      </div>
+
+      <div class="case-credits">
+        <div class="case-credits-label">Services</div>
+        <div class="case-services">
+          <span class="case-service-tag">Produce</span>
+          <span class="case-service-tag">Branding</span>
+          <span class="case-service-tag">Creative Direction</span>
+        </div>
+      </div>
     </div>
   </div>
   <div class="page-num">10 / 15</div>
 </div>
 
-<!-- SLIDE 11: Case Study 2 -->
-<div class="slide" data-slide="11">
-  <div class="case-layout">
-    <div class="case-images">
-      <img src="images/nekasehai-1.jpg" alt="">
-      <img src="images/nekasehai-2.jpg" alt="">
-      <img src="images/nekasehai-3.jpg" alt="">
-      <img src="images/nekasehai-4.jpg" alt="">
-    </div>
-    <div class="case-info">
-      <div class="case-info-header">
+<!-- SLIDE 11: Case Study 2 - 寝かせハイ -->
+<div class="slide slide-case" data-slide="11">
+  <div class="case-scroll">
+    <div class="case-fv">
+      <img src="images/nekasehai-1.jpg" alt="寝かせハイ">
+      <div class="case-fv-overlay">
         <div class="case-num">Case 02</div>
         <h2>寝かせハイ</h2>
       </div>
-      <div class="case-info-body">
-        <div class="case-desc">クラフト酒キットの新ブランド立ち上げ。ブランドコンセプト〜パッケージ〜サイトまで一貫設計。</div>
-        <div class="case-detail-item"><div class="case-detail-label">Challenge</div><div class="case-detail-text">「自宅で寝かせて完成する」新しい体験を、パッケージとブランドで直感的に伝える。</div></div>
-        <div class="case-detail-item"><div class="case-detail-label">Approach</div><div class="case-detail-text">プロデュースとして企画段階から参画。ブランドストーリーからパッケージ、Webまで上流から設計。</div></div>
-        <div class="case-detail-item"><div class="case-detail-label">Output</div><div class="case-detail-text">ブランドコンセプト / ロゴ / パッケージ / ラベル / Webサイト</div></div>
+    </div>
+    <div class="case-body">
+      <p class="case-overview">
+        クラフト酒キットの新ブランド立ち上げ。<br>
+        ブランドコンセプトの策定からパッケージ・ラベル・Webサイトまで一貫して設計しました。
+      </p>
+
+      <div class="case-section-img"><img src="images/nekasehai-2.jpg" alt=""></div>
+
+      <div class="case-section">
+        <div class="case-section-label">Challenge</div>
+        <p class="case-section-text">「自宅で寝かせて完成する」という新しい体験を、パッケージとブランドで直感的に伝える。まだ世の中にないカテゴリを、どうすれば手に取った瞬間にワクワクできるプロダクトにできるかが課題でした。</p>
       </div>
-      <div class="case-services"><span class="case-service-tag">Produce</span><span class="case-service-tag">Branding</span></div>
+
+      <div class="case-section-img"><img src="images/nekasehai-3.jpg" alt=""></div>
+
+      <div class="case-section">
+        <div class="case-section-label">Approach</div>
+        <p class="case-section-text">プロデュースとして企画段階から参画。ブランドストーリーの策定からパッケージデザイン、ラベル、Webサイトまで上流から設計。「寝かせる時間」そのものをブランド体験に変換するコンセプトを軸に据えました。</p>
+      </div>
+
+      <div class="case-section-img"><img src="images/nekasehai-4.jpg" alt=""></div>
+
+      <div class="case-section">
+        <div class="case-section-label">Output</div>
+        <p class="case-section-text">ブランドコンセプト / ロゴ / パッケージ / ラベル / Webサイト</p>
+      </div>
+
+      <div class="case-credits">
+        <div class="case-credits-label">Services</div>
+        <div class="case-services">
+          <span class="case-service-tag">Produce</span>
+          <span class="case-service-tag">Branding</span>
+        </div>
+      </div>
     </div>
   </div>
   <div class="page-num">11 / 15</div>
 </div>
 
-<!-- SLIDE 12: Case Study 3 -->
-<div class="slide" data-slide="12">
-  <div class="case-layout">
-    <div class="case-images case-images--2col">
-      <img src="images/matcha-1.jpg" alt="">
-      <img src="images/matcha-2.jpg" alt="">
-    </div>
-    <div class="case-info">
-      <div class="case-info-header">
+<!-- SLIDE 12: Case Study 3 - MATCHA STYLE -->
+<div class="slide slide-case" data-slide="12">
+  <div class="case-scroll">
+    <div class="case-fv">
+      <img src="images/matcha-1.jpg" alt="MATCHA STYLE">
+      <div class="case-fv-overlay">
         <div class="case-num">Case 03</div>
         <h2>MATCHA STYLE</h2>
       </div>
-      <div class="case-info-body">
-        <div class="case-desc">海外向け抹茶ブランドのクリエイティブ全般。パッケージ・ラベルをアートディレクションで統括。</div>
-        <div class="case-detail-item"><div class="case-detail-label">Challenge</div><div class="case-detail-text">日本の抹茶を海外市場に向けて「モダンで洗練された」ブランドとして展開する。</div></div>
-        <div class="case-detail-item"><div class="case-detail-label">Approach</div><div class="case-detail-text">和のエッセンスを現代的なデザイン言語に翻訳。パッケージとブランドビジュアルを統一設計。</div></div>
-        <div class="case-detail-item"><div class="case-detail-label">Output</div><div class="case-detail-text">ブランドVI / パッケージ / ラベル / 販促物</div></div>
+    </div>
+    <div class="case-body">
+      <p class="case-overview">
+        海外向け抹茶ブランドのクリエイティブ全般。<br>
+        パッケージ・ラベルをアートディレクションで統括し、日本の抹茶をグローバルに展開するブランドビジュアルを構築。
+      </p>
+
+      <div class="case-section">
+        <div class="case-section-label">Challenge</div>
+        <p class="case-section-text">日本の抹茶を海外市場に向けて「モダンで洗練された」ブランドとして展開する。和のエッセンスを残しつつ、グローバルに通用するデザイン言語への翻訳が求められました。</p>
       </div>
-      <div class="case-services"><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
+
+      <div class="case-section-img"><img src="images/matcha-2.jpg" alt=""></div>
+
+      <div class="case-section">
+        <div class="case-section-label">Approach</div>
+        <p class="case-section-text">和のエッセンスを現代的なデザイン言語に翻訳。パッケージとブランドビジュアルを統一設計し、海外の棚に並んだときに「日本の本物」と一目で伝わるトーンを追求しました。</p>
+      </div>
+
+      <div class="case-section">
+        <div class="case-section-label">Output</div>
+        <p class="case-section-text">ブランドVI / パッケージ / ラベル / 販促物</p>
+      </div>
+
+      <div class="case-credits">
+        <div class="case-credits-label">Services</div>
+        <div class="case-services">
+          <span class="case-service-tag">Branding</span>
+          <span class="case-service-tag">Creative Direction</span>
+        </div>
+      </div>
     </div>
   </div>
   <div class="page-num">12 / 15</div>
 </div>
 
-<!-- SLIDE 13: Case Study 4 -->
-<div class="slide" data-slide="13">
-  <div class="case-layout">
-    <div class="case-images">
-      <img src="images/yoicha-1.jpg" alt="">
-      <img src="images/yoicha-2.jpg" alt="">
-      <img src="images/yoicha-3.jpg" alt="">
-      <img src="images/yoicha-4.jpg" alt="">
-    </div>
-    <div class="case-info">
-      <div class="case-info-header">
+<!-- SLIDE 13: Case Study 4 - YOICHA -->
+<div class="slide slide-case" data-slide="13">
+  <div class="case-scroll">
+    <div class="case-fv">
+      <img src="images/yoicha-1.jpg" alt="YOICHA">
+      <div class="case-fv-overlay">
         <div class="case-num">Case 04</div>
         <h2>YOICHA</h2>
       </div>
-      <div class="case-info-body">
-        <div class="case-desc">CBDボトリングティーのデザイン一式。ロゴ・パッケージ・KVをトータルデザイン。</div>
-        <div class="case-detail-item"><div class="case-detail-label">Challenge</div><div class="case-detail-text">CBD飲料という新カテゴリのプロダクトを、怪しさを排除しつつ興味を引くデザインに。</div></div>
-        <div class="case-detail-item"><div class="case-detail-label">Approach</div><div class="case-detail-text">「お茶」のカルチャーとCBDのウェルネス性を融合し、クリーンかつ洗練されたトーンで設計。</div></div>
-        <div class="case-detail-item"><div class="case-detail-label">Output</div><div class="case-detail-text">ロゴ / パッケージ / KV / 販促物</div></div>
+    </div>
+    <div class="case-body">
+      <p class="case-overview">
+        CBDボトリングティーのデザイン一式。<br>
+        ロゴ・パッケージ・KVをトータルデザインし、新カテゴリのプロダクトに洗練されたブランドイメージを付与。
+      </p>
+
+      <div class="case-section-img"><img src="images/yoicha-2.jpg" alt=""></div>
+
+      <div class="case-section">
+        <div class="case-section-label">Challenge</div>
+        <p class="case-section-text">CBD飲料という新カテゴリのプロダクトを、怪しさを排除しつつ興味を引くデザインに。「健康食品」でも「嗜好品」でもない、新しいポジションの視覚言語を開発する必要がありました。</p>
       </div>
-      <div class="case-services"><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
+
+      <div class="case-section-img"><img src="images/yoicha-3.jpg" alt=""></div>
+
+      <div class="case-section">
+        <div class="case-section-label">Approach</div>
+        <p class="case-section-text">「お茶」のカルチャーとCBDのウェルネス性を融合し、クリーンかつ洗練されたトーンで設計。手に取りやすさと上質さを両立するパッケージデザインを追求しました。</p>
+      </div>
+
+      <div class="case-section-img"><img src="images/yoicha-4.jpg" alt=""></div>
+
+      <div class="case-section">
+        <div class="case-section-label">Output</div>
+        <p class="case-section-text">ロゴ / パッケージ / KV / 販促物</p>
+      </div>
+
+      <div class="case-credits">
+        <div class="case-credits-label">Services</div>
+        <div class="case-services">
+          <span class="case-service-tag">Branding</span>
+          <span class="case-service-tag">Creative Direction</span>
+        </div>
+      </div>
     </div>
   </div>
   <div class="page-num">13 / 15</div>
 </div>
 
-<!-- SLIDE 14: Case Study 5 -->
-<div class="slide" data-slide="14">
-  <div class="case-layout">
-    <div class="case-images">
-      <img src="images/tokio-3.jpg" alt="">
-      <img src="images/tokio-4.jpg" alt="">
-      <img src="images/tokio-5.jpg" alt="">
-      <img src="images/tokio-6.jpg" alt="">
-    </div>
-    <div class="case-info">
-      <div class="case-info-header">
+<!-- SLIDE 14: Case Study 5 - TOKIOTOKYO -->
+<div class="slide slide-case" data-slide="14">
+  <div class="case-scroll">
+    <div class="case-fv">
+      <img src="images/tokio-3.jpg" alt="TOKIOTOKYO">
+      <div class="case-fv-overlay">
         <div class="case-num">Case 05</div>
         <h2>TOKIOTOKYO</h2>
       </div>
-      <div class="case-info-body">
-        <div class="case-desc">パートナー型ライブハウスのフライヤー制作。多彩なビジュアルで月次更新。</div>
-        <div class="case-detail-item"><div class="case-detail-label">Challenge</div><div class="case-detail-text">毎月異なるアーティストのフライヤーを、統一感を保ちつつ個性を表現する。</div></div>
-        <div class="case-detail-item"><div class="case-detail-label">Approach</div><div class="case-detail-text">フォーマットとトーンの一貫性を軸に、アーティストごとのビジュアル表現を変化させる。</div></div>
-        <div class="case-detail-item"><div class="case-detail-label">Output</div><div class="case-detail-text">月次フライヤー / イベントビジュアル</div></div>
+    </div>
+    <div class="case-body">
+      <p class="case-overview">
+        パートナー型ライブハウスのフライヤー制作。<br>
+        多彩なビジュアル表現で月次更新し、統一感と個性を両立するシリーズデザインを展開。
+      </p>
+
+      <div class="case-section-img"><img src="images/tokio-4.jpg" alt=""></div>
+
+      <div class="case-section">
+        <div class="case-section-label">Challenge</div>
+        <p class="case-section-text">毎月異なるアーティストのフライヤーを、統一感を保ちつつ個性を表現する。継続的なシリーズとしてのブランド認知と、毎回の新鮮さを両立させるフレームワークが必要でした。</p>
       </div>
-      <div class="case-services"><span class="case-service-tag">Creative Direction</span></div>
+
+      <div class="case-section-img--pair">
+        <img src="images/tokio-5.jpg" alt="">
+        <img src="images/tokio-6.jpg" alt="">
+      </div>
+
+      <div class="case-section">
+        <div class="case-section-label">Approach</div>
+        <p class="case-section-text">フォーマットとトーンの一貫性を軸に、アーティストごとのビジュアル表現を変化させる設計。共通のグリッドとタイポグラフィルールを維持しながら、色・写真・グラフィック要素で個性を演出しています。</p>
+      </div>
+
+      <div class="case-section">
+        <div class="case-section-label">Output</div>
+        <p class="case-section-text">月次フライヤー / イベントビジュアル</p>
+      </div>
+
+      <div class="case-credits">
+        <div class="case-credits-label">Services</div>
+        <div class="case-services">
+          <span class="case-service-tag">Creative Direction</span>
+        </div>
+      </div>
     </div>
   </div>
   <div class="page-num">14 / 15</div>
@@ -615,17 +766,30 @@
   const total = 15;
   function showSlide(n) {
     document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
-    document.querySelector(`[data-slide="${n}"]`).classList.add('active');
+    const slide = document.querySelector(`[data-slide="${n}"]`);
+    slide.classList.add('active');
     document.getElementById('current').textContent = n;
+    // Reset scroll for case study slides
+    if (slide.classList.contains('slide-case')) slide.scrollTop = 0;
   }
   document.getElementById('next').addEventListener('click', () => { if (current < total) { current++; showSlide(current); } });
   document.getElementById('prev').addEventListener('click', () => { if (current > 1) { current--; showSlide(current); } });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (current < total) { current++; showSlide(current); } }
-    if (e.key === 'ArrowLeft') { if (current > 1) { current--; showSlide(current); } }
+    if (e.key === 'ArrowRight') { e.preventDefault(); if (current < total) { current++; showSlide(current); } }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); if (current > 1) { current--; showSlide(current); } }
+    // Space scrolls case study slides, advances others
+    if (e.key === ' ') {
+      const activeSlide = document.querySelector('.slide.active');
+      if (activeSlide && activeSlide.classList.contains('slide-case')) {
+        // Let space scroll naturally in case study
+        return;
+      }
+      e.preventDefault();
+      if (current < total) { current++; showSlide(current); }
+    }
   });
 
-  // Touch swipe
+  // Touch swipe - horizontal only (vertical scroll is native in case study slides)
   let touchStartX = 0;
   let touchStartY = 0;
   document.addEventListener('touchstart', (e) => {
@@ -635,10 +799,17 @@
   document.addEventListener('touchend', (e) => {
     const dx = e.changedTouches[0].screenX - touchStartX;
     const dy = e.changedTouches[0].screenY - touchStartY;
-    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return;
+    // Only trigger slide change for strong horizontal swipes
+    if (Math.abs(dx) < 80 || Math.abs(dy) > Math.abs(dx) * 0.5) return;
     if (dx < 0 && current < total) { current++; showSlide(current); }
     if (dx > 0 && current > 1) { current--; showSlide(current); }
   }, { passive: true });
+
+  // Reset scroll position when entering a case study slide
+  function resetCaseScroll() {
+    const activeSlide = document.querySelector('.slide.active.slide-case');
+    if (activeSlide) activeSlide.scrollTop = 0;
+  }
 
 </script>
 </body>
