@@ -1354,11 +1354,6 @@
 
       float brightness = a_brightness + wave * 0.4;
 
-      // Dim particles near center to keep text readable
-      float centerDist = length(pos);
-      float textFade = smoothstep(0.15, 0.45, centerDist);
-      brightness *= textFade;
-
       gl_Position = vec4(pos, 0.0, 1.0);
       gl_PointSize = a_size * (1.0 + wave * 0.3);
       v_alpha = min(brightness, 1.0);
