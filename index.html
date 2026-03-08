@@ -212,13 +212,15 @@
   }
   .case-right {
     display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
-    gap: 8px; height: 440px; overflow: hidden;
+    gap: 8px; height: 440px; min-height: 0;
   }
   .case-right--single-row { grid-template-rows: 1fr; }
+  .case-right--single-img { grid-template-columns: 1fr; grid-template-rows: 1fr; }
   .case-right--3img { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
   .case-right--3img img:first-child { grid-row: 1 / -1; }
   .case-right img {
     width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px;
+    min-height: 0;
   }
 
   /* Contact */
@@ -409,7 +411,7 @@
     </div>
     <div class="detail-right">
       <div class="photo-grid">
-        <img src="images/tokio-1.jpg" alt="">
+        <img src="images/tokio-3.jpg" alt="">
         <img src="images/ego-1.jpg" alt="">
         <img src="images/charm-1.jpg" alt="">
         <img src="images/yoicha-3.jpg" alt="">
@@ -554,8 +556,7 @@
       </div>
       <div class="case-services"><span class="case-service-tag">Creative Direction</span></div>
     </div>
-    <div class="case-right case-right--single-row">
-      <img src="images/tokio-1.jpg" alt="">
+    <div class="case-right case-right--single-img">
       <img src="images/tokio-3.jpg" alt="">
     </div>
   </div>
