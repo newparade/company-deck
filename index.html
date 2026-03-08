@@ -186,6 +186,7 @@
   .slide-case::-webkit-scrollbar { width: 4px; }
   .slide-case::-webkit-scrollbar-track { background: transparent; }
   .slide-case::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+  .slide-case .page-num { display: none; }
 
   .case-scroll { width: 100%; min-height: 100vh; }
 
@@ -252,62 +253,28 @@
     font-size: 15px; color: var(--gray-light); font-weight: 300; line-height: 1.9;
   }
 
-  /* ⑥ Image pair / grid */
-  .case-img-pair {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-    margin-bottom: 72px;
+  /* ⑥ Image grid (2x2) */
+  .case-img-grid {
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    gap: 12px; margin-bottom: 72px;
   }
-  .case-img-pair img {
+  .case-img-grid img {
     width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px;
     aspect-ratio: 4/3;
   }
-  .case-img-trio {
-    display: grid; grid-template-columns: 2fr 1fr; gap: 12px;
-    margin-bottom: 72px;
-  }
-  .case-img-trio img {
-    width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px;
-  }
-  .case-img-trio .case-img-stack {
-    display: grid; grid-template-rows: 1fr 1fr; gap: 12px;
-  }
-  .case-img-trio .case-img-stack img {
-    width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px;
-  }
+  .case-img-grid--2 { grid-template-rows: auto; }
 
-  /* ⑦ Output tags */
-  .case-output {
-    margin-bottom: 72px;
-    padding: 40px 48px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
-  }
-  .case-output-label {
-    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 20px; font-weight: 500;
-  }
-  .case-output-tags {
-    display: flex; gap: 10px; flex-wrap: wrap;
-  }
-  .case-output-tag {
-    padding: 10px 24px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    font-size: 13px; color: var(--white); font-weight: 400;
-  }
-
-  /* ⑧ Credits footer */
+  /* ⑦ Footer (Output + Credits) */
   .case-footer {
     padding-top: 40px; margin-top: 16px;
     border-top: 1px solid rgba(255,255,255,0.08);
-    display: flex; justify-content: space-between; align-items: center;
     padding-bottom: 40px;
   }
-  .case-footer-left {
-    display: flex; gap: 40px; align-items: center;
+  .case-footer-row {
+    display: flex; gap: 40px; align-items: start; flex-wrap: wrap;
+    margin-bottom: 24px;
   }
+  .case-footer-row:last-child { margin-bottom: 0; }
   .case-footer-label {
     font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--gray); margin-bottom: 3px;
@@ -577,7 +544,8 @@
     <div class="case-body">
       <p class="case-overview">
         BI策定からCI・VI、Web、アプリUI、OOHまでトータルで担当。<br>
-        ブランドの根幹となるコンセプトの言語化から、すべての接点に一貫性をもたせるビジュアルシステムを構築しました。
+        ブランドの根幹となるコンセプトの言語化から、すべての接点に一貫性をもたせるビジュアルシステムを構築しました。<br>
+        「アートをもっとカジュアルに」という理念を、見た人が直感的に感じ取れるブランド体験へと落とし込んでいます。
       </p>
       <!-- ④ Full-width Image -->
       <div class="case-img-full"><img src="images/ego-1.jpg" alt=""></div>
@@ -585,40 +553,32 @@
       <div class="case-two-col">
         <div>
           <div class="case-col-label">Challenge</div>
-          <p class="case-col-text">新規アートプラットフォームのブランドを、既存のアート業界とは異なる「カジュアルさ」で設計する必要があった。アートに馴染みのないユーザーにも手に取りやすく、かつアート本来の価値を損なわないブランド体験をゼロから構築する挑戦。</p>
+          <p class="case-col-text">新規アートプラットフォームのブランドを、既存のアート業界とは異なる「カジュアルさ」で設計する必要がありました。アートに馴染みのないユーザーにも手に取りやすく、かつアート本来の価値を損なわないブランド体験をゼロから構築する挑戦。ギャラリーやオークションといった従来のアート流通とは異なる文脈で、「日常の中でアートに触れる」という新しい体験価値をブランドとして表現することが求められました。</p>
         </div>
         <div>
           <div class="case-col-label">Approach</div>
-          <p class="case-col-text">BI策定から入り、CI・VIを核にWeb・アプリUI・OOHまで全接点を一貫設計。ブランドコンセプトの言語化からビジュアルシステムの構築、各タッチポイントへの展開までをワンチームで手がけました。</p>
+          <p class="case-col-text">BI策定から入り、CI・VIを核にWeb・アプリUI・OOHまで全接点を一貫設計。ブランドコンセプトの言語化からビジュアルシステムの構築、各タッチポイントへの展開までをワンチームで手がけました。ロゴタイプには遊び心と洗練さを同居させ、カラーシステムには親しみやすさと上質感を両立するパレットを設計。OOHではストリートのコンテキストに溶け込むグラフィック表現を展開し、アプリUIではアート鑑賞のUXを直感的に設計しています。</p>
         </div>
       </div>
-      <!-- ⑥ Image Pair -->
-      <div class="case-img-pair">
+      <!-- ⑥ Image Grid (2x2) -->
+      <div class="case-img-grid">
+        <img src="images/ego-logo.jpg" alt="">
+        <img src="images/ego-1.jpg" alt="">
         <img src="images/ego-2.jpg" alt="">
         <img src="images/ego-3.jpg" alt="">
       </div>
-      <!-- ⑦ Output -->
-      <div class="case-output">
-        <div class="case-output-label">Output</div>
-        <div class="case-output-tags">
-          <span class="case-output-tag">ロゴ</span>
-          <span class="case-output-tag">カラーシステム</span>
-          <span class="case-output-tag">タイポグラフィ</span>
-          <span class="case-output-tag">Webサイト</span>
-          <span class="case-output-tag">アプリUI</span>
-          <span class="case-output-tag">OOH</span>
-        </div>
-      </div>
-      <!-- ⑧ Footer -->
+      <!-- ⑦ Footer -->
       <div class="case-footer">
-        <div class="case-footer-left">
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Output</div><div class="case-footer-value">ロゴ / カラーシステム / タイポグラフィ / Webサイト / アプリUI / OOH</div></div>
+        </div>
+        <div class="case-footer-row">
           <div><div class="case-footer-label">Team</div><div class="case-footer-value">newparade Creative Boutique</div></div>
           <div><div class="case-footer-label">Role</div><div class="case-footer-value">企画 / AD / デザイン</div></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="page-num">10 / 15</div>
 </div>
 
 <!-- SLIDE 11: Case Study 2 - 寝かせハイ -->
@@ -644,42 +604,37 @@
     <div class="case-body">
       <p class="case-overview">
         ブランドコンセプトの策定からパッケージ・ラベル・Webサイトまで一貫して設計。<br>
-        「自宅で寝かせて完成する」という体験そのものをブランドの核に据え、すべてのクリエイティブに展開しました。
+        「自宅で寝かせて完成する」という体験そのものをブランドの核に据え、すべてのクリエイティブに展開しました。<br>
+        プロダクトの手に取りやすさと特別感を両立させ、ギフト需要にも対応するパッケージ体験を実現しています。
       </p>
       <div class="case-img-full"><img src="images/nekasehai-2.jpg" alt=""></div>
       <div class="case-two-col">
         <div>
           <div class="case-col-label">Challenge</div>
-          <p class="case-col-text">「自宅で寝かせて完成する」という新しい体験を、パッケージとブランドで直感的に伝える。まだ世の中にないカテゴリを、どうすれば手に取った瞬間にワクワクできるプロダクトにできるかが課題でした。</p>
+          <p class="case-col-text">「自宅で寝かせて完成する」という新しい体験を、パッケージとブランドで直感的に伝える必要がありました。まだ世の中にないカテゴリのため、既存の酒類やキット商品の文脈では語れない。手に取った瞬間にワクワクし、完成までのプロセス自体が楽しめるプロダクトにするために、パッケージそのものがブランド体験の入口となる設計が求められました。</p>
         </div>
         <div>
           <div class="case-col-label">Approach</div>
-          <p class="case-col-text">プロデュースとして企画段階から参画。ブランドストーリーの策定からパッケージデザイン、ラベル、Webサイトまで上流から設計。「寝かせる時間」そのものをブランド体験に変換するコンセプトを軸に据えました。</p>
+          <p class="case-col-text">プロデュースとして企画段階から参画し、ブランドストーリーの策定からパッケージデザイン、ラベル、Webサイトまで上流から設計。「寝かせる時間」そのものをブランド体験に変換するコンセプトを軸に据え、待つ楽しさ・育てる喜びを視覚的に伝えるトーン&マナーを構築しました。パッケージは開封体験まで含めた設計を行い、Webサイトでは寝かせ方ガイドをコンテンツの軸に据えています。</p>
         </div>
       </div>
-      <div class="case-img-pair">
+      <div class="case-img-grid">
+        <img src="images/nekasehai-1.jpg" alt="">
+        <img src="images/nekasehai-2.jpg" alt="">
         <img src="images/nekasehai-3.jpg" alt="">
         <img src="images/nekasehai-4.jpg" alt="">
       </div>
-      <div class="case-output">
-        <div class="case-output-label">Output</div>
-        <div class="case-output-tags">
-          <span class="case-output-tag">ブランドコンセプト</span>
-          <span class="case-output-tag">ロゴ</span>
-          <span class="case-output-tag">パッケージ</span>
-          <span class="case-output-tag">ラベル</span>
-          <span class="case-output-tag">Webサイト</span>
-        </div>
-      </div>
       <div class="case-footer">
-        <div class="case-footer-left">
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Output</div><div class="case-footer-value">ブランドコンセプト / ロゴ / パッケージ / ラベル / Webサイト</div></div>
+        </div>
+        <div class="case-footer-row">
           <div><div class="case-footer-label">Team</div><div class="case-footer-value">newparade Creative Boutique</div></div>
           <div><div class="case-footer-label">Role</div><div class="case-footer-value">企画 / AD / デザイン</div></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="page-num">11 / 15</div>
 </div>
 
 <!-- SLIDE 12: Case Study 3 - MATCHA STYLE -->
@@ -705,37 +660,34 @@
     <div class="case-body">
       <p class="case-overview">
         パッケージ・ラベルをアートディレクションで統括。<br>
-        日本の抹茶をグローバルに展開するための、モダンで洗練されたブランドビジュアルを構築しました。
+        日本の抹茶をグローバルに展開するための、モダンで洗練されたブランドビジュアルを構築しました。<br>
+        海外市場における「日本品質」の信頼性と、現代的なライフスタイルブランドとしての魅力を一つのビジュアルに凝縮しています。
       </p>
       <div class="case-two-col">
         <div>
           <div class="case-col-label">Challenge</div>
-          <p class="case-col-text">日本の抹茶を海外市場に向けて「モダンで洗練された」ブランドとして展開する。和のエッセンスを残しつつ、グローバルに通用するデザイン言語への翻訳が求められました。</p>
+          <p class="case-col-text">日本の抹茶を海外市場に向けて「モダンで洗練された」ブランドとして展開する。従来の和風デザインでは海外消費者に届きにくく、かといって和のエッセンスを排除すれば抹茶の本質が失われる。この両立が最大の設計課題でした。競合ひしめく海外の棚で、一目で「日本の本物」と認識されるビジュアルアイデンティティの構築が求められました。</p>
         </div>
         <div>
           <div class="case-col-label">Approach</div>
-          <p class="case-col-text">和のエッセンスを現代的なデザイン言語に翻訳。パッケージとブランドビジュアルを統一設計し、海外の棚に並んだときに「日本の本物」と一目で伝わるトーンを追求しました。</p>
+          <p class="case-col-text">和のエッセンスを現代的なデザイン言語に翻訳するアプローチを採用。書道や抹茶の所作から抽出した「間」と「余白」をデザイン原則に据え、ミニマルでありながら豊かな世界観を構築。パッケージとブランドビジュアルを統一設計し、カラーパレットには抹茶の深緑を軸にニュートラルトーンを組み合わせ、高級感とナチュラルさを両立させています。</p>
         </div>
       </div>
-      <div class="case-img-full"><img src="images/matcha-2.jpg" alt=""></div>
-      <div class="case-output">
-        <div class="case-output-label">Output</div>
-        <div class="case-output-tags">
-          <span class="case-output-tag">ブランドVI</span>
-          <span class="case-output-tag">パッケージ</span>
-          <span class="case-output-tag">ラベル</span>
-          <span class="case-output-tag">販促物</span>
-        </div>
+      <div class="case-img-grid case-img-grid--2">
+        <img src="images/matcha-1.jpg" alt="">
+        <img src="images/matcha-2.jpg" alt="">
       </div>
       <div class="case-footer">
-        <div class="case-footer-left">
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Output</div><div class="case-footer-value">ブランドVI / パッケージ / ラベル / 販促物</div></div>
+        </div>
+        <div class="case-footer-row">
           <div><div class="case-footer-label">Team</div><div class="case-footer-value">newparade Creative Boutique</div></div>
           <div><div class="case-footer-label">Role</div><div class="case-footer-value">AD / デザイン</div></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="page-num">12 / 15</div>
 </div>
 
 <!-- SLIDE 13: Case Study 4 - YOICHA -->
@@ -761,41 +713,37 @@
     <div class="case-body">
       <p class="case-overview">
         ロゴ・パッケージ・KVをトータルデザイン。<br>
-        新カテゴリのプロダクトに、クリーンかつ洗練されたブランドイメージを付与しました。
+        新カテゴリのプロダクトに、クリーンかつ洗練されたブランドイメージを付与しました。<br>
+        CBD市場が成長する中で、日本発のプレミアムティーブランドとしての独自のポジションを確立するビジュアル戦略を設計しています。
       </p>
       <div class="case-img-full"><img src="images/yoicha-2.jpg" alt=""></div>
       <div class="case-two-col">
         <div>
           <div class="case-col-label">Challenge</div>
-          <p class="case-col-text">CBD飲料という新カテゴリのプロダクトを、怪しさを排除しつつ興味を引くデザインに。「健康食品」でも「嗜好品」でもない、新しいポジションの視覚言語を開発する必要がありました。</p>
+          <p class="case-col-text">CBD飲料という新カテゴリのプロダクトを、怪しさを排除しつつ興味を引くデザインに仕上げること。日本市場ではCBDに対する認知がまだ低く、「健康食品」でも「嗜好品」でもない新しいポジションの視覚言語をゼロから開発する必要がありました。店頭で手に取るハードルを下げながらも、プレミアム感と信頼性を担保するバランスが鍵でした。</p>
         </div>
         <div>
           <div class="case-col-label">Approach</div>
-          <p class="case-col-text">「お茶」のカルチャーとCBDのウェルネス性を融合し、クリーンかつ洗練されたトーンで設計。手に取りやすさと上質さを両立するパッケージデザインを追求しました。</p>
+          <p class="case-col-text">「お茶」のカルチャーとCBDのウェルネス性を融合し、クリーンかつ洗練されたトーンで設計。ロゴタイプには日本茶の落ち着きとモダンさを共存させ、パッケージカラーには自然由来の穏やかなパレットを採用。KVではライフスタイルシーンを軸に、「日常の中のリラクゼーション」というブランドメッセージを視覚化しました。手に取りやすさと上質さを両立するパッケージデザインを追求しています。</p>
         </div>
       </div>
-      <div class="case-img-pair">
+      <div class="case-img-grid">
+        <img src="images/yoicha-1.jpg" alt="">
+        <img src="images/yoicha-2.jpg" alt="">
         <img src="images/yoicha-3.jpg" alt="">
         <img src="images/yoicha-4.jpg" alt="">
       </div>
-      <div class="case-output">
-        <div class="case-output-label">Output</div>
-        <div class="case-output-tags">
-          <span class="case-output-tag">ロゴ</span>
-          <span class="case-output-tag">パッケージ</span>
-          <span class="case-output-tag">KV</span>
-          <span class="case-output-tag">販促物</span>
-        </div>
-      </div>
       <div class="case-footer">
-        <div class="case-footer-left">
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Output</div><div class="case-footer-value">ロゴ / パッケージ / KV / 販促物</div></div>
+        </div>
+        <div class="case-footer-row">
           <div><div class="case-footer-label">Team</div><div class="case-footer-value">newparade Creative Boutique</div></div>
           <div><div class="case-footer-label">Role</div><div class="case-footer-value">AD / デザイン</div></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="page-num">13 / 15</div>
 </div>
 
 <!-- SLIDE 14: Case Study 5 - TOKIOTOKYO -->
@@ -820,39 +768,37 @@
     <div class="case-body">
       <p class="case-overview">
         多彩なビジュアル表現で月次更新し、統一感と個性を両立するシリーズデザインを展開。<br>
-        共通のフレームワークの中でアーティストごとの世界観を表現しています。
+        共通のフレームワークの中でアーティストごとの世界観を表現しています。<br>
+        フライヤーが単なる告知ツールではなく、コレクションしたくなるアートピースとして機能することを目指しました。
       </p>
       <div class="case-img-full"><img src="images/tokio-4.jpg" alt=""></div>
       <div class="case-two-col">
         <div>
           <div class="case-col-label">Challenge</div>
-          <p class="case-col-text">毎月異なるアーティストのフライヤーを、統一感を保ちつつ個性を表現する。継続的なシリーズとしてのブランド認知と、毎回の新鮮さを両立させるフレームワークが必要でした。</p>
+          <p class="case-col-text">毎月異なるアーティストのフライヤーを、統一感を保ちつつ個性を表現すること。ライブハウスとしてのブランド認知を継続的に積み上げながら、毎回の新鮮さも欠かせない。出演者のジャンルもロック、エレクトロ、ジャズと幅広く、あらゆる音楽性に対応できる柔軟なデザインフレームワークの構築が課題でした。</p>
         </div>
         <div>
           <div class="case-col-label">Approach</div>
-          <p class="case-col-text">フォーマットとトーンの一貫性を軸に、アーティストごとのビジュアル表現を変化させる設計。共通のグリッドとタイポグラフィルールを維持しながら、色・写真・グラフィック要素で個性を演出しています。</p>
+          <p class="case-col-text">フォーマットとトーンの一貫性を軸に、アーティストごとのビジュアル表現を変化させる設計。共通のグリッドシステムとタイポグラフィルールを維持しながら、色・写真・グラフィック要素で個性を演出。毎月のリリースがSNS上でシリーズとして認知されるよう、「違うのに同じ」というバランスを意識した連作ビジュアルを展開しています。</p>
         </div>
       </div>
-      <div class="case-img-pair">
+      <div class="case-img-grid">
+        <img src="images/tokio-3.jpg" alt="">
+        <img src="images/tokio-4.jpg" alt="">
         <img src="images/tokio-5.jpg" alt="">
         <img src="images/tokio-6.jpg" alt="">
       </div>
-      <div class="case-output">
-        <div class="case-output-label">Output</div>
-        <div class="case-output-tags">
-          <span class="case-output-tag">月次フライヤー</span>
-          <span class="case-output-tag">イベントビジュアル</span>
-        </div>
-      </div>
       <div class="case-footer">
-        <div class="case-footer-left">
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Output</div><div class="case-footer-value">月次フライヤー / イベントビジュアル</div></div>
+        </div>
+        <div class="case-footer-row">
           <div><div class="case-footer-label">Team</div><div class="case-footer-value">newparade Creative Boutique</div></div>
           <div><div class="case-footer-label">Role</div><div class="case-footer-value">CD / デザイン</div></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="page-num">14 / 15</div>
 </div>
 
 <!-- SLIDE 15: Contact -->
