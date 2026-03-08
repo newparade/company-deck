@@ -1422,7 +1422,7 @@
   gl.useProgram(program);
 
   // ── Star field data ──
-  const COUNT = 12000;
+  const COUNT = 150000;
   const posArr = new Float32Array(COUNT * 2);
   const brightArr = new Float32Array(COUNT);
   const sizeArr = new Float32Array(COUNT);
@@ -1445,13 +1445,13 @@
     const rawBright = Math.pow(Math.random(), 2.5);
     brightArr[i] = 0.15 + rawBright * 0.85;
 
-    // Size: far stars tiny, near stars can be larger; rare big bright stars
-    const isBright = Math.random() < 0.02; // 2% chance of being a prominent star
+    // Mostly tiny particles, rare bright stars
+    const isBright = Math.random() < 0.003;
     if (isBright) {
-      sizeArr[i] = (3.0 + Math.random() * 4.0) * dpr;
+      sizeArr[i] = (2.5 + Math.random() * 3.0) * dpr;
       brightArr[i] = 0.7 + Math.random() * 0.3;
     } else {
-      sizeArr[i] = (0.5 + depth * 1.5 + Math.random() * 1.0) * dpr;
+      sizeArr[i] = (0.4 + depth * 0.8 + Math.random() * 0.8) * dpr;
     }
 
     // Twinkle: each star has its own frequency and phase
