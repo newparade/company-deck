@@ -171,17 +171,36 @@
   }
 
   /* Concept */
-  .slide-concept { text-align: center; align-items: center; }
-  .concept-copy { font-size: 48px; font-weight: 700; line-height: 1.5; letter-spacing: -0.01em; margin-bottom: 48px; }
+  .slide-concept { text-align: center; align-items: center; overflow: hidden; }
+  .concept-copy { font-size: 48px; font-weight: 700; line-height: 1.5; letter-spacing: -0.01em; margin-bottom: 48px; position: relative; z-index: 2; }
   .concept-copy span { color: var(--accent); }
-  .concept-desc { max-width: 700px; text-align: center; font-size: 16px; line-height: 2; }
-  .concept-pillars { display: flex; gap: 60px; margin-top: 56px; }
-  .concept-pillar { text-align: center; }
-  .concept-pillar .pillar-label {
-    font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 6px;
+  .concept-desc { max-width: 700px; text-align: center; font-size: 16px; line-height: 2; position: relative; z-index: 2; }
+  .slide-concept .label { position: relative; z-index: 2; }
+
+  /* Concept background image mosaic */
+  .concept-mosaic {
+    position: absolute; top: -10%; left: -5%; right: -5%; bottom: -10%;
+    z-index: 0; opacity: 0.12;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: auto;
+    gap: 8px;
+    animation: mosaicDrift 25s linear infinite;
   }
-  .concept-pillar .pillar-text { font-size: 14px; color: var(--gray-light); }
+  .concept-mosaic img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    border-radius: 6px; aspect-ratio: 4/3;
+  }
+  @keyframes mosaicDrift {
+    0% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-4%) translateX(-1.5%); }
+    100% { transform: translateY(0) translateX(0); }
+  }
+  /* Dark vignette over mosaic */
+  .concept-vignette {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1;
+    background: radial-gradient(ellipse at center, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.85) 70%, rgba(10,10,10,0.95) 100%);
+  }
 
   /* Value Flow */
   .flow-container { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 48px; }
@@ -666,6 +685,13 @@
 
 <!-- SLIDE 3: Concept -->
 <div class="slide slide-concept" data-slide="3">
+  <div class="concept-mosaic">
+    <img src="images/ego-logo.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/charm-1.jpg" alt="">
+    <img src="images/ego-1.jpg" alt=""><img src="images/tokio-4.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/nekasehai-2.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/ego-2.jpg" alt="">
+    <img src="images/tokio-5.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/tokio-6.jpg" alt="">
+    <img src="images/ego-3.jpg" alt=""><img src="images/yoicha-4.jpg" alt=""><img src="images/nekasehai-4.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/parallel-1.jpg" alt="">
+  </div>
+  <div class="concept-vignette"></div>
   <div class="label">Our Concept</div>
   <div class="concept-copy">企画する。<span>つくる。</span>届ける。</div>
   <p class="concept-desc">
