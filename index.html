@@ -181,55 +181,15 @@
 
   /* Concept background image mosaic */
   .mosaic-bg {
-    position: absolute; top: -20%; left: -5%; right: -5%; bottom: -20%;
-    z-index: 0; opacity: 0.3;
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    grid-auto-rows: 40px;
-    grid-auto-flow: dense;
-    gap: 0;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0; opacity: 0.35;
+    display: flex; flex-wrap: wrap;
+    overflow: hidden;
   }
   .mosaic-bg img {
-    width: 100%; height: 100%; object-fit: cover; display: block;
-    animation: var(--mosaic-anim) ease-in-out infinite alternate;
+    width: 10%; height: auto; object-fit: cover; display: block;
+    flex-shrink: 0;
   }
-  .mosaic-bg img:nth-child(10n+1) { --mosaic-anim: puzzleA 2.5s; animation-delay: 0s; }
-  .mosaic-bg img:nth-child(10n+2) { --mosaic-anim: puzzleB 3s; animation-delay: -0.8s; }
-  .mosaic-bg img:nth-child(10n+3) { --mosaic-anim: puzzleC 2.8s; animation-delay: -1.5s; }
-  .mosaic-bg img:nth-child(10n+4) { --mosaic-anim: puzzleD 3.5s; animation-delay: -0.4s; }
-  .mosaic-bg img:nth-child(10n+5) { --mosaic-anim: puzzleA 3.2s; animation-delay: -1.2s; }
-  .mosaic-bg img:nth-child(10n+6) { --mosaic-anim: puzzleC 2.6s; animation-delay: -2s; }
-  .mosaic-bg img:nth-child(10n+7) { --mosaic-anim: puzzleB 3.3s; animation-delay: -0.6s; }
-  .mosaic-bg img:nth-child(10n+8) { --mosaic-anim: puzzleD 2.7s; animation-delay: -1.4s; }
-  .mosaic-bg img:nth-child(10n+9) { --mosaic-anim: puzzleA 3.5s; animation-delay: -1s; }
-  .mosaic-bg img:nth-child(10n)   { --mosaic-anim: puzzleC 3s; animation-delay: -1.8s; }
-  @keyframes puzzleA {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(8px, -6px); }
-  }
-  @keyframes puzzleB {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(-6px, 10px); }
-  }
-  @keyframes puzzleC {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(10px, 5px); }
-  }
-  @keyframes puzzleD {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(-8px, -8px); }
-  }
-  /* Varying spans for organic layout */
-  .mosaic-bg img:nth-child(10n+1) { grid-row: span 3; }
-  .mosaic-bg img:nth-child(10n+2) { grid-row: span 2; }
-  .mosaic-bg img:nth-child(10n+3) { grid-row: span 3; }
-  .mosaic-bg img:nth-child(10n+4) { grid-row: span 2; }
-  .mosaic-bg img:nth-child(10n+5) { grid-row: span 3; }
-  .mosaic-bg img:nth-child(10n+6) { grid-row: span 2; }
-  .mosaic-bg img:nth-child(10n+7) { grid-row: span 2; }
-  .mosaic-bg img:nth-child(10n+8) { grid-row: span 3; }
-  .mosaic-bg img:nth-child(10n+9) { grid-row: span 2; }
-  .mosaic-bg img:nth-child(10n)   { grid-row: span 3; }
   /* Dark vignette over mosaic */
   .mosaic-vignette {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1;
