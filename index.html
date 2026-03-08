@@ -1544,22 +1544,47 @@ import * as THREE from 'three';
   renderer.setClearColor(0x000000, 0);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
-  camera.position.set(0, 1.2, 6);
-  camera.lookAt(0, 0.2, 0);
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.set(0, 0.8, 4.5);
+  camera.lookAt(0, 0, 0);
 
-  // Chrome material (pure silver, no color)
-  const chromeMat = new THREE.ShaderMaterial({
+  // Simplex noise
+  const perm = new Uint8Array(512);
+  const grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+  const p = [151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,89,18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,119,248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,249,14,239,107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
+  for (let i = 0; i < 256; i++) { perm[i] = p[i]; perm[i + 256] = p[i]; }
+  function dot3(g, x, y, z) { return g[0]*x + g[1]*y + g[2]*z; }
+  function noise3(x, y, z) {
+    const F3 = 1/3, G3 = 1/6;
+    const s = (x+y+z)*F3;
+    const i = Math.floor(x+s), j = Math.floor(y+s), k = Math.floor(z+s);
+    const t = (i+j+k)*G3;
+    const x0 = x-(i-t), y0 = y-(j-t), z0 = z-(k-t);
+    let i1,j1,k1,i2,j2,k2;
+    if (x0>=y0) { if (y0>=z0) {i1=1;j1=0;k1=0;i2=1;j2=1;k2=0;} else if (x0>=z0) {i1=1;j1=0;k1=0;i2=1;j2=0;k2=1;} else {i1=0;j1=0;k1=1;i2=1;j2=0;k2=1;} }
+    else { if (y0<z0) {i1=0;j1=0;k1=1;i2=0;j2=1;k2=1;} else if (x0<z0) {i1=0;j1=1;k1=0;i2=0;j2=1;k2=1;} else {i1=0;j1=1;k1=0;i2=1;j2=1;k2=0;} }
+    const x1=x0-i1+G3, y1=y0-j1+G3, z1=z0-k1+G3;
+    const x2=x0-i2+2*G3, y2=y0-j2+2*G3, z2=z0-k2+2*G3;
+    const x3=x0-1+3*G3, y3=y0-1+3*G3, z3=z0-1+3*G3;
+    const ii=i&255, jj=j&255, kk=k&255;
+    let n0=0,n1=0,n2=0,n3=0;
+    let t0=0.6-x0*x0-y0*y0-z0*z0; if(t0>0){t0*=t0;n0=t0*t0*dot3(grad3[perm[ii+perm[jj+perm[kk]]]%12],x0,y0,z0);}
+    let t1=0.6-x1*x1-y1*y1-z1*z1; if(t1>0){t1*=t1;n1=t1*t1*dot3(grad3[perm[ii+i1+perm[jj+j1+perm[kk+k1]]]%12],x1,y1,z1);}
+    let t2=0.6-x2*x2-y2*y2-z2*z2; if(t2>0){t2*=t2;n2=t2*t2*dot3(grad3[perm[ii+i2+perm[jj+j2+perm[kk+k2]]]%12],x2,y2,z2);}
+    let t3=0.6-x3*x3-y3*y3-z3*z3; if(t3>0){t3*=t3;n3=t3*t3*dot3(grad3[perm[ii+1+perm[jj+1+perm[kk+1]]]%12],x3,y3,z3);}
+    return 32*(n0+n1+n2+n3);
+  }
+
+  // Chrome shader (pure silver)
+  const mat = new THREE.ShaderMaterial({
     uniforms: {
       u_lightDir: { value: new THREE.Vector3(0.5, 0.5, 1).normalize() },
     },
     vertexShader: `
       varying vec3 vNormal;
       varying vec3 vViewPosition;
-      varying vec3 vWorldNormal;
       void main() {
         vNormal = normalize(normalMatrix * normal);
-        vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
         vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
         vViewPosition = -mvPos.xyz;
         gl_Position = projectionMatrix * mvPos;
@@ -1569,21 +1594,14 @@ import * as THREE from 'three';
       uniform vec3 u_lightDir;
       varying vec3 vNormal;
       varying vec3 vViewPosition;
-      varying vec3 vWorldNormal;
 
       vec3 envMap(vec3 r) {
         vec3 env = vec3(0.02);
-        // Key (top-right, white)
         env += vec3(3.0) * pow(max(dot(r, normalize(vec3(1.0, 1.2, 0.6))), 0.0), 4.0);
-        // Fill (top-left, white)
         env += vec3(1.5) * pow(max(dot(r, normalize(vec3(-0.8, 1.0, 0.4))), 0.0), 5.0);
-        // Horizon strip
         env += vec3(2.0) * pow(1.0 - abs(r.y), 25.0);
-        // Bottom (dim)
         env += vec3(0.1) * pow(max(dot(r, normalize(vec3(0.0, -1.0, 0.3))), 0.0), 3.0);
-        // Back rim
         env += vec3(2.0) * pow(max(dot(r, normalize(vec3(0.0, 0.3, -1.0))), 0.0), 8.0);
-        // Side accent
         env += vec3(1.0) * pow(max(dot(r, normalize(vec3(1.0, 0.0, -0.5))), 0.0), 12.0);
         return env;
       }
@@ -1593,127 +1611,85 @@ import * as THREE from 'three';
         vec3 v = normalize(vViewPosition);
         vec3 r = reflect(-v, n);
         float cosTheta = max(dot(n, v), 0.0);
-
-        // Silver fresnel
-        float F0 = 0.95;
-        float fresnel = F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-
+        float fresnel = 0.95 + 0.05 * pow(1.0 - cosTheta, 5.0);
         vec3 env = envMap(r);
-
-        // Sharp specular (white only)
         float s1 = pow(max(dot(n, normalize(u_lightDir + v)), 0.0), 600.0) * 5.0;
         float s2 = pow(max(dot(n, normalize(normalize(vec3(-1.5, 2.0, -0.5)) + v)), 0.0), 400.0) * 3.0;
         float s3 = pow(max(dot(n, normalize(normalize(vec3(0.5, -0.5, 2.0)) + v)), 0.0), 300.0) * 2.0;
-
         float rim = pow(1.0 - cosTheta, 3.5) * 0.4;
-
-        vec3 color = vec3(fresnel) * env * 2.0 + vec3(s1 + s2 + s3) + vec3(rim);
-
-        // ACES
+        vec3 color = vec3(fresnel) * env * 2.0 + vec3(s1 + s2 + s3 + rim);
         vec3 x = color;
-        color = (x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14);
-        color = clamp(color, 0.0, 1.0);
+        color = clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0);
         color = pow(color, vec3(0.88));
-
         gl_FragColor = vec4(color, 1.0);
       }
     `,
   });
 
-  // Dark tire material
-  const tireMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+  // ── Blob sphere deformed into car silhouette ──
+  const geo = new THREE.IcosahedronGeometry(1.0, 128);
+  const basePositions = geo.attributes.position.array.slice();
 
-  // ── Build car from primitives ──
-  const carGroup = new THREE.Group();
+  // Pre-deform sphere into abstract car shape
+  const carPositions = new Float32Array(basePositions.length);
+  for (let i = 0; i < basePositions.length; i += 3) {
+    let x = basePositions[i], y = basePositions[i+1], z = basePositions[i+2];
+    const len = Math.sqrt(x*x + y*y + z*z);
+    const nx = x/len, ny = y/len, nz = z/len;
 
-  // Body (lower): rounded box
-  const bodyGeo = new THREE.BoxGeometry(3.2, 0.7, 1.4, 8, 4, 4);
-  // Round the edges
-  const bodyPos = bodyGeo.attributes.position;
-  for (let i = 0; i < bodyPos.count; i++) {
-    let x = bodyPos.getX(i), y = bodyPos.getY(i), z = bodyPos.getZ(i);
-    const bevelR = 0.15;
-    const hx = 1.6 - bevelR, hy = 0.35 - bevelR, hz = 0.7 - bevelR;
-    const dx = Math.max(0, Math.abs(x) - hx);
-    const dy = Math.max(0, Math.abs(y) - hy);
-    const dz = Math.max(0, Math.abs(z) - hz);
-    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-    if (dist > 0) {
-      const scale = (bevelR) / (bevelR + dist * 0.6);
-      x = Math.sign(x) * Math.min(Math.abs(x), hx + bevelR * (Math.abs(x) - hx) / (dist || 1));
-      y = Math.sign(y) * Math.min(Math.abs(y), hy + bevelR * (Math.abs(y) - hy) / (dist || 1));
-      z = Math.sign(z) * Math.min(Math.abs(z), hz + bevelR * (Math.abs(z) - hz) / (dist || 1));
+    // Stretch X (length), compress Y (height), slight Z (width)
+    let sx = nx * 1.8;  // elongate
+    let sy = ny * 0.55;  // flatten
+    let sz = nz * 0.9;  // slightly narrow
+
+    // Cabin bump: raise the top-center area
+    const cabinX = Math.exp(-sx*sx * 1.5); // centered on X
+    const cabinTop = Math.max(0, ny); // only upper half
+    sy += cabinTop * cabinX * 0.35;
+
+    // Hood slope: front part slopes down
+    if (sx > 0.3 && ny > 0) {
+      const hoodFactor = Math.max(0, (sx - 0.3) / 1.5);
+      sy -= hoodFactor * cabinTop * 0.25;
     }
-    bodyPos.setXYZ(i, x, y, z);
+
+    // Trunk: rear slopes down slightly
+    if (sx < -0.8 && ny > 0) {
+      const trunkFactor = Math.max(0, (-sx - 0.8) / 1.0);
+      sy -= trunkFactor * cabinTop * 0.15;
+    }
+
+    // Flatten bottom
+    if (ny < -0.2) {
+      sy = Math.max(sy, -0.45);
+    }
+
+    // Wheel arches: indent lower sides
+    const wheelX1 = 1.0, wheelX2 = -0.9;
+    const archR = 0.4;
+    [wheelX1, wheelX2].forEach(wx => {
+      const dx = sx - wx;
+      const archDist = Math.sqrt(dx*dx + (sy+0.3)*(sy+0.3));
+      if (archDist < archR && ny < 0 && Math.abs(nz) > 0.3) {
+        const indent = (archR - archDist) * 0.3;
+        sy += indent;
+      }
+    });
+
+    const finalLen = Math.sqrt(sx*sx + sy*sy + sz*sz);
+    carPositions[i] = sx;
+    carPositions[i+1] = sy;
+    carPositions[i+2] = sz;
   }
-  bodyGeo.computeVertexNormals();
-  const body = new THREE.Mesh(bodyGeo, chromeMat);
-  body.position.y = 0.35;
-  carGroup.add(body);
 
-  // Cabin (upper): tapered box
-  const cabinGeo = new THREE.BoxGeometry(1.6, 0.6, 1.3, 6, 4, 4);
-  const cabPos = cabinGeo.attributes.position;
-  for (let i = 0; i < cabPos.count; i++) {
-    let x = cabPos.getX(i), y = cabPos.getY(i), z = cabPos.getZ(i);
-    // Taper: narrow at top and front/back
-    const tY = (y + 0.3) / 0.6;
-    x *= 1.0 - tY * 0.15;
-    z *= 1.0 - tY * 0.08;
-    cabPos.setXYZ(i, x, y, z);
-  }
-  cabinGeo.computeVertexNormals();
-  const cabin = new THREE.Mesh(cabinGeo, chromeMat);
-  cabin.position.set(-0.1, 0.95, 0);
-  carGroup.add(cabin);
+  // Set initial positions
+  const pos = geo.attributes.position.array;
+  for (let i = 0; i < pos.length; i++) pos[i] = carPositions[i];
+  geo.attributes.position.needsUpdate = true;
+  geo.computeVertexNormals();
 
-  // Hood slope: connect body front to cabin
-  const hoodGeo = new THREE.BoxGeometry(0.8, 0.25, 1.3, 4, 2, 4);
-  const hoodPos = hoodGeo.attributes.position;
-  for (let i = 0; i < hoodPos.count; i++) {
-    let x = hoodPos.getX(i), y = hoodPos.getY(i);
-    // Slope down toward front
-    y -= x * 0.2;
-    hoodPos.setXY(i, x, y);
-  }
-  hoodGeo.computeVertexNormals();
-  const hood = new THREE.Mesh(hoodGeo, chromeMat);
-  hood.position.set(0.9, 0.78, 0);
-  carGroup.add(hood);
-
-  // Wheels (4x)
-  const wheelPositions = [
-    [1.0, 0.05, 0.75], [1.0, 0.05, -0.75],
-    [-1.0, 0.05, 0.75], [-1.0, 0.05, -0.75]
-  ];
-  wheelPositions.forEach(([wx, wy, wz]) => {
-    // Tire
-    const tireGeo = new THREE.TorusGeometry(0.28, 0.12, 16, 32);
-    const tire = new THREE.Mesh(tireGeo, tireMat);
-    tire.position.set(wx, wy, wz);
-    tire.rotation.y = Math.PI / 2;
-    carGroup.add(tire);
-    // Rim (chrome)
-    const rimGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.1, 24);
-    const rim = new THREE.Mesh(rimGeo, chromeMat);
-    rim.position.set(wx, wy, wz);
-    rim.rotation.x = Math.PI / 2;
-    carGroup.add(rim);
-  });
-
-  // Headlights
-  const hlGeo = new THREE.SphereGeometry(0.08, 16, 16);
-  const hlMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-  [-0.45, 0.45].forEach(z => {
-    const hl = new THREE.Mesh(hlGeo, hlMat);
-    hl.position.set(1.6, 0.4, z);
-    carGroup.add(hl);
-  });
-
-  // Scale and position
-  carGroup.scale.setScalar(0.85);
-  carGroup.position.y = -0.3;
-  scene.add(carGroup);
+  const mesh = new THREE.Mesh(geo, mat);
+  scene.add(mesh);
 
   // Mouse
   const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
@@ -1740,13 +1716,30 @@ import * as THREE from 'three';
     const coverSlide = document.querySelector('[data-slide="1"]');
     if (!coverSlide || !coverSlide.classList.contains('active')) return;
 
-    time += 0.005;
+    time += 0.008;
     mouse.x += (mouse.tx - mouse.x) * 0.05;
     mouse.y += (mouse.ty - mouse.y) * 0.05;
 
-    // Slow turntable rotation + mouse influence
-    carGroup.rotation.y = time * 0.3 + mouse.x * 0.4;
-    carGroup.rotation.x = mouse.y * -0.1;
+    // Wobble vertices with noise (on top of car shape)
+    for (let i = 0; i < pos.length; i += 3) {
+      const cx = carPositions[i], cy = carPositions[i+1], cz = carPositions[i+2];
+      const len = Math.sqrt(cx*cx + cy*cy + cz*cz) || 1;
+      const nx = cx/len, ny = cy/len, nz = cz/len;
+
+      const n1 = noise3(nx*1.5 + time*0.4, ny*1.5 + time*0.3, nz*1.5 + time*0.35);
+      const n2 = noise3(nx*2.5 + time*0.6, ny*2.5 - time*0.4, nz*2.5 + time*0.5) * 0.3;
+      const disp = (n1 + n2) * 0.06;
+
+      pos[i] = cx + nx * disp;
+      pos[i+1] = cy + ny * disp;
+      pos[i+2] = cz + nz * disp;
+    }
+    geo.attributes.position.needsUpdate = true;
+    geo.computeVertexNormals();
+
+    // Slow rotation + mouse
+    mesh.rotation.y = time * 0.2 + mouse.x * 0.4;
+    mesh.rotation.x = -mouse.y * 0.15 + 0.1;
 
     renderer.render(scene, camera);
   }
