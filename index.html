@@ -1615,47 +1615,75 @@ import * as THREE from 'three';
       uniform float u_time;
       varying vec3 vNormal;
       varying vec3 vViewPosition;
+
+      // Fake HDRI environment: high-contrast studio lighting
+      vec3 envMap(vec3 r) {
+        // Base: very dark
+        vec3 env = vec3(0.01);
+
+        // Bright top-right area light (large soft box)
+        float topRight = max(dot(r, normalize(vec3(1.0, 1.0, 0.5))), 0.0);
+        env += vec3(1.2, 1.2, 1.3) * pow(topRight, 6.0);
+
+        // Sharp horizontal strip (studio horizon reflection)
+        float horizonStrip = 1.0 - abs(r.y);
+        env += vec3(0.8, 0.85, 0.95) * pow(horizonStrip, 20.0);
+
+        // Left fill light (cooler, dimmer)
+        float leftFill = max(dot(r, normalize(vec3(-1.0, 0.3, 0.8))), 0.0);
+        env += vec3(0.3, 0.35, 0.5) * pow(leftFill, 8.0);
+
+        // Bottom kick (subtle warm)
+        float bottomKick = max(dot(r, normalize(vec3(0.0, -1.0, 0.3))), 0.0);
+        env += vec3(0.15, 0.12, 0.08) * pow(bottomKick, 4.0);
+
+        // Bright back rim
+        float backRim = max(dot(r, normalize(vec3(0.0, 0.2, -1.0))), 0.0);
+        env += vec3(0.6, 0.65, 0.8) * pow(backRim, 12.0);
+
+        return env;
+      }
+
       void main() {
         vec3 n = normalize(vNormal);
         vec3 v = normalize(vViewPosition);
         vec3 r = reflect(-v, n);
 
-        // Metallic base color (dark chrome)
-        vec3 metalColor = vec3(0.6, 0.6, 0.65);
+        // Silver/chrome metal color
+        vec3 metalColor = vec3(0.85, 0.85, 0.9);
 
-        // Fresnel (metals have strong fresnel)
-        float fresnel = pow(1.0 - max(dot(n, v), 0.0), 4.0);
-        float metalFresnel = 0.04 + 0.96 * fresnel;
+        // Schlick fresnel for metals (high F0)
+        float cosTheta = max(dot(n, v), 0.0);
+        vec3 F0 = metalColor;
+        vec3 fresnel = F0 + (vec3(1.0) - F0) * pow(1.0 - cosTheta, 5.0);
 
-        // Fake environment reflection (gradient based on reflection direction)
-        float envUp = r.y * 0.5 + 0.5;
-        vec3 envColor = mix(vec3(0.02, 0.02, 0.04), vec3(0.25, 0.27, 0.35), pow(envUp, 2.0));
-        // Add horizon highlight
-        float horizon = 1.0 - abs(r.y);
-        envColor += vec3(0.15, 0.15, 0.2) * pow(horizon, 8.0);
+        // Environment reflection (the key to liquid chrome look)
+        vec3 envReflection = envMap(r);
 
-        // Multiple specular highlights (key + fill + back)
+        // Specular highlights (very sharp for mirror-like surface)
         vec3 h1 = normalize(u_lightDir + v);
-        float spec1 = pow(max(dot(n, h1), 0.0), 200.0) * 2.0;
+        float spec1 = pow(max(dot(n, h1), 0.0), 400.0) * 3.0;
 
-        vec3 lightDir2 = normalize(vec3(-2.0, 1.0, -1.0));
-        vec3 h2 = normalize(lightDir2 + v);
-        float spec2 = pow(max(dot(n, h2), 0.0), 120.0) * 0.8;
+        vec3 l2 = normalize(vec3(-1.5, 2.0, -0.5));
+        vec3 h2 = normalize(l2 + v);
+        float spec2 = pow(max(dot(n, h2), 0.0), 300.0) * 2.0;
 
-        vec3 lightDir3 = normalize(vec3(0.0, -1.0, 2.0));
-        vec3 h3 = normalize(lightDir3 + v);
-        float spec3 = pow(max(dot(n, h3), 0.0), 60.0) * 0.4;
+        vec3 l3 = normalize(vec3(0.5, -0.5, 2.0));
+        vec3 h3 = normalize(l3 + v);
+        float spec3 = pow(max(dot(n, h3), 0.0), 200.0) * 1.5;
 
-        // Rim light (edge glow)
-        float rim = pow(1.0 - max(dot(n, v), 0.0), 3.5) * 0.6;
+        // Rim/edge highlight
+        float rim = pow(1.0 - cosTheta, 4.0) * 0.8;
 
-        // Compose: metal reflection model
-        vec3 reflection = envColor * metalColor;
-        vec3 specular = (spec1 + spec2 + spec3) * vec3(1.0, 0.98, 0.95);
-        vec3 color = mix(reflection * 0.3, reflection, metalFresnel) + specular + rim * vec3(0.35, 0.4, 0.55);
+        // Compose: chrome = fresnel-weighted env reflection + sharp specular
+        vec3 color = fresnel * envReflection * 1.5;
+        color += (spec1 + spec2 + spec3) * vec3(1.0, 0.98, 0.95);
+        color += rim * vec3(0.5, 0.55, 0.7);
 
-        // Subtle warm highlight on top
-        color += max(dot(n, vec3(0.0, 1.0, 0.0)), 0.0) * 0.05 * vec3(1.0, 0.9, 0.7);
+        // Tone mapping (prevent blow-out while keeping punch)
+        color = color / (color + vec3(0.8));
+        // Boost contrast for that liquid metal look
+        color = pow(color, vec3(0.85));
 
         gl_FragColor = vec4(color, 1.0);
       }
