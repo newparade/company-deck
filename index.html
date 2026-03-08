@@ -91,6 +91,9 @@
   .slide-cover {
     padding: 0; justify-content: flex-end; position: relative; overflow: hidden;
   }
+  #cover-particles {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+  }
   /* 左上: サブラベル */
   .cover-top-left {
     position: absolute; top: 48px; left: 60px; z-index: 2;
@@ -651,6 +654,7 @@
 
 <!-- SLIDE 1: Cover -->
 <div class="slide slide-cover active" data-slide="1">
+  <canvas id="cover-particles"></canvas>
   <div class="cover-top-left">
     <div class="cover-label">Company Deck 2026</div>
   </div>
@@ -1524,18 +1528,23 @@
 })();
 </script>
 
+<!-- Cover particle art animation -->
 <script>
-void(function() { return;
-  const canvas = document.getElementById('cover-chrome');
+(function initCoverParticles() {
+  const canvas = document.getElementById('cover-particles');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   let W, H, dpr;
   let particles = [];
-  let targetPositions = [];
   let startTime = performance.now();
-  const MORPH_DURATION = 4000; // 4 seconds to fully form
-  const HOLD_DURATION = 3000;  // hold for 3s then loop
+  const MORPH_DURATION = 5000;
+  const HOLD_DURATION = 6000;
   const TOTAL_CYCLE = MORPH_DURATION + HOLD_DURATION;
+
+  const coverImg = new Image();
+  coverImg.src = 'images/cover-art.png';
+  let imgReady = false;
+  coverImg.onload = () => { imgReady = true; sampleImage(); };
 
   function resize() {
     const slide = canvas.parentElement;
@@ -1548,243 +1557,113 @@ void(function() { return;
     canvas.style.width = W + 'px';
     canvas.style.height = H + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    sampleFont();
+    if (imgReady) sampleImage();
   }
 
-  // Font-based sampling (Pacifico script font)
-  let fontReady = false;
-  const LOGO_FONT = 'Pacifico';
-  const LOGO_TEXT = 'newparade';
+  function sampleImage() {
+    if (!imgReady || !W) return;
 
-  // Wait for font to load
-  document.fonts.ready.then(() => {
-    fontReady = true;
-    sampleFont();
-  });
+    const offC = document.createElement('canvas');
+    const offCtx = offC.getContext('2d');
+    offC.width = W;
+    offC.height = H;
 
-  function getLogoFontSize() { return Math.min(W * 0.09, 110); }
+    // Fit image to canvas (contain), centered
+    const imgAspect = coverImg.width / coverImg.height;
+    const canvasAspect = W / H;
+    let drawW, drawH, drawX, drawY;
+    if (imgAspect > canvasAspect) {
+      drawW = W * 0.85;
+      drawH = drawW / imgAspect;
+    } else {
+      drawH = H * 0.85;
+      drawW = drawH * imgAspect;
+    }
+    drawX = (W - drawW) / 2;
+    drawY = (H - drawH) / 2;
+    offCtx.drawImage(coverImg, drawX, drawY, drawW, drawH);
 
-  function sampleFont() {
-    if (!fontReady || !W) return;
-
-    const offCanvas = document.createElement('canvas');
-    const offCtx = offCanvas.getContext('2d');
-    offCanvas.width = W;
-    offCanvas.height = H;
-
-    const fontSize = getLogoFontSize();
-    offCtx.font = `${fontSize}px '${LOGO_FONT}', cursive`;
-    offCtx.textAlign = 'center';
-    offCtx.textBaseline = 'middle';
-    offCtx.fillStyle = '#fff';
-    offCtx.fillText(LOGO_TEXT, W / 2, H / 2);
-
-    // Sample pixels
+    // Sample pixels — monochrome (white only), skip dark background
     const imageData = offCtx.getImageData(0, 0, W, H);
     const data = imageData.data;
-    targetPositions = [];
+    const sampled = [];
     const step = 3;
     for (let y = 0; y < H; y += step) {
       for (let x = 0; x < W; x += step) {
         const idx = (y * W + x) * 4;
-        if (data[idx + 3] > 128) {
-          targetPositions.push({ x, y });
-        }
+        const r = data[idx], g = data[idx+1], b = data[idx+2], a = data[idx+3];
+        if (a < 50) continue;
+        const brightness = (r + g + b) / 3;
+        // Skip very dark pixels (background)
+        if (brightness < 35) continue;
+        sampled.push({ x, y, brightness });
       }
     }
 
-    particles = targetPositions.map(target => ({
+    // Create particles
+    particles = sampled.map(s => ({
       x: Math.random() * W,
       y: Math.random() * H,
-      tx: target.x,
-      ty: target.y,
-      vx: (Math.random() - 0.5) * 4,
-      vy: (Math.random() - 0.5) * 4,
-      size: 1.5 + Math.random() * 1.5,
-      delay: Math.random() * 0.4,
+      tx: s.x,
+      ty: s.y,
+      bright: s.brightness,
+      size: 1.2 + Math.random() * 1.3,
+      delay: Math.random() * 0.5,
     }));
 
     startTime = performance.now();
-  }
-
-  // Chrome gradient colors (3D metallic reflection bands)
-  function getChromeColor(normalizedY, time) {
-    // Sharp chrome bands: dark-bright-dark-bright like real chrome
-    const band = Math.sin(normalizedY * Math.PI * 5.0 + time * 0.3);
-    const band2 = Math.sin(normalizedY * Math.PI * 11.0 - time * 0.5) * 0.4;
-    const raw = band * 0.5 + band2 * 0.25 + 0.5;
-    // Remap: emphasize contrast between dark and bright
-    const curved = raw * raw * (3 - 2 * raw); // smoothstep
-    const val = Math.min(255, Math.max(30, curved * 280));
-    return `rgb(${val|0},${val|0},${val|0})`;
   }
 
   function animate() {
     requestAnimationFrame(animate);
     const coverSlide = document.querySelector('[data-slide="1"]');
     if (!coverSlide || !coverSlide.classList.contains('active')) return;
+    if (!particles.length) return;
 
     ctx.clearRect(0, 0, W, H);
 
     const elapsed = performance.now() - startTime;
-    const cycleTime = elapsed % (TOTAL_CYCLE + 2000); // +2s for scatter
+    const cycleTime = elapsed % (TOTAL_CYCLE + 2500);
     const time = elapsed * 0.001;
 
-    // Phase: 0→MORPH = forming, MORPH→TOTAL = hold, TOTAL→TOTAL+2000 = scatter
     let morphProgress;
     if (cycleTime < MORPH_DURATION) {
       morphProgress = cycleTime / MORPH_DURATION;
     } else if (cycleTime < TOTAL_CYCLE) {
       morphProgress = 1.0;
     } else {
-      // Scatter phase: reverse
-      const scatterT = (cycleTime - TOTAL_CYCLE) / 2000;
+      const scatterT = (cycleTime - TOTAL_CYCLE) / 2500;
       morphProgress = 1.0 - scatterT;
       if (morphProgress <= 0) {
-        // Reassign random start positions
         particles.forEach(p => {
           p.x = Math.random() * W;
           p.y = Math.random() * H;
-          p.delay = Math.random() * 0.4;
+          p.delay = Math.random() * 0.5;
         });
         startTime = performance.now();
         return;
       }
     }
 
-    // Bounding box for normalization
-    let minY = H, maxY = 0;
-    targetPositions.forEach(t => {
-      if (t.y < minY) minY = t.y;
-      if (t.y > maxY) maxY = t.y;
-    });
-    const rangeY = maxY - minY || 1;
-
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];
-      const individualProgress = Math.max(0, Math.min(1,
-        (morphProgress - p.delay) / (1 - p.delay)
-      ));
+      const ip = Math.max(0, Math.min(1, (morphProgress - p.delay) / (1 - p.delay)));
 
-      // Easing: cubic ease-in-out
-      const t = individualProgress < 0.5
-        ? 4 * individualProgress * individualProgress * individualProgress
-        : 1 - Math.pow(-2 * individualProgress + 2, 3) / 2;
+      // Cubic ease-in-out
+      const t = ip < 0.5
+        ? 4 * ip * ip * ip
+        : 1 - Math.pow(-2 * ip + 2, 3) / 2;
 
       const cx = p.x + (p.tx - p.x) * t;
       const cy = p.y + (p.ty - p.y) * t;
 
-      // When formed, add slight noise wobble
-      const noiseX = morphProgress > 0.8 ? Math.sin(time * 2 + i * 0.1) * 0.3 * (1 - morphProgress) : 0;
-      const noiseY = morphProgress > 0.8 ? Math.cos(time * 1.5 + i * 0.15) * 0.3 * (1 - morphProgress) : 0;
+      // White monochrome — brightness maps to alpha
+      const bNorm = p.bright / 255;
+      const alpha = (0.15 + t * 0.85) * (0.3 + bNorm * 0.7);
 
-      const drawX = cx + noiseX;
-      const drawY = cy + noiseY;
-
-      // Chrome color based on Y position within text
-      const normalizedY = (p.ty - minY) / rangeY;
-      const alpha = 0.3 + t * 0.7;
-
-      // During chaos phase: white-ish particles; during form: chrome
-      if (t < 0.3) {
-        const brightness = 120 + Math.random() * 80;
-        ctx.fillStyle = `rgba(${brightness|0},${brightness|0},${brightness|0},${alpha})`;
-      } else {
-        ctx.fillStyle = getChromeColor(normalizedY, time);
-        ctx.globalAlpha = alpha;
-      }
-
-      const size = p.size * (0.5 + t * 0.5);
-      ctx.fillRect(drawX, drawY, size, size);
-      ctx.globalAlpha = 1;
-    }
-
-    // Once fully formed, overlay extruded 3D chrome text
-    if (morphProgress > 0.7 && fontReady) {
-      const textAlpha = Math.min(1, (morphProgress - 0.7) / 0.3);
-      const fontSize = getLogoFontSize();
-      const tx = W / 2, ty = H / 2;
-      const fontStr = `${fontSize}px '${LOGO_FONT}', cursive`;
-
-      ctx.save();
-      ctx.globalAlpha = textAlpha;
-      ctx.font = fontStr;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.lineJoin = 'round';
-
-      // ── Extrusion: stack 20 layers going down-right for 3D depth ──
-      const extrudeDepth = 12;
-      const extrudeLayers = 20;
-      for (let d = extrudeLayers; d >= 1; d--) {
-        const t = d / extrudeLayers;
-        const ox = t * extrudeDepth * 0.3;  // slight rightward
-        const oy = t * extrudeDepth;        // downward depth
-
-        // Side face gradient: darker at back, lighter near front
-        const sideVal = Math.floor(25 + t * 40);
-        ctx.fillStyle = `rgb(${sideVal},${sideVal},${sideVal})`;
-        ctx.fillText(LOGO_TEXT, tx + ox, ty + oy);
-
-        // Side edge
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = `rgb(${Math.floor(sideVal * 0.6)},${Math.floor(sideVal * 0.6)},${Math.floor(sideVal * 0.6)})`;
-        ctx.strokeText(LOGO_TEXT, tx + ox, ty + oy);
-      }
-
-      // ── Front face outline (dark border) ──
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = '#111';
-      ctx.strokeText(LOGO_TEXT, tx, ty);
-
-      // ── Front face: chrome gradient ──
-      const top = ty - fontSize * 0.55;
-      const bot = ty + fontSize * 0.45;
-      const chromeGrad = ctx.createLinearGradient(0, top, 0, bot);
-      chromeGrad.addColorStop(0.00, '#3a3a3a');
-      chromeGrad.addColorStop(0.06, '#888');
-      chromeGrad.addColorStop(0.12, '#e8e8e8');
-      chromeGrad.addColorStop(0.17, '#ffffff'); // sharp highlight 1
-      chromeGrad.addColorStop(0.22, '#e0e0e0');
-      chromeGrad.addColorStop(0.28, '#666');
-      chromeGrad.addColorStop(0.34, '#222');    // deep dark band
-      chromeGrad.addColorStop(0.40, '#444');
-      chromeGrad.addColorStop(0.47, '#bbb');
-      chromeGrad.addColorStop(0.52, '#f0f0f0');
-      chromeGrad.addColorStop(0.56, '#ffffff'); // sharp highlight 2
-      chromeGrad.addColorStop(0.61, '#d0d0d0');
-      chromeGrad.addColorStop(0.67, '#555');
-      chromeGrad.addColorStop(0.73, '#1a1a1a'); // deep dark band
-      chromeGrad.addColorStop(0.80, '#555');
-      chromeGrad.addColorStop(0.87, '#999');
-      chromeGrad.addColorStop(0.93, '#555');
-      chromeGrad.addColorStop(1.00, '#2a2a2a');
-      ctx.fillStyle = chromeGrad;
-      ctx.fillText(LOGO_TEXT, tx, ty);
-
-      // ── Highlight: top-half light for balloon roundness ──
-      const topGrad = ctx.createLinearGradient(0, top, 0, top + (bot - top) * 0.35);
-      topGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
-      topGrad.addColorStop(0.4, 'rgba(255,255,255,0.12)');
-      topGrad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = topGrad;
-      ctx.fillText(LOGO_TEXT, tx, ty);
-
-      // ── Bright edge on top ──
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-      ctx.strokeText(LOGO_TEXT, tx, ty - 1.5);
-
-      // ── Moving specular sweep ──
-      const sweepX = tx + Math.sin(time * 0.35) * fontSize * 3;
-      const specGrad = ctx.createRadialGradient(sweepX, ty - fontSize * 0.1, 0, sweepX, ty, fontSize * 1.0);
-      specGrad.addColorStop(0, 'rgba(255,255,255,0.25)');
-      specGrad.addColorStop(0.12, 'rgba(255,255,255,0.08)');
-      specGrad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = specGrad;
-      ctx.fillText(LOGO_TEXT, tx, ty);
-
-      ctx.restore();
+      ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+      const size = p.size * (0.4 + t * 0.6);
+      ctx.fillRect(cx, cy, size, size);
     }
   }
 
