@@ -236,6 +236,37 @@
     100% { top: 100%; }
   }
 
+  /* Center scroll prompt (auto-dismiss) */
+  .case-scroll-prompt {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 10; pointer-events: none;
+    opacity: 0; animation: promptFade 2.4s ease 0.6s both;
+  }
+  .case-scroll-prompt .prompt-mouse {
+    width: 26px; height: 42px; border: 1.5px solid rgba(255,255,255,0.7);
+    border-radius: 13px; position: relative; margin-bottom: 14px;
+  }
+  .case-scroll-prompt .prompt-mouse::after {
+    content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    width: 3px; height: 8px; background: rgba(255,255,255,0.8); border-radius: 2px;
+    animation: mouseScroll 1.2s ease-in-out infinite;
+  }
+  .case-scroll-prompt .prompt-text {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(255,255,255,0.6); font-weight: 400;
+  }
+  @keyframes mouseScroll {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  }
+  @keyframes promptFade {
+    0% { opacity: 0; }
+    12% { opacity: 1; }
+    75% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
   /* ② Project Info Bar */
   .case-info-bar {
     display: flex; align-items: center; gap: 40px; flex-wrap: wrap;
@@ -642,6 +673,7 @@
         <p class="case-fv-summary">カジュアルなアート体験をひらく次世代プラットフォーム</p>
       </div>
       <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-prompt"><div class="prompt-mouse"></div><div class="prompt-text">Scroll to explore</div></div>
     </div>
     <!-- ② Project Info Bar -->
     <div class="case-info-bar">
@@ -706,6 +738,7 @@
         <p class="case-fv-summary">クラフト酒キットの新ブランド立ち上げ</p>
       </div>
       <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-prompt"><div class="prompt-mouse"></div><div class="prompt-text">Scroll to explore</div></div>
     </div>
     <div class="case-info-bar">
       <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">寝かせハイ</div></div>
@@ -763,6 +796,7 @@
         <p class="case-fv-summary">海外向け抹茶ブランドのクリエイティブ全般</p>
       </div>
       <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-prompt"><div class="prompt-mouse"></div><div class="prompt-text">Scroll to explore</div></div>
     </div>
     <div class="case-info-bar">
       <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">MATCHA STYLE</div></div>
@@ -817,6 +851,7 @@
         <p class="case-fv-summary">CBDボトリングティーのトータルデザイン</p>
       </div>
       <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-prompt"><div class="prompt-mouse"></div><div class="prompt-text">Scroll to explore</div></div>
     </div>
     <div class="case-info-bar">
       <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">YOICHA</div></div>
@@ -874,6 +909,7 @@
         <p class="case-fv-summary">パートナー型ライブハウスのフライヤー制作</p>
       </div>
       <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-prompt"><div class="prompt-mouse"></div><div class="prompt-text">Scroll to explore</div></div>
     </div>
     <div class="case-info-bar">
       <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">TOKIOTOKYO</div></div>
@@ -966,6 +1002,12 @@
       slide.querySelectorAll('.case-img-grid.is-visible').forEach(el => el.classList.remove('is-visible'));
       slide.querySelectorAll('.case-two-col.is-visible').forEach(el => el.classList.remove('is-visible'));
       slide.querySelectorAll('.case-scroll-hint.is-hidden').forEach(el => el.classList.remove('is-hidden'));
+      // Re-trigger center scroll prompt animation
+      slide.querySelectorAll('.case-scroll-prompt').forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight; // force reflow
+        el.style.animation = '';
+      });
     }
   }
   document.getElementById('next').addEventListener('click', () => { if (current < total) { current++; showSlide(current); } });
