@@ -181,14 +181,13 @@
 
   /* Concept background image mosaic */
   .mosaic-bg {
-    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    position: absolute; top: -10%; left: -2%; right: -2%; bottom: -10%;
     z-index: 0; opacity: 0.35;
-    display: flex; flex-wrap: wrap;
+    columns: 10; column-gap: 0;
     overflow: hidden;
   }
   .mosaic-bg img {
-    width: 10%; height: auto; object-fit: cover; display: block;
-    flex-shrink: 0;
+    width: 100%; display: block; break-inside: avoid;
   }
   /* Dark vignette over mosaic */
   .mosaic-vignette {
