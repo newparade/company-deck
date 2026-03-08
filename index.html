@@ -15,8 +15,8 @@
     --gray: #888;
     --gray-light: #c8c8c8;
     --gray-dark: #333;
-    --accent: #f0c840;
-    --accent-dim: rgba(240,200,64,0.15);
+    --accent: #f8f7f4;
+    --accent-dim: rgba(255,255,255,0.08);
   }
 
   body {
@@ -97,7 +97,7 @@
   .slide-cover .sub { font-size: 20px; color: var(--gray); font-weight: 300; letter-spacing: 0.02em; }
   .cover-line {
     position: absolute; top: 0; right: 30%; width: 1px; height: 100%;
-    background: linear-gradient(to bottom, transparent, rgba(240,200,64,0.12), transparent);
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.06), transparent);
   }
   .cover-accent {
     position: absolute; top: 60px; right: 80px; width: 6px; height: 60px;
@@ -114,7 +114,7 @@
   .about-meta-item .meta-value { font-size: 15px; color: var(--white); font-weight: 400; }
   .culture-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
   .culture-tag {
-    padding: 8px 20px; border: 1px solid rgba(240,200,64,0.3); border-radius: 100px;
+    padding: 8px 20px; border: 1px solid rgba(255,255,255,0.15); border-radius: 100px;
     font-size: 13px; color: var(--gray-light); font-weight: 400; letter-spacing: 0.02em;
   }
 
@@ -139,7 +139,7 @@
     border-radius: 12px; width: 200px;
   }
   .flow-step.highlight {
-    background: var(--accent-dim); border-color: rgba(240,200,64,0.3);
+    background: var(--accent-dim); border-color: rgba(255,255,255,0.15);
   }
   .flow-step .step-num { font-size: 11px; color: var(--gray); letter-spacing: 0.15em; margin-bottom: 12px; }
   .flow-step .step-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
@@ -152,9 +152,9 @@
     padding: 40px 32px; background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; transition: all 0.3s;
   }
-  .menu-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(240,200,64,0.3); }
+  .menu-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
   .menu-card .menu-num {
-    font-size: 48px; font-weight: 800; color: rgba(240,200,64,0.15);
+    font-size: 48px; font-weight: 800; color: rgba(255,255,255,0.08);
     margin-bottom: 20px; line-height: 1;
   }
   .menu-card .menu-en { font-size: 18px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
@@ -211,7 +211,7 @@
     cursor: pointer; font-size: 12px; display: flex; align-items: center;
     justify-content: center; transition: all 0.2s;
   }
-  .gallery-btn:hover { background: rgba(240,200,64,0.2); border-color: var(--accent); }
+  .gallery-btn:hover { background: rgba(255,255,255,0.15); border-color: var(--accent); }
 
   /* Case Study */
   .case-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; height: 100%; }
@@ -231,7 +231,7 @@
   .case-services { display: flex; gap: 8px; }
   .case-service-tag {
     padding: 6px 16px; background: var(--accent-dim);
-    border: 1px solid rgba(240,200,64,0.25); border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 100px;
     font-size: 12px; color: var(--accent);
   }
 
