@@ -177,48 +177,49 @@
   .concept-desc { max-width: 700px; text-align: center; font-size: 16px; line-height: 2; position: relative; z-index: 2; }
   .slide-concept .label { position: relative; z-index: 2; }
 
-  /* Concept background image mosaic */
+  /* Concept background image mosaic - dual layer chaos */
   .concept-mosaic {
-    position: absolute; top: -15%; left: -5%; right: -5%; bottom: -15%;
+    position: absolute; top: -30%; left: -10%; right: -10%; bottom: -30%;
     z-index: 0; opacity: 0.3;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-auto-rows: 80px;
-    gap: 6px;
-    animation: mosaicDrift 8s linear infinite;
+    grid-template-columns: repeat(10, 1fr);
+    grid-auto-rows: 48px;
+    gap: 5px;
+  }
+  .concept-mosaic.mosaic-a {
+    animation: mosaicChaosA 12s ease-in-out infinite;
+  }
+  .concept-mosaic.mosaic-b {
+    opacity: 0.2;
+    animation: mosaicChaosB 9s ease-in-out infinite reverse;
+    transform: scale(1.15) rotate(3deg);
   }
   .concept-mosaic img {
     width: 100%; height: 100%; object-fit: cover; display: block;
   }
   /* Varying spans for organic layout */
-  .concept-mosaic img:nth-child(1)  { grid-row: span 3; }
-  .concept-mosaic img:nth-child(2)  { grid-row: span 2; }
-  .concept-mosaic img:nth-child(3)  { grid-row: span 4; }
-  .concept-mosaic img:nth-child(4)  { grid-row: span 2; }
-  .concept-mosaic img:nth-child(5)  { grid-row: span 3; }
-  .concept-mosaic img:nth-child(6)  { grid-row: span 2; }
-  .concept-mosaic img:nth-child(7)  { grid-row: span 2; }
-  .concept-mosaic img:nth-child(8)  { grid-row: span 3; }
-  .concept-mosaic img:nth-child(9)  { grid-row: span 2; }
-  .concept-mosaic img:nth-child(10) { grid-row: span 4; }
-  .concept-mosaic img:nth-child(11) { grid-row: span 2; }
-  .concept-mosaic img:nth-child(12) { grid-row: span 3; }
-  .concept-mosaic img:nth-child(13) { grid-row: span 3; }
-  .concept-mosaic img:nth-child(14) { grid-row: span 2; }
-  .concept-mosaic img:nth-child(15) { grid-row: span 4; }
-  .concept-mosaic img:nth-child(16) { grid-row: span 2; }
-  .concept-mosaic img:nth-child(17) { grid-row: span 3; }
-  .concept-mosaic img:nth-child(18) { grid-row: span 2; }
-  .concept-mosaic img:nth-child(19) { grid-row: span 2; }
-  .concept-mosaic img:nth-child(20) { grid-row: span 3; }
-  .concept-mosaic img:nth-child(21) { grid-row: span 4; }
-  .concept-mosaic img:nth-child(22) { grid-row: span 2; }
-  .concept-mosaic img:nth-child(23) { grid-row: span 3; }
-  .concept-mosaic img:nth-child(24) { grid-row: span 2; }
-  @keyframes mosaicDrift {
-    0% { transform: translateY(0) translateX(0); }
-    50% { transform: translateY(-4%) translateX(-1.5%); }
-    100% { transform: translateY(0) translateX(0); }
+  .concept-mosaic img:nth-child(10n+1) { grid-row: span 3; }
+  .concept-mosaic img:nth-child(10n+2) { grid-row: span 2; }
+  .concept-mosaic img:nth-child(10n+3) { grid-row: span 4; }
+  .concept-mosaic img:nth-child(10n+4) { grid-row: span 2; }
+  .concept-mosaic img:nth-child(10n+5) { grid-row: span 3; }
+  .concept-mosaic img:nth-child(10n+6) { grid-row: span 2; }
+  .concept-mosaic img:nth-child(10n+7) { grid-row: span 3; }
+  .concept-mosaic img:nth-child(10n+8) { grid-row: span 2; }
+  .concept-mosaic img:nth-child(10n+9) { grid-row: span 4; }
+  .concept-mosaic img:nth-child(10n)   { grid-row: span 2; }
+  @keyframes mosaicChaosA {
+    0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+    25%  { transform: translate(3%, -5%) scale(1.04) rotate(-1.5deg); }
+    50%  { transform: translate(-2%, -8%) scale(1.02) rotate(1deg); }
+    75%  { transform: translate(-4%, -3%) scale(1.06) rotate(-0.5deg); }
+    100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  }
+  @keyframes mosaicChaosB {
+    0%   { transform: translate(0, 0) scale(1.15) rotate(3deg); }
+    30%  { transform: translate(-5%, 3%) scale(1.1) rotate(1deg); }
+    60%  { transform: translate(3%, 6%) scale(1.18) rotate(4deg); }
+    100% { transform: translate(0, 0) scale(1.15) rotate(3deg); }
   }
   /* Dark vignette over mosaic */
   .concept-vignette {
@@ -709,11 +710,15 @@
 
 <!-- SLIDE 3: Concept -->
 <div class="slide slide-concept" data-slide="3">
-  <div class="concept-mosaic">
-    <img src="images/ego-logo.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/charm-1.jpg" alt="">
-    <img src="images/ego-1.jpg" alt=""><img src="images/tokio-4.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/nekasehai-2.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/ego-2.jpg" alt="">
-    <img src="images/tokio-5.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/tokio-6.jpg" alt="">
-    <img src="images/ego-3.jpg" alt=""><img src="images/yoicha-4.jpg" alt=""><img src="images/nekasehai-4.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/parallel-1.jpg" alt="">
+  <div class="concept-mosaic mosaic-a">
+    <img src="images/ego-logo.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/tokio-4.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/nekasehai-2.jpg" alt="">
+    <img src="images/matcha-2.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/yoicha-4.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/ego-3.jpg" alt="">
+    <img src="images/nekasehai-4.jpg" alt=""><img src="images/tokio-6.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/ego-logo.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt="">
+  </div>
+  <div class="concept-mosaic mosaic-b">
+    <img src="images/tokio-5.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/yoicha-4.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/ego-3.jpg" alt=""><img src="images/nekasehai-4.jpg" alt=""><img src="images/tokio-6.jpg" alt="">
+    <img src="images/curry-2.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/ego-logo.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/tokio-4.jpg" alt=""><img src="images/nekasehai-2.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/matcha-1.jpg" alt="">
+    <img src="images/ego-2.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/nekasehai-3.jpg" alt="">
   </div>
   <div class="concept-vignette"></div>
   <div class="label">Our Concept</div>
