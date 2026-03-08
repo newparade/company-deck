@@ -1347,53 +1347,37 @@
       pos.x += u_mouse.x * parallax / u_aspect;
       pos.y += u_mouse.y * parallax;
 
-      // ── Inward drift: particles slowly flow toward center ──
-      float dist = length(a_pos);
-      float normDist = dist / 1.2;
-      vec2 toCenter = -normalize(a_pos + 0.0001); // direction toward center
+      // Gentle drift
+      pos.x += sin(u_time * 0.08 + a_twinklePhase * 3.0) * 0.003 * a_depth;
+      pos.y += cos(u_time * 0.06 + a_twinklePhase * 2.0) * 0.002 * a_depth;
 
-      // Continuous slow inward pull — stronger for outer particles
-      float driftSpeed = 0.03 + a_depth * 0.02;
-      float driftAmount = sin(u_time * driftSpeed + a_twinklePhase) * 0.06 * normDist;
-      pos += toCenter * driftAmount;
-
-      // Gentle orbital drift (gives life, prevents static feeling)
-      float angle = u_time * 0.015 * (0.5 + a_depth * 0.5);
-      float orbitR = 0.008 * a_depth;
-      pos.x += cos(angle + a_twinklePhase * 6.28) * orbitR;
-      pos.y += sin(angle + a_twinklePhase * 6.28) * orbitR;
-
-      // ── Story wave with position movement ──
+      // ── Story wave: brightness ripple ──
+      // Slow cycle ~25s. Wave travels: outer→center (企画), center bloom (つくる), center→outer (届ける)
       float cycle = fract(u_time * 0.04);
+      float dist = length(a_pos); // original distance from center (0~1.6)
+      float normDist = dist / 1.2; // normalize to ~0-1
 
       float wave = 0.0;
-      float moveMul = 0.0; // position movement multiplier
       if (cycle < 0.35) {
-        // 企画: particles pull inward
-        float wavePos = 1.0 - cycle / 0.35;
-        float d = abs(normDist - wavePos);
-        wave = max(0.0, cos(d * 3.14159) * 0.5 + 0.5) * smoothstep(0.6, 0.0, d);
-        moveMul = wave * 0.08; // inward position shift
-        pos += toCenter * moveMul;
+        // 企画: inward wave — brightness ring sweeps from outside to center
+        float wavePos = 1.0 - cycle / 0.35; // 1→0
+        wave = 1.0 - smoothstep(0.0, 0.25, abs(normDist - wavePos));
       } else if (cycle < 0.55) {
-        // つくる: center bloom pulse
+        // つくる: center bloom — particles near center glow
         float t = (cycle - 0.35) / 0.2;
         float pulse = sin(t * 3.14159);
-        wave = pulse * smoothstep(0.7, 0.0, normDist);
+        wave = pulse * smoothstep(0.5, 0.0, normDist);
       } else {
-        // 届ける: particles push outward
-        float wavePos = (cycle - 0.55) / 0.45;
-        float d = abs(normDist - wavePos);
-        wave = max(0.0, cos(d * 3.14159) * 0.5 + 0.5) * smoothstep(0.6, 0.0, d);
-        moveMul = wave * 0.06;
-        pos -= toCenter * moveMul; // outward
+        // 届ける: outward wave — brightness ring sweeps from center to outside
+        float wavePos = (cycle - 0.55) / 0.45; // 0→1
+        wave = 1.0 - smoothstep(0.0, 0.25, abs(normDist - wavePos));
       }
 
       // Twinkle
       float twinkle = 0.5 + 0.5 * sin(u_time * a_twinkleSpeed + a_twinklePhase);
 
-      float brightness = a_brightness * (0.45 + 0.55 * twinkle) + wave * 0.45;
-      float sizeMul = 1.0 + wave * 0.5;
+      float brightness = a_brightness * (0.4 + 0.6 * twinkle) + wave * 0.5;
+      float sizeMul = 1.0 + wave * 0.4;
 
       gl_Position = vec4(pos, 0.0, 1.0);
       gl_PointSize = a_size * sizeMul * (0.8 + 0.2 * twinkle);
