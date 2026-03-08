@@ -1703,11 +1703,11 @@ import * as THREE from 'three';
       const len = Math.sqrt(ox*ox + oy*oy + oz*oz);
       const nx = ox/len, ny = oy/len, nz = oz/len;
 
-      // Multi-octave noise displacement
-      const freq1 = 1.5, freq2 = 3.0;
-      const n1 = noise3(nx*freq1 + time*0.5, ny*freq1 + time*0.3, nz*freq1 + time*0.4);
-      const n2 = noise3(nx*freq2 + time*0.8, ny*freq2 - time*0.5, nz*freq2 + time*0.6) * 0.3;
-      const displacement = (n1 + n2) * 0.15;
+      // High-freq noise: sharp metallic vibration, not blobby
+      const n1 = noise3(nx*3.0 + time*1.2, ny*3.0 + time*0.9, nz*3.0 + time*1.0);
+      const n2 = noise3(nx*6.0 + time*2.0, ny*6.0 - time*1.5, nz*6.0 + time*1.8) * 0.4;
+      const n3 = noise3(nx*12.0 - time*3.0, ny*12.0 + time*2.5, nz*12.0 - time*2.0) * 0.15;
+      const displacement = (n1 + n2 + n3) * 0.06;
 
       pos[i] = nx * (len + displacement);
       pos[i+1] = ny * (len + displacement);
