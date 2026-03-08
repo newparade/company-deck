@@ -212,15 +212,11 @@
   }
   .case-right {
     display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
-    gap: 8px; height: 440px; min-height: 0;
+    gap: 8px; height: 440px;
   }
-  .case-right--single-row { grid-template-rows: 1fr; }
-  .case-right--single-img { grid-template-columns: 1fr; grid-template-rows: 1fr; }
-  .case-right--3img { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-  .case-right--3img img:first-child { grid-row: 1 / -1; }
   .case-right img {
     width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px;
-    min-height: 0;
+    min-height: 0; min-width: 0;
   }
 
   /* Contact */
@@ -465,10 +461,11 @@
       </div>
       <div class="case-services"><span class="case-service-tag">Produce</span><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
     </div>
-    <div class="case-right case-right--3img">
+    <div class="case-right">
       <img src="images/ego-logo.jpg" alt="">
       <img src="images/ego-1.jpg" alt="">
       <img src="images/ego-2.jpg" alt="">
+      <img src="images/ego-3.jpg" alt="">
     </div>
   </div>
   <div class="page-num">10 / 15</div>
@@ -488,10 +485,11 @@
       </div>
       <div class="case-services"><span class="case-service-tag">Produce</span><span class="case-service-tag">Branding</span></div>
     </div>
-    <div class="case-right case-right--3img">
+    <div class="case-right">
       <img src="images/nekasehai-1.jpg" alt="">
       <img src="images/nekasehai-2.jpg" alt="">
       <img src="images/nekasehai-3.jpg" alt="">
+      <img src="images/nekasehai-4.jpg" alt="">
     </div>
   </div>
   <div class="page-num">11 / 15</div>
@@ -511,7 +509,7 @@
       </div>
       <div class="case-services"><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
     </div>
-    <div class="case-right case-right--single-row">
+    <div class="case-right" style="grid-template-rows: 1fr;">
       <img src="images/matcha-1.jpg" alt="">
       <img src="images/matcha-2.jpg" alt="">
     </div>
@@ -533,10 +531,11 @@
       </div>
       <div class="case-services"><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
     </div>
-    <div class="case-right case-right--3img">
+    <div class="case-right">
       <img src="images/yoicha-1.jpg" alt="">
       <img src="images/yoicha-2.jpg" alt="">
       <img src="images/yoicha-3.jpg" alt="">
+      <img src="images/yoicha-4.jpg" alt="">
     </div>
   </div>
   <div class="page-num">13 / 15</div>
@@ -556,8 +555,11 @@
       </div>
       <div class="case-services"><span class="case-service-tag">Creative Direction</span></div>
     </div>
-    <div class="case-right case-right--single-img">
+    <div class="case-right">
       <img src="images/tokio-3.jpg" alt="">
+      <img src="images/tokio-4.jpg" alt="">
+      <img src="images/tokio-5.jpg" alt="">
+      <img src="images/tokio-6.jpg" alt="">
     </div>
   </div>
   <div class="page-num">14 / 15</div>
