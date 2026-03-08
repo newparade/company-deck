@@ -172,63 +172,43 @@
   }
   .detail-right { position: relative; height: 440px; }
 
-  /* Gallery */
-  .gallery { position: relative; width: 100%; height: 100%; }
-  .gallery-page {
-    display: none; width: 100%; height: 100%; gap: 8px;
-  }
-  .gallery-page.active {
+  /* Photo Grid (Service slides) */
+  .photo-grid {
     display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    gap: 8px; width: 100%; height: 100%;
   }
-  .gallery-page .img-large { grid-row: 1 / 3; border-radius: 16px; overflow: hidden; position: relative; }
-  .gallery-page .img-small { border-radius: 16px; overflow: hidden; position: relative; }
-  .gallery-page img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .gallery-page .img-label {
-    position: absolute; bottom: 12px; left: 12px;
-    background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
-    padding: 4px 12px; border-radius: 100px;
-    font-size: 11px; color: var(--white); font-weight: 500;
-    letter-spacing: 0.03em;
+  .photo-grid img {
+    width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px;
   }
-  .gallery-page .img-large .img-label {
-    bottom: 16px; left: 16px; padding: 6px 16px; font-size: 12px;
-    border-left: 2px solid var(--accent);
-  }
-  .gallery-nav {
-    position: absolute; bottom: -32px; right: 0;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .gallery-dots { display: flex; gap: 6px; }
-  .gallery-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: rgba(255,255,255,0.2); cursor: pointer;
-    transition: all 0.2s; border: none; padding: 0;
-  }
-  .gallery-dot.active { background: var(--accent); width: 18px; border-radius: 3px; }
-  .gallery-btn {
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-    color: var(--white); width: 28px; height: 28px; border-radius: 50%;
-    cursor: pointer; font-size: 12px; display: flex; align-items: center;
-    justify-content: center; transition: all 0.2s;
-  }
-  .gallery-btn:hover { background: rgba(255,255,255,0.15); border-color: var(--accent); }
 
   /* Case Study */
-  .case-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; height: 100%; }
-  .case-visual { position: relative; height: 460px; }
-  .case-info .case-client {
+  .case-layout {
+    display: flex; flex-direction: column; height: 100%; gap: 0;
+  }
+  .case-header {
+    display: flex; align-items: baseline; gap: 24px; margin-bottom: 20px;
+  }
+  .case-header .case-num {
     font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 16px;
+    color: var(--gray);
   }
-  .case-info h2 { margin-bottom: 32px; }
-  .case-flow { margin-bottom: 32px; }
-  .case-flow-item { padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .case-flow-item .cfi-label {
-    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 6px; font-weight: 500;
+  .case-header h2 { font-size: 32px; margin-bottom: 0; }
+  .case-images {
+    flex: 1; display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px;
+    min-height: 0; border-radius: 16px; overflow: hidden;
   }
-  .case-flow-item .cfi-text { font-size: 15px; color: var(--gray-light); font-weight: 300; line-height: 1.6; }
-  .case-services { display: flex; gap: 8px; }
+  .case-images img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .case-bottom {
+    display: flex; align-items: center; gap: 40px;
+    padding-top: 20px; margin-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .case-bottom .case-desc {
+    font-size: 14px; color: var(--gray-light); font-weight: 300; line-height: 1.7; flex: 1;
+  }
+  .case-services { display: flex; gap: 8px; flex-shrink: 0; }
   .case-service-tag {
     padding: 6px 16px; background: var(--accent-dim);
     border: 1px solid rgba(255,255,255,0.12); border-radius: 100px;
@@ -362,23 +342,11 @@
       </p>
     </div>
     <div class="detail-right">
-      <div class="gallery" data-gallery>
-        <div class="gallery-page active">
-          <div class="img-large"><img src="images/ego-logo.jpg" alt="ego graphica"><span class="img-label">ego graphica</span></div>
-          <div class="img-small"><img src="images/ego-1.jpg" alt="ego graphica"></div>
-          <div class="img-small"><img src="images/ego-2.jpg" alt="ego graphica"></div>
-        </div>
-        <div class="gallery-page">
-          <div class="img-large"><img src="images/matcha-1.jpg" alt="MATCHA STYLE"><span class="img-label">MATCHA STYLE</span></div>
-          <div class="img-small"><img src="images/matcha-2.jpg" alt="MATCHA STYLE"></div>
-          <div class="img-small"><img src="images/nekasehai-1.jpg" alt="寝かせハイ"></div>
-        </div>
-        <div class="gallery-page">
-          <div class="img-large"><img src="images/pmconf-1.jpg" alt="pmconf2025"><span class="img-label">pmconf2025</span></div>
-          <div class="img-small"><img src="images/pmconf-2.jpg" alt="pmconf2025"></div>
-          <div class="img-small"><img src="images/yoicha-1.jpg" alt="YOICHA"></div>
-        </div>
-        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
+      <div class="photo-grid">
+        <img src="images/ego-logo.jpg" alt="">
+        <img src="images/matcha-1.jpg" alt="">
+        <img src="images/nekasehai-1.jpg" alt="">
+        <img src="images/pmconf-1.jpg" alt="">
       </div>
     </div>
   </div>
@@ -404,23 +372,11 @@
       </p>
     </div>
     <div class="detail-right">
-      <div class="gallery" data-gallery>
-        <div class="gallery-page active">
-          <div class="img-large"><img src="images/nekasehai-1.jpg" alt="寝かせハイ"><span class="img-label">寝かせハイ</span></div>
-          <div class="img-small"><img src="images/nekasehai-2.jpg" alt="寝かせハイ"></div>
-          <div class="img-small"><img src="images/nekasehai-3.jpg" alt="寝かせハイ"></div>
-        </div>
-        <div class="gallery-page">
-          <div class="img-large"><img src="images/yoicha-1.jpg" alt="YOICHA"><span class="img-label">YOICHA</span></div>
-          <div class="img-small"><img src="images/yoicha-2.jpg" alt="YOICHA"></div>
-          <div class="img-small"><img src="images/yoicha-3.jpg" alt="YOICHA"></div>
-        </div>
-        <div class="gallery-page">
-          <div class="img-large"><img src="images/ego-logo.jpg" alt="ego graphica"><span class="img-label">ego graphica</span></div>
-          <div class="img-small"><img src="images/ego-1.jpg" alt="ego graphica"></div>
-          <div class="img-small"><img src="images/ego-2.jpg" alt="ego graphica"></div>
-        </div>
-        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
+      <div class="photo-grid">
+        <img src="images/nekasehai-1.jpg" alt="">
+        <img src="images/yoicha-1.jpg" alt="">
+        <img src="images/ego-logo.jpg" alt="">
+        <img src="images/matcha-2.jpg" alt="">
       </div>
     </div>
   </div>
@@ -446,23 +402,11 @@
       </p>
     </div>
     <div class="detail-right">
-      <div class="gallery" data-gallery>
-        <div class="gallery-page active">
-          <div class="img-large"><img src="images/tokio-1.jpg" alt="TOKIOTOKYO"><span class="img-label">TOKIOTOKYO</span></div>
-          <div class="img-small"><img src="images/tokio-3.jpg" alt="TOKIOTOKYO"></div>
-          <div class="img-small"><img src="images/tokio-2.jpg" alt="TOKIOTOKYO"></div>
-        </div>
-        <div class="gallery-page">
-          <div class="img-large"><img src="images/pmconf-1.jpg" alt="pmconf2025"><span class="img-label">pmconf2025</span></div>
-          <div class="img-small"><img src="images/pmconf-2.jpg" alt="pmconf2025"></div>
-          <div class="img-small"><img src="images/matcha-1.jpg" alt="MATCHA STYLE"></div>
-        </div>
-        <div class="gallery-page">
-          <div class="img-large"><img src="images/matcha-2.jpg" alt="MATCHA STYLE"><span class="img-label">MATCHA STYLE</span></div>
-          <div class="img-small"><img src="images/yoicha-2.jpg" alt="YOICHA"></div>
-          <div class="img-small"><img src="images/nekasehai-2.jpg" alt="寝かせハイ"></div>
-        </div>
-        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
+      <div class="photo-grid">
+        <img src="images/tokio-1.jpg" alt="">
+        <img src="images/pmconf-2.jpg" alt="">
+        <img src="images/matcha-1.jpg" alt="">
+        <img src="images/yoicha-2.jpg" alt="">
       </div>
     </div>
   </div>
@@ -488,23 +432,11 @@
       </p>
     </div>
     <div class="detail-right">
-      <div class="gallery" data-gallery>
-        <div class="gallery-page active">
-          <div class="img-large"><img src="images/yoicha-1.jpg" alt="YOICHA"><span class="img-label">YOICHA</span></div>
-          <div class="img-small"><img src="images/yoicha-2.jpg" alt="YOICHA"></div>
-          <div class="img-small"><img src="images/yoicha-3.jpg" alt="YOICHA"></div>
-        </div>
-        <div class="gallery-page">
-          <div class="img-large"><img src="images/nekasehai-1.jpg" alt="寝かせハイ"><span class="img-label">寝かせハイ</span></div>
-          <div class="img-small"><img src="images/nekasehai-2.jpg" alt="寝かせハイ"></div>
-          <div class="img-small"><img src="images/matcha-1.jpg" alt="MATCHA STYLE"></div>
-        </div>
-        <div class="gallery-page">
-          <div class="img-large"><img src="images/tokio-1.jpg" alt="TOKIOTOKYO"><span class="img-label">TOKIOTOKYO</span></div>
-          <div class="img-small"><img src="images/tokio-3.jpg" alt="TOKIOTOKYO"></div>
-          <div class="img-small"><img src="images/ego-1.jpg" alt="ego graphica"></div>
-        </div>
-        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
+      <div class="photo-grid">
+        <img src="images/yoicha-1.jpg" alt="">
+        <img src="images/nekasehai-2.jpg" alt="">
+        <img src="images/tokio-3.jpg" alt="">
+        <img src="images/ego-1.jpg" alt="">
       </div>
     </div>
   </div>
@@ -514,24 +446,17 @@
 <!-- SLIDE 10: Case Study 1 -->
 <div class="slide" data-slide="10">
   <div class="case-layout">
-    <div class="case-visual">
-      <div class="gallery" data-gallery>
-        <div class="gallery-page active">
-          <div class="img-large"><img src="images/ego-logo.jpg" alt="ego graphica"></div>
-          <div class="img-small"><img src="images/ego-1.jpg" alt="ego graphica"></div>
-          <div class="img-small"><img src="images/ego-2.jpg" alt="ego graphica"></div>
-        </div>
-        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
-      </div>
-    </div>
-    <div class="case-info">
-      <div class="case-client">Case Study 01</div>
+    <div class="case-header">
+      <span class="case-num">Case 01</span>
       <h2>ego graphica</h2>
-      <div class="case-flow">
-        <div class="case-flow-item"><div class="cfi-label">Challenge</div><div class="cfi-text">カジュアルなアート体験をひらく次世代プラットフォームの世界観構築</div></div>
-        <div class="case-flow-item"><div class="cfi-label">Approach</div><div class="cfi-text">ブランディング・サービスサイト・プロダクトUI/UXデザインをトータルで担当</div></div>
-        <div class="case-flow-item"><div class="cfi-label">Output</div><div class="cfi-text">BI / CI・VI / Web / アプリUI / OOH</div></div>
-      </div>
+    </div>
+    <div class="case-images">
+      <img src="images/ego-logo.jpg" alt="">
+      <img src="images/ego-1.jpg" alt="">
+      <img src="images/ego-2.jpg" alt="">
+    </div>
+    <div class="case-bottom">
+      <p class="case-desc">カジュアルなアート体験をひらく次世代プラットフォーム。BI / CI・VI / Web / アプリUI / OOHをトータルで担当。</p>
       <div class="case-services"><span class="case-service-tag">Produce</span><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
     </div>
   </div>
@@ -541,24 +466,17 @@
 <!-- SLIDE 11: Case Study 2 -->
 <div class="slide" data-slide="11">
   <div class="case-layout">
-    <div class="case-visual">
-      <div class="gallery" data-gallery>
-        <div class="gallery-page active">
-          <div class="img-large"><img src="images/nekasehai-1.jpg" alt="寝かせハイ"></div>
-          <div class="img-small"><img src="images/nekasehai-2.jpg" alt="寝かせハイ"></div>
-          <div class="img-small"><img src="images/nekasehai-3.jpg" alt="寝かせハイ"></div>
-        </div>
-        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
-      </div>
-    </div>
-    <div class="case-info">
-      <div class="case-client">Case Study 02</div>
+    <div class="case-header">
+      <span class="case-num">Case 02</span>
       <h2>寝かせハイ</h2>
-      <div class="case-flow">
-        <div class="case-flow-item"><div class="cfi-label">Challenge</div><div class="cfi-text">クラフト酒キットの商品開発から世界観構築まで、新ブランドの立ち上げ</div></div>
-        <div class="case-flow-item"><div class="cfi-label">Approach</div><div class="cfi-text">"お酒を入れて、そっとねかせる"のコンセプトを軸に、ブランドコンセプト〜パッケージ〜サイトまで一貫設計</div></div>
-        <div class="case-flow-item"><div class="cfi-label">Output</div><div class="cfi-text">ブランドコンセプト / パッケージ / LP</div></div>
-      </div>
+    </div>
+    <div class="case-images">
+      <img src="images/nekasehai-1.jpg" alt="">
+      <img src="images/nekasehai-2.jpg" alt="">
+      <img src="images/nekasehai-3.jpg" alt="">
+    </div>
+    <div class="case-bottom">
+      <p class="case-desc">クラフト酒キットの新ブランド立ち上げ。ブランドコンセプト〜パッケージ〜サイトまで一貫設計。</p>
       <div class="case-services"><span class="case-service-tag">Produce</span><span class="case-service-tag">Branding</span></div>
     </div>
   </div>
@@ -568,24 +486,17 @@
 <!-- SLIDE 12: Case Study 3 -->
 <div class="slide" data-slide="12">
   <div class="case-layout">
-    <div class="case-visual">
-      <div class="gallery" data-gallery>
-        <div class="gallery-page active">
-          <div class="img-large"><img src="images/matcha-1.jpg" alt="MATCHA STYLE"></div>
-          <div class="img-small"><img src="images/matcha-2.jpg" alt="MATCHA STYLE"></div>
-          <div class="img-small"><img src="images/yoicha-1.jpg" alt="YOICHA"></div>
-        </div>
-        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
-      </div>
-    </div>
-    <div class="case-info">
-      <div class="case-client">Case Study 03</div>
+    <div class="case-header">
+      <span class="case-num">Case 03</span>
       <h2>MATCHA STYLE</h2>
-      <div class="case-flow">
-        <div class="case-flow-item"><div class="cfi-label">Challenge</div><div class="cfi-text">世界的な抹茶の流行を捉え、海外向けに展開する抹茶ブランドのクリエイティブ</div></div>
-        <div class="case-flow-item"><div class="cfi-label">Approach</div><div class="cfi-text">ブランディング・パッケージデザイン・ラベルデザインをクリエイティブ/アートディレクションで統括</div></div>
-        <div class="case-flow-item"><div class="cfi-label">Output</div><div class="cfi-text">Creative Direction / Art Direction / Package / Label Design</div></div>
-      </div>
+    </div>
+    <div class="case-images">
+      <img src="images/matcha-1.jpg" alt="">
+      <img src="images/matcha-2.jpg" alt="">
+      <img src="images/yoicha-1.jpg" alt="">
+    </div>
+    <div class="case-bottom">
+      <p class="case-desc">海外向け抹茶ブランドのクリエイティブ全般。パッケージ・ラベルをアートディレクションで統括。</p>
       <div class="case-services"><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
     </div>
   </div>
@@ -595,24 +506,17 @@
 <!-- SLIDE 13: Case Study 4 -->
 <div class="slide" data-slide="13">
   <div class="case-layout">
-    <div class="case-visual">
-      <div class="gallery" data-gallery>
-        <div class="gallery-page active">
-          <div class="img-large"><img src="images/yoicha-1.jpg" alt="YOICHA"></div>
-          <div class="img-small"><img src="images/yoicha-2.jpg" alt="YOICHA"></div>
-          <div class="img-small"><img src="images/yoicha-3.jpg" alt="YOICHA"></div>
-        </div>
-        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
-      </div>
-    </div>
-    <div class="case-info">
-      <div class="case-client">Case Study 04</div>
+    <div class="case-header">
+      <span class="case-num">Case 04</span>
       <h2>YOICHA</h2>
-      <div class="case-flow">
-        <div class="case-flow-item"><div class="cfi-label">Challenge</div><div class="cfi-text">「あえて飲まない時間」を提案するCBDボトリングティーのデザイン一式</div></div>
-        <div class="case-flow-item"><div class="cfi-label">Approach</div><div class="cfi-text">ご褒美アイテムとしてのブランドコンセプトを軸に、ロゴ・パッケージ・KVをトータルデザイン</div></div>
-        <div class="case-flow-item"><div class="cfi-label">Output</div><div class="cfi-text">Logo / Package / Key Visual</div></div>
-      </div>
+    </div>
+    <div class="case-images">
+      <img src="images/yoicha-1.jpg" alt="">
+      <img src="images/yoicha-2.jpg" alt="">
+      <img src="images/yoicha-3.jpg" alt="">
+    </div>
+    <div class="case-bottom">
+      <p class="case-desc">CBDボトリングティーのデザイン一式。ロゴ・パッケージ・KVをトータルデザイン。</p>
       <div class="case-services"><span class="case-service-tag">Branding</span><span class="case-service-tag">Creative Direction</span></div>
     </div>
   </div>
@@ -622,24 +526,17 @@
 <!-- SLIDE 14: Case Study 5 -->
 <div class="slide" data-slide="14">
   <div class="case-layout">
-    <div class="case-visual">
-      <div class="gallery" data-gallery>
-        <div class="gallery-page active">
-          <div class="img-large"><img src="images/tokio-1.jpg" alt="TOKIOTOKYO"></div>
-          <div class="img-small"><img src="images/tokio-3.jpg" alt="TOKIOTOKYO"></div>
-          <div class="img-small"><img src="images/pmconf-1.jpg" alt="pmconf2025"></div>
-        </div>
-        <div class="gallery-nav"><div class="gallery-dots"></div><button class="gallery-btn" data-gallery-prev>&larr;</button><button class="gallery-btn" data-gallery-next>&rarr;</button></div>
-      </div>
-    </div>
-    <div class="case-info">
-      <div class="case-client">Case Study 05</div>
+    <div class="case-header">
+      <span class="case-num">Case 05</span>
       <h2>TOKIOTOKYO</h2>
-      <div class="case-flow">
-        <div class="case-flow-item"><div class="cfi-label">Challenge</div><div class="cfi-text">パートナー型ライブハウスのオフィシャルフライヤー制作</div></div>
-        <div class="case-flow-item"><div class="cfi-label">Approach</div><div class="cfi-text">単なる箱貸しではなく"イベントの成功"まで共に走る姿勢を、多彩なビジュアルで表現</div></div>
-        <div class="case-flow-item"><div class="cfi-label">Output</div><div class="cfi-text">Flyer Design（月次更新）</div></div>
-      </div>
+    </div>
+    <div class="case-images">
+      <img src="images/tokio-1.jpg" alt="">
+      <img src="images/tokio-3.jpg" alt="">
+      <img src="images/pmconf-1.jpg" alt="">
+    </div>
+    <div class="case-bottom">
+      <p class="case-desc">パートナー型ライブハウスのフライヤー制作。多彩なビジュアルで月次更新。</p>
       <div class="case-services"><span class="case-service-tag">Creative Direction</span></div>
     </div>
   </div>
@@ -707,29 +604,6 @@
     if (dx > 0 && current > 1) { current--; showSlide(current); }
   }, { passive: true });
 
-  // Gallery
-  document.querySelectorAll('[data-gallery]').forEach(gallery => {
-    const pages = gallery.querySelectorAll('.gallery-page');
-    const dotsContainer = gallery.querySelector('.gallery-dots');
-    const prevBtn = gallery.querySelector('[data-gallery-prev]');
-    const nextBtn = gallery.querySelector('[data-gallery-next]');
-    let idx = 0;
-    pages.forEach((_, i) => {
-      const dot = document.createElement('button');
-      dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
-      dot.addEventListener('click', (e) => { e.stopPropagation(); goTo(i); });
-      dotsContainer.appendChild(dot);
-    });
-    function goTo(n) {
-      pages[idx].classList.remove('active');
-      dotsContainer.children[idx].classList.remove('active');
-      idx = (n + pages.length) % pages.length;
-      pages[idx].classList.add('active');
-      dotsContainer.children[idx].classList.add('active');
-    }
-    prevBtn.addEventListener('click', (e) => { e.stopPropagation(); goTo(idx - 1); });
-    nextBtn.addEventListener('click', (e) => { e.stopPropagation(); goTo(idx + 1); });
-  });
 </script>
 </body>
 </html>
