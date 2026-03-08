@@ -175,6 +175,9 @@
   .slide-concept .label,
   .slide-concept .concept-copy,
   .slide-concept .concept-desc { position: relative; z-index: 2; }
+  #concept-particles {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+  }
   .concept-copy { font-size: 48px; font-weight: 700; line-height: 1.5; letter-spacing: -0.01em; margin-bottom: 48px; }
   .concept-copy span { color: var(--accent); }
   .concept-desc { max-width: 700px; text-align: center; font-size: 16px; line-height: 2; }
@@ -685,18 +688,7 @@
 
 <!-- SLIDE 3: Concept -->
 <div class="slide slide-concept" data-slide="3">
-  <div class="mosaic-bg">
-    <img src="images/ego-logo.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/tokio-4.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/nekasehai-2.jpg" alt="">
-    <img src="images/matcha-2.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/yoicha-4.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/ego-3.jpg" alt="">
-    <img src="images/nekasehai-4.jpg" alt=""><img src="images/tokio-6.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/ego-logo.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt="">
-    <img src="images/tokio-4.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/nekasehai-2.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/charm-2.jpg" alt="">
-    <img src="images/richill-pine.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/ego-3.jpg" alt=""><img src="images/yoicha-4.jpg" alt=""><img src="images/tokio-6.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/nekasehai-4.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/ego-logo.jpg" alt="">
-    <img src="images/charm-1.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/tokio-4.jpg" alt=""><img src="images/ego-2.jpg" alt="">
-    <img src="images/nekasehai-2.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/ego-3.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/tokio-6.jpg" alt=""><img src="images/yoicha-4.jpg" alt="">
-    <img src="images/ego-1.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/tokio-4.jpg" alt="">
-    <img src="images/nekasehai-4.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/ego-logo.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/ego-3.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/nekasehai-2.jpg" alt="">
-  </div>
-  <div class="mosaic-vignette"></div>
+  <canvas id="concept-particles"></canvas>
   <div class="label">Our Concept</div>
   <div class="concept-copy">企画する。<span>つくる。</span>届ける。</div>
   <p class="concept-desc">
@@ -1293,6 +1285,143 @@
     });
   })();
 
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function initConceptParticles() {
+  const canvas = document.getElementById('concept-particles');
+  if (!canvas) return;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 5;
+
+  const mouse = { x: 0, y: 0 };
+  window.addEventListener('mousemove', (e) => {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  });
+
+  // Image sources for particle textures
+  const imageSrcs = [
+    'images/ego-logo.jpg','images/tokio-3.jpg','images/yoicha-1.jpg','images/nekasehai-1.jpg',
+    'images/matcha-1.jpg','images/charm-1.jpg','images/ego-1.jpg','images/tokio-4.jpg',
+    'images/yoicha-2.jpg','images/nekasehai-2.jpg','images/matcha-2.jpg','images/ego-2.jpg',
+    'images/tokio-5.jpg','images/curry-1.jpg','images/nekasehai-3.jpg','images/yoicha-4.jpg',
+    'images/charm-2.jpg','images/parallel-1.jpg','images/richill-pine.jpg','images/ego-3.jpg',
+    'images/nekasehai-4.jpg','images/tokio-6.jpg','images/curry-2.jpg','images/yoicha-3.jpg'
+  ];
+
+  const loader = new THREE.TextureLoader();
+  const particleGroups = [];
+  const COUNT_PER_IMAGE = 60;
+  let allReady = 0;
+
+  imageSrcs.forEach((src, imgIdx) => {
+    loader.load(src, (texture) => {
+      const geo = new THREE.BufferGeometry();
+      const positions = new Float32Array(COUNT_PER_IMAGE * 3);
+      const velocities = new Float32Array(COUNT_PER_IMAGE * 3);
+      const sizes = new Float32Array(COUNT_PER_IMAGE);
+
+      for (let i = 0; i < COUNT_PER_IMAGE; i++) {
+        // Distribute in a sphere shell
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        const r = 1.5 + Math.random() * 3.5;
+        positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 3;
+
+        // Orbital velocity (tangential)
+        const speed = 0.002 + Math.random() * 0.004;
+        velocities[i * 3] = -positions[i * 3 + 1] * speed;
+        velocities[i * 3 + 1] = positions[i * 3] * speed;
+        velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.001;
+
+        sizes[i] = 0.08 + Math.random() * 0.18;
+      }
+
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const mat = new THREE.PointsMaterial({
+        map: texture,
+        size: 0.25,
+        transparent: true,
+        opacity: 0.7,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true
+      });
+
+      const points = new THREE.Points(geo, mat);
+      scene.add(points);
+      particleGroups.push({ points, velocities, geo });
+      allReady++;
+    });
+  });
+
+  let time = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    time += 0.01;
+
+    // Only render when concept slide is active
+    const conceptSlide = document.querySelector('[data-slide="3"]');
+    if (!conceptSlide || !conceptSlide.classList.contains('active')) return;
+
+    particleGroups.forEach(({ points, velocities, geo }) => {
+      const pos = geo.attributes.position.array;
+      for (let i = 0; i < pos.length / 3; i++) {
+        const ix = i * 3, iy = i * 3 + 1, iz = i * 3 + 2;
+
+        // Orbital motion
+        pos[ix] += velocities[ix];
+        pos[iy] += velocities[iy];
+        pos[iz] += velocities[iz];
+
+        // Recalculate tangential velocity to maintain orbit
+        const dist = Math.sqrt(pos[ix] * pos[ix] + pos[iy] * pos[iy]);
+        if (dist > 0.01) {
+          const speed = Math.sqrt(velocities[ix] * velocities[ix] + velocities[iy] * velocities[iy]);
+          velocities[ix] = -pos[iy] / dist * speed;
+          velocities[iy] = pos[ix] / dist * speed;
+        }
+
+        // Mouse repulsion
+        const dx = pos[ix] - mouse.x * 3;
+        const dy = pos[iy] - mouse.y * 3;
+        const md = Math.sqrt(dx * dx + dy * dy);
+        if (md < 1.5) {
+          const force = (1.5 - md) * 0.01;
+          pos[ix] += dx / md * force;
+          pos[iy] += dy / md * force;
+        }
+      }
+      geo.attributes.position.needsUpdate = true;
+    });
+
+    // Slow camera sway
+    camera.position.x = Math.sin(time * 0.3) * 0.3 + mouse.x * 0.4;
+    camera.position.y = Math.cos(time * 0.2) * 0.2 + mouse.y * 0.3;
+    camera.lookAt(0, 0, 0);
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+})();
 </script>
 </body>
 </html>
