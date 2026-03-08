@@ -91,10 +91,6 @@
   .slide-cover {
     padding: 0; justify-content: flex-end; position: relative; overflow: hidden;
   }
-  /* Chrome text canvas */
-  #cover-chrome {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
-  }
   /* 左上: サブラベル */
   .cover-top-left {
     position: absolute; top: 48px; left: 60px; z-index: 2;
@@ -655,7 +651,6 @@
 
 <!-- SLIDE 1: Cover -->
 <div class="slide slide-cover active" data-slide="1">
-  <canvas id="cover-chrome"></canvas>
   <div class="cover-top-left">
     <div class="cover-label">Company Deck 2026</div>
   </div>
@@ -1529,9 +1524,8 @@
 })();
 </script>
 
-<!-- Chrome text morph animation -->
 <script>
-(function initChromeText() {
+void(function() { return;
   const canvas = document.getElementById('cover-chrome');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
