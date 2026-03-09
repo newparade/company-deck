@@ -1748,12 +1748,14 @@
 </script>
 
 <script>
-// Menu — Grid wave (structured grid of dots that ripple like water surface)
+// Menu — Constellation network (nodes + dynamic connections)
+// Canvas 2D for lines + dots — simpler, more controllable than WebGL for this
 (function() {
   const canvas = document.getElementById('menu-particles');
   if (!canvas) return;
-  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-  if (!gl) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
 
   const dpr = Math.min(window.devicePixelRatio, 2);
   function resize() {
@@ -1761,175 +1763,108 @@
     canvas.height = window.innerHeight * dpr;
     canvas.style.width = window.innerWidth + 'px';
     canvas.style.height = window.innerHeight + 'px';
-    gl.viewport(0, 0, canvas.width, canvas.height);
   }
   resize();
   window.addEventListener('resize', resize);
 
-  // Grid layout
-  const COLS = 80;
-  const ROWS = 45;
-  const NUM = COLS * ROWS;
+  const NUM = 120;
+  const CONNECT_DIST = 150; // px distance to draw connection
+  const nodes = [];
 
-  const vsSource = `
-    attribute vec2 a_gridPos;
-    attribute float a_rnd;
-    uniform float u_time;
-    uniform vec2 u_mouse;
-    uniform float u_aspect;
-    uniform vec2 u_resolution;
-    uniform float u_dpr;
-    varying float v_alpha;
-    varying float v_temp;
-
-    float hash(vec2 p) {
-      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-    }
-    float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      f = f * f * (3.0 - 2.0 * f);
-      return mix(
-        mix(hash(i), hash(i + vec2(1, 0)), f.x),
-        mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x),
-        f.y
-      );
-    }
-
-    void main() {
-      float t = u_time;
-      vec2 pos = a_gridPos;
-
-      // Noise-based displacement — grid points pushed by flow field
-      float n1 = noise(pos * 2.0 + t * 0.15);
-      float n2 = noise(pos * 2.0 + t * 0.12 + 5.0);
-      float displacement = 0.015 + 0.01 * n1;
-      pos.x += (n1 - 0.5) * displacement * 2.0;
-      pos.y += (n2 - 0.5) * displacement * 2.0;
-
-      // Wave ripple — height mapped to brightness
-      float wave1 = sin(a_gridPos.x * 8.0 - t * 0.8 + a_gridPos.y * 3.0) * 0.5 + 0.5;
-      float wave2 = sin(a_gridPos.y * 6.0 + t * 0.5 + a_gridPos.x * 4.0) * 0.5 + 0.5;
-      float wave = wave1 * 0.6 + wave2 * 0.4;
-
-      // Mouse interaction — ripple from cursor
-      float depth = 0.3 + a_rnd * 0.7;
-      pos.x += u_mouse.x * depth * 0.03 / u_aspect;
-      pos.y += u_mouse.y * depth * 0.03;
-
-      // Size pulsing with wave
-      float baseSize = 1.2 + wave * 1.8;
-      gl_PointSize = baseSize * u_dpr * (u_resolution.y / 900.0);
-
-      // Alpha: wave-driven brightness
-      float edgeFade = smoothstep(1.15, 0.85, abs(a_gridPos.x))
-                     * smoothstep(1.15, 0.85, abs(a_gridPos.y));
-      v_alpha = (0.1 + wave * 0.35) * edgeFade;
-      v_temp = depth;
-
-      gl_Position = vec4(pos, 0.0, 1.0);
-    }
-  `;
-
-  const fsSource = `
-    precision mediump float;
-    varying float v_alpha;
-    varying float v_temp;
-
-    void main() {
-      float d = length(gl_PointCoord - 0.5);
-      if (d > 0.5) discard;
-      float shape = smoothstep(0.5, 0.1, d);
-
-      vec3 warm = vec3(1.0, 0.92, 0.7);
-      vec3 neutral = vec3(0.95, 0.93, 0.88);
-      vec3 cool = vec3(0.85, 0.9, 1.0);
-      vec3 col = v_temp < 0.5
-        ? mix(warm, neutral, v_temp * 2.0)
-        : mix(neutral, cool, (v_temp - 0.5) * 2.0);
-
-      gl_FragColor = vec4(col, shape * v_alpha);
-    }
-  `;
-
-  function createShader(type, source) {
-    const s = gl.createShader(type);
-    gl.shaderSource(s, source);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
-    return s;
+  for (let i = 0; i < NUM; i++) {
+    nodes.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      size: 1.5 + Math.random() * 2,
+      alpha: 0.2 + Math.random() * 0.4,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.5 + Math.random() * 1.5
+    });
   }
 
-  const vs = createShader(gl.VERTEX_SHADER, vsSource);
-  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
-  const program = gl.createProgram();
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
-  gl.useProgram(program);
-
-  const gridData = new Float32Array(NUM * 2);
-  const rndData = new Float32Array(NUM);
-
-  for (let row = 0; row < ROWS; row++) {
-    for (let col = 0; col < COLS; col++) {
-      const i = row * COLS + col;
-      gridData[i * 2]     = (col / (COLS - 1)) * 2.2 - 1.1; // x: -1.1 to 1.1
-      gridData[i * 2 + 1] = (row / (ROWS - 1)) * 2.2 - 1.1; // y: -1.1 to 1.1
-      rndData[i] = Math.random();
-    }
-  }
-
-  function makeBuf(data, attr, size) {
-    const loc = gl.getAttribLocation(program, attr);
-    if (loc === -1) return;
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
-  }
-
-  makeBuf(gridData, 'a_gridPos', 2);
-  makeBuf(rndData, 'a_rnd', 1);
-
-  const uTime = gl.getUniformLocation(program, 'u_time');
-  const uMouse = gl.getUniformLocation(program, 'u_mouse');
-  const uAspect = gl.getUniformLocation(program, 'u_aspect');
-  const uRes = gl.getUniformLocation(program, 'u_resolution');
-  const uDpr = gl.getUniformLocation(program, 'u_dpr');
-
-  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+  const mouse = { x: -1000, y: -1000 };
   window.addEventListener('mousemove', (e) => {
-    mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
-    mouse.ty = -(e.clientY / window.innerHeight) * 2 + 1;
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
   });
-
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-  gl.clearColor(0, 0, 0, 0);
 
   let time = 0;
   let lastFrame = 0;
+
   function animate(now) {
     requestAnimationFrame(animate);
+
     const slide = document.querySelector('[data-slide="5"]');
     if (!slide || !slide.classList.contains('active')) { lastFrame = now; return; }
 
     const dt = Math.min((now - lastFrame) / 1000, 0.05);
     lastFrame = now;
-    mouse.x += (mouse.tx - mouse.x) * 0.03;
-    mouse.y += (mouse.ty - mouse.y) * 0.03;
     time += dt;
 
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform1f(uTime, time);
-    gl.uniform2f(uMouse, mouse.x, mouse.y);
-    gl.uniform1f(uAspect, canvas.width / canvas.height);
-    gl.uniform2f(uRes, canvas.width, canvas.height);
-    gl.uniform1f(uDpr, dpr);
-    gl.drawArrays(gl.POINTS, 0, NUM);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Update positions
+    for (const n of nodes) {
+      // Gentle drift + sine wave movement
+      n.x += n.vx + Math.sin(time * n.speed * 0.3 + n.phase) * 0.15;
+      n.y += n.vy + Math.cos(time * n.speed * 0.25 + n.phase * 1.3) * 0.12;
+
+      // Mouse repulsion (subtle)
+      const dx = n.x - mouse.x;
+      const dy = n.y - mouse.y;
+      const md = Math.sqrt(dx * dx + dy * dy);
+      if (md < 200) {
+        const force = (200 - md) / 200 * 0.5;
+        n.x += (dx / md) * force;
+        n.y += (dy / md) * force;
+      }
+
+      // Wrap around edges
+      if (n.x < -20) n.x = w + 20;
+      if (n.x > w + 20) n.x = -20;
+      if (n.y < -20) n.y = h + 20;
+      if (n.y > h + 20) n.y = -20;
+    }
+
+    // Draw connections
+    for (let i = 0; i < NUM; i++) {
+      for (let j = i + 1; j < NUM; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONNECT_DIST) {
+          const alpha = (1 - dist / CONNECT_DIST) * 0.12;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x * dpr, nodes[i].y * dpr);
+          ctx.lineTo(nodes[j].x * dpr, nodes[j].y * dpr);
+          ctx.strokeStyle = `rgba(255, 250, 240, ${alpha})`;
+          ctx.lineWidth = 0.5 * dpr;
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw nodes
+    for (const n of nodes) {
+      const twinkle = 0.6 + 0.4 * Math.sin(time * n.speed + n.phase);
+      const a = n.alpha * twinkle;
+
+      // Glow
+      ctx.beginPath();
+      ctx.arc(n.x * dpr, n.y * dpr, n.size * 3 * dpr, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 248, 235, ${a * 0.08})`;
+      ctx.fill();
+
+      // Core
+      ctx.beginPath();
+      ctx.arc(n.x * dpr, n.y * dpr, n.size * dpr, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 250, 242, ${a})`;
+      ctx.fill();
+    }
   }
   animate(0);
 })();
