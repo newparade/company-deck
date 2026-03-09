@@ -1621,17 +1621,17 @@
       float b3 = smoothstep(-0.15, 0.35, blob3) * 0.6;
       float b4 = smoothstep(0.0, 0.4, blob4) * 0.5;
 
-      // Bright, positive, fresh culture colors
-      vec3 skyBlue  = vec3(0.25, 0.55, 0.9);   // bright sky blue
-      vec3 coral    = vec3(0.85, 0.4, 0.35);   // warm coral
-      vec3 mint     = vec3(0.2, 0.7, 0.55);    // fresh mint green
-      vec3 lavender = vec3(0.5, 0.4, 0.8);     // soft lavender
+      // TORAY Summer Shield palette — vivid blue sky + golden sand
+      vec3 vividBlue = vec3(0.1, 0.4, 0.85);   // vivid sky blue
+      vec3 paleBlue  = vec3(0.35, 0.6, 0.9);   // light sky / fabric blue
+      vec3 golden    = vec3(0.7, 0.55, 0.25);  // golden sand / warm light
+      vec3 cream     = vec3(0.6, 0.55, 0.45);  // warm cream / haze
 
       vec3 col = vec3(0.0);
-      col += skyBlue * b1;
-      col += coral * b2;
-      col += mint * b3;
-      col += lavender * b4;
+      col += vividBlue * b1;
+      col += paleBlue * b2;
+      col += golden * b3;
+      col += cream * b4;
 
       // Subtle vignette — darker at edges
       vec2 center = v_uv - 0.5;
