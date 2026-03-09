@@ -1547,323 +1547,242 @@
 </script>
 
 <script>
-// Why newparade — Stage lighting blobs (slow, atmospheric, culture feel)
+// Shared particle system for Why newparade (slide 4) & Menu (slide 5)
+// Same design language as Concept: point particles, additive blend, twinkle, parallax
+// Variation: different density, distribution, wave patterns per slide
 (function() {
-  const canvas = document.getElementById('why-particles');
-  if (!canvas) return;
+  function initSlideParticles(canvasId, slideSelector, config) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
 
-  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-  if (!gl) return;
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    if (!gl) return;
 
-  const dpr = Math.min(window.devicePixelRatio, 2);
-  function resize() {
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    canvas.style.width = window.innerWidth + 'px';
-    canvas.style.height = window.innerHeight + 'px';
-    gl.viewport(0, 0, canvas.width, canvas.height);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Full-screen quad
-  const vsSource = `
-    attribute vec2 a_pos;
-    varying vec2 v_uv;
-    void main() {
-      v_uv = a_pos * 0.5 + 0.5;
-      gl_Position = vec4(a_pos, 0.0, 1.0);
+    const dpr = Math.min(window.devicePixelRatio, 2);
+    function resize() {
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      gl.viewport(0, 0, canvas.width, canvas.height);
     }
-  `;
+    resize();
+    window.addEventListener('resize', resize);
 
-  const fsSource = `
-    precision highp float;
-    varying vec2 v_uv;
-    uniform float u_time;
-    uniform float u_aspect;
+    const vsSource = `
+      attribute vec2 a_pos;
+      attribute float a_brightness;
+      attribute float a_size;
+      attribute float a_twinkleSpeed;
+      attribute float a_twinklePhase;
+      attribute float a_depth;
+      uniform float u_time;
+      uniform vec2 u_mouse;
+      uniform float u_aspect;
+      uniform float u_waveMode;
+      varying float v_alpha;
+      varying float v_temp;
 
-    // Smooth noise
-    vec2 hash(vec2 p) {
-      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
-      return -1.0 + 2.0 * fract(sin(p) * 43758.5453);
-    }
-    float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
-      return mix(
-        mix(dot(hash(i), f), dot(hash(i + vec2(1,0)), f - vec2(1,0)), u.x),
-        mix(dot(hash(i + vec2(0,1)), f - vec2(0,1)), dot(hash(i + vec2(1,1)), f - vec2(1,1)), u.x),
-        u.y
-      );
-    }
-    float fbm(vec2 p) {
-      float v = 0.0;
-      float a = 0.5;
-      for (int i = 0; i < 4; i++) {
-        v += a * noise(p);
-        p *= 2.0;
-        a *= 0.5;
+      void main() {
+        vec2 pos = a_pos;
+
+        // Parallax from mouse
+        float parallax = a_depth * 0.04;
+        pos.x += u_mouse.x * parallax / u_aspect;
+        pos.y += u_mouse.y * parallax;
+
+        // Gentle drift
+        pos.x += sin(u_time * 0.1 + a_twinklePhase * 3.0) * 0.004 * a_depth;
+        pos.y += cos(u_time * 0.07 + a_twinklePhase * 2.0) * 0.003 * a_depth;
+
+        // Wave animation
+        float dist = length(a_pos);
+        float normDist = dist / 1.2;
+        float rnd = fract(sin(a_twinklePhase * 127.1 + a_depth * 311.7) * 43758.5453);
+
+        float wave = 0.0;
+        if (u_waveMode < 0.5) {
+          // Why newparade: slow breathing pulse from center outward
+          float cycle = fract(u_time * 0.05);
+          float pulse = sin(cycle * 6.28318 - normDist * 4.0 + rnd * 1.5);
+          wave = max(pulse, 0.0) * 0.6;
+        } else {
+          // Menu: horizontal sweep left→right, repeating
+          float cycle = fract(u_time * 0.06);
+          float xNorm = (a_pos.x + 1.2) / 2.4;
+          float d = abs(xNorm - cycle + (rnd - 0.5) * 0.2);
+          wave = smoothstep(0.3, 0.0, d) * 0.5;
+        }
+
+        // Twinkle
+        float twinkle = 0.5 + 0.5 * sin(u_time * a_twinkleSpeed + a_twinklePhase);
+
+        float brightness = a_brightness * (0.4 + 0.6 * twinkle) + wave * 0.4;
+        float sizeMul = 1.0 + wave * 0.3;
+
+        gl_Position = vec4(pos, 0.0, 1.0);
+        gl_PointSize = a_size * sizeMul * (0.8 + 0.2 * twinkle);
+        v_alpha = min(brightness, 1.0);
+        v_temp = a_depth;
       }
-      return v;
-    }
+    `;
 
-    void main() {
-      vec2 uv = v_uv;
-      uv.x *= u_aspect;
-      float t = u_time * 0.25;
+    const fsSource = `
+      precision mediump float;
+      varying float v_alpha;
+      varying float v_temp;
 
-      // 4 large blobs drifting
-      float blob1 = fbm(uv * 1.2 + vec2(t * 0.3, t * 0.2));
-      float blob2 = fbm(uv * 1.0 + vec2(-t * 0.25, t * 0.35) + 5.0);
-      float blob3 = fbm(uv * 0.8 + vec2(t * 0.15, -t * 0.2) + 10.0);
-      float blob4 = fbm(uv * 1.5 + vec2(-t * 0.2, -t * 0.15) + 15.0);
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        if (d > 0.5) discard;
 
-      // Soft blob shapes — more visible
-      float b1 = smoothstep(-0.1, 0.4, blob1) * 0.8;
-      float b2 = smoothstep(-0.05, 0.45, blob2) * 0.7;
-      float b3 = smoothstep(-0.15, 0.35, blob3) * 0.6;
-      float b4 = smoothstep(0.0, 0.4, blob4) * 0.5;
+        float core = smoothstep(0.5, 0.0, d);
+        float glow = exp(-d * 6.0);
+        float shape = core * 0.6 + glow * 0.4;
 
-      // Liquid abstract — deep teal × hot orange × dark
-      vec3 deepTeal  = vec3(0.05, 0.3, 0.35);  // dark teal green
-      vec3 hotOrange = vec3(0.85, 0.35, 0.05); // vivid hot orange
-      vec3 ember     = vec3(0.7, 0.15, 0.02);  // deep red-orange ember
-      vec3 darkTeal  = vec3(0.02, 0.18, 0.2);  // near-black teal
+        // Same color temperature as Concept
+        vec3 warm = vec3(1.0, 0.92, 0.7);
+        vec3 neutral = vec3(0.97, 0.95, 0.9);
+        vec3 cool = vec3(0.85, 0.9, 1.0);
+        vec3 col = v_temp < 0.5
+          ? mix(warm, neutral, v_temp * 2.0)
+          : mix(neutral, cool, (v_temp - 0.5) * 2.0);
 
-      vec3 col = vec3(0.0);
-      col += deepTeal * b1;
-      col += hotOrange * b2;
-      col += ember * b3;
-      col += darkTeal * b4;
-
-      // Subtle vignette — darker at edges
-      vec2 center = v_uv - 0.5;
-      float vig = 1.0 - dot(center, center) * 1.2;
-      vig = clamp(vig, 0.0, 1.0);
-      col *= vig;
-
-      // Overall opacity — atmospheric, not overpowering
-      float alpha = length(col) * 3.5;
-      alpha = min(alpha, 0.55);
-
-      gl_FragColor = vec4(col, alpha);
-    }
-  `;
-
-  function createShader(type, source) {
-    const s = gl.createShader(type);
-    gl.shaderSource(s, source);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
-    return s;
-  }
-
-  const vs = createShader(gl.VERTEX_SHADER, vsSource);
-  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
-  const program = gl.createProgram();
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
-  gl.useProgram(program);
-
-  // Full-screen quad
-  const quadVerts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(program, 'a_pos');
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-  const uTime = gl.getUniformLocation(program, 'u_time');
-  const uAspect = gl.getUniformLocation(program, 'u_aspect');
-
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-  gl.clearColor(0, 0, 0, 0);
-
-  let time = 0;
-  let lastFrame = 0;
-  function animate(now) {
-    requestAnimationFrame(animate);
-
-    const whySlide = document.querySelector('[data-slide="4"]');
-    if (!whySlide || !whySlide.classList.contains('active')) { lastFrame = now; return; }
-
-    const dt = Math.min((now - lastFrame) / 1000, 0.05);
-    lastFrame = now;
-    time += dt;
-
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform1f(uTime, time);
-    gl.uniform1f(uAspect, canvas.width / canvas.height);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  }
-  animate(0);
-})();
-</script>
-
-<script>
-// Menu — Flowing gradient mesh (teal × magenta × orange, culture-forward)
-(function() {
-  const canvas = document.getElementById('menu-particles');
-  if (!canvas) return;
-
-  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-  if (!gl) return;
-
-  const dpr = Math.min(window.devicePixelRatio, 2);
-  function resize() {
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    canvas.style.width = window.innerWidth + 'px';
-    canvas.style.height = window.innerHeight + 'px';
-    gl.viewport(0, 0, canvas.width, canvas.height);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  const vsSource = `
-    attribute vec2 a_pos;
-    varying vec2 v_uv;
-    void main() {
-      v_uv = a_pos * 0.5 + 0.5;
-      gl_Position = vec4(a_pos, 0.0, 1.0);
-    }
-  `;
-
-  const fsSource = `
-    precision highp float;
-    varying vec2 v_uv;
-    uniform float u_time;
-    uniform float u_aspect;
-
-    vec2 hash(vec2 p) {
-      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
-      return -1.0 + 2.0 * fract(sin(p) * 43758.5453);
-    }
-    float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
-      return mix(
-        mix(dot(hash(i), f), dot(hash(i + vec2(1,0)), f - vec2(1,0)), u.x),
-        mix(dot(hash(i + vec2(0,1)), f - vec2(0,1)), dot(hash(i + vec2(1,1)), f - vec2(1,1)), u.x),
-        u.y
-      );
-    }
-    float fbm(vec2 p) {
-      float v = 0.0; float a = 0.5;
-      for (int i = 0; i < 5; i++) {
-        v += a * noise(p);
-        p *= 2.0; a *= 0.5;
+        gl_FragColor = vec4(col, shape * v_alpha);
       }
-      return v;
+    `;
+
+    function createShader(type, source) {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, source);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+      return s;
     }
 
-    void main() {
-      vec2 uv = v_uv;
-      uv.x *= u_aspect;
-      float t = u_time * 0.2;
+    const vs = createShader(gl.VERTEX_SHADER, vsSource);
+    const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+    const program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
+    gl.useProgram(program);
 
-      // Domain warping — gives organic flowing motion
-      float warp1 = fbm(uv * 1.5 + t * 0.3);
-      float warp2 = fbm(uv * 1.5 - t * 0.2 + 5.0);
-      vec2 warped = uv + vec2(warp1, warp2) * 0.4;
+    const COUNT = config.count;
+    const posArr = new Float32Array(COUNT * 2);
+    const brightArr = new Float32Array(COUNT);
+    const sizeArr = new Float32Array(COUNT);
+    const twinkleSpeedArr = new Float32Array(COUNT);
+    const twinklePhaseArr = new Float32Array(COUNT);
+    const depthArr = new Float32Array(COUNT);
 
-      // Second pass warp for extra fluidity
-      float w2a = fbm(warped * 1.8 + t * 0.15);
-      float w2b = fbm(warped * 1.8 - t * 0.12 + 10.0);
-      vec2 warped2 = warped + vec2(w2a, w2b) * 0.2;
-
-      // Color field from double-warped coordinates
-      float field = fbm(warped2 * 2.0 + t * 0.1);
-
-      // Color gradient — teal to warm orange via magenta
-      vec3 teal    = vec3(0.04, 0.22, 0.28);
-      vec3 magenta = vec3(0.35, 0.06, 0.2);
-      vec3 orange  = vec3(0.5, 0.2, 0.02);
-      vec3 deep    = vec3(0.02, 0.08, 0.12);
-
-      // Map field to colors
-      float f = field * 0.5 + 0.5;
-      vec3 col;
-      if (f < 0.33) {
-        col = mix(deep, teal, f / 0.33);
-      } else if (f < 0.66) {
-        col = mix(teal, magenta, (f - 0.33) / 0.33);
+    for (let i = 0; i < COUNT; i++) {
+      // Distribution varies by config
+      let x, y;
+      if (config.distribution === 'wide') {
+        // Wider spread, less center bias — for Why (text in upper half, cards in lower)
+        x = (Math.random() * 2 - 1) * 1.3;
+        y = (Math.random() * 2 - 1) * 1.3;
       } else {
-        col = mix(magenta, orange, (f - 0.66) / 0.34);
+        // Even spread across full area — for Menu
+        x = (Math.random() * 2 - 1) * 1.2;
+        y = (Math.random() * 2 - 1) * 1.2;
+      }
+      posArr[i * 2] = x;
+      posArr[i * 2 + 1] = y;
+
+      const depth = Math.random();
+      depthArr[i] = depth;
+
+      const rawBright = Math.pow(Math.random(), 2.5);
+      brightArr[i] = 0.15 + rawBright * 0.85;
+
+      const isBright = Math.random() < config.brightStarRate;
+      if (isBright) {
+        sizeArr[i] = (2.5 + Math.random() * 3.0) * dpr;
+        brightArr[i] = 0.7 + Math.random() * 0.3;
+      } else {
+        sizeArr[i] = (0.4 + depth * 0.8 + Math.random() * 0.8) * dpr;
       }
 
-      // Add subtle highlight streaks
-      float streak = smoothstep(0.15, 0.0, abs(fbm(warped2 * 3.0 + t * 0.08) - 0.1));
-      col += vec3(0.15, 0.08, 0.04) * streak * 0.5;
-
-      // Vignette — darker edges, keeps center readable
-      vec2 center = v_uv - 0.5;
-      float vig = 1.0 - dot(center, center) * 1.8;
-      col *= clamp(vig, 0.3, 1.0);
-
-      // Alpha — visible but not overpowering
-      float alpha = 0.55;
-
-      gl_FragColor = vec4(col, alpha);
+      twinkleSpeedArr[i] = 0.5 + Math.random() * 3.0;
+      twinklePhaseArr[i] = Math.random() * Math.PI * 2;
     }
-  `;
 
-  function createShader(type, source) {
-    const s = gl.createShader(type);
-    gl.shaderSource(s, source);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
-    return s;
+    function createBuffer(data, attrib, perVertex) {
+      const loc = gl.getAttribLocation(program, attrib);
+      if (loc === -1) return;
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, perVertex, gl.FLOAT, false, 0, 0);
+    }
+
+    createBuffer(posArr, 'a_pos', 2);
+    createBuffer(brightArr, 'a_brightness', 1);
+    createBuffer(sizeArr, 'a_size', 1);
+    createBuffer(twinkleSpeedArr, 'a_twinkleSpeed', 1);
+    createBuffer(twinklePhaseArr, 'a_twinklePhase', 1);
+    createBuffer(depthArr, 'a_depth', 1);
+
+    const uTime = gl.getUniformLocation(program, 'u_time');
+    const uMouse = gl.getUniformLocation(program, 'u_mouse');
+    const uAspect = gl.getUniformLocation(program, 'u_aspect');
+    const uWaveMode = gl.getUniformLocation(program, 'u_waveMode');
+
+    const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+    window.addEventListener('mousemove', (e) => {
+      mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.ty = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    gl.clearColor(0, 0, 0, 0);
+
+    let time = 0;
+    let lastFrame = 0;
+    function animate(now) {
+      requestAnimationFrame(animate);
+
+      const slide = document.querySelector(slideSelector);
+      if (!slide || !slide.classList.contains('active')) { lastFrame = now; return; }
+
+      const dt = Math.min((now - lastFrame) / 1000, 0.05);
+      lastFrame = now;
+
+      mouse.x += (mouse.tx - mouse.x) * 0.03;
+      mouse.y += (mouse.ty - mouse.y) * 0.03;
+
+      time += dt;
+
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform1f(uTime, time);
+      gl.uniform2f(uMouse, mouse.x, mouse.y);
+      gl.uniform1f(uAspect, canvas.width / canvas.height);
+      gl.uniform1f(uWaveMode, config.waveMode);
+      gl.drawArrays(gl.POINTS, 0, COUNT);
+    }
+    animate(0);
   }
 
-  const vs = createShader(gl.VERTEX_SHADER, vsSource);
-  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
-  const program = gl.createProgram();
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
-  gl.useProgram(program);
+  // Why newparade: 80k particles, breathing pulse wave, wider spread
+  initSlideParticles('why-particles', '[data-slide="4"]', {
+    count: 80000,
+    distribution: 'wide',
+    brightStarRate: 0.004,
+    waveMode: 0.0
+  });
 
-  const quadVerts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(program, 'a_pos');
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-  const uTime = gl.getUniformLocation(program, 'u_time');
-  const uAspect = gl.getUniformLocation(program, 'u_aspect');
-
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-  gl.clearColor(0, 0, 0, 0);
-
-  let time = 0;
-  let lastFrame = 0;
-  function animate(now) {
-    requestAnimationFrame(animate);
-
-    const menuSlide = document.querySelector('[data-slide="5"]');
-    if (!menuSlide || !menuSlide.classList.contains('active')) { lastFrame = now; return; }
-
-    const dt = Math.min((now - lastFrame) / 1000, 0.05);
-    lastFrame = now;
-    time += dt;
-
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform1f(uTime, time);
-    gl.uniform1f(uAspect, canvas.width / canvas.height);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  }
-  animate(0);
+  // Menu: 60k particles, horizontal sweep wave, even spread
+  initSlideParticles('menu-particles', '[data-slide="5"]', {
+    count: 60000,
+    distribution: 'even',
+    brightStarRate: 0.005,
+    waveMode: 1.0
+  });
 })();
 </script>
 
