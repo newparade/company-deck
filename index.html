@@ -1748,7 +1748,7 @@
 </script>
 
 <script>
-// Menu — Bokeh circles (soft, large, floating light orbs)
+// Menu — Grid wave (structured grid of dots that ripple like water surface)
 (function() {
   const canvas = document.getElementById('menu-particles');
   if (!canvas) return;
@@ -1766,15 +1766,14 @@
   resize();
   window.addEventListener('resize', resize);
 
-  const NUM = 50; // Few but large
+  // Grid layout
+  const COLS = 80;
+  const ROWS = 45;
+  const NUM = COLS * ROWS;
 
   const vsSource = `
-    attribute vec2 a_pos;
-    attribute float a_size;
-    attribute float a_speed;
-    attribute float a_phase;
-    attribute float a_alpha;
-    attribute float a_depth;
+    attribute vec2 a_gridPos;
+    attribute float a_rnd;
     uniform float u_time;
     uniform vec2 u_mouse;
     uniform float u_aspect;
@@ -1782,48 +1781,68 @@
     varying float v_alpha;
     varying float v_temp;
 
+    float hash(vec2 p) {
+      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+    }
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      f = f * f * (3.0 - 2.0 * f);
+      return mix(
+        mix(hash(i), hash(i + vec2(1, 0)), f.x),
+        mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x),
+        f.y
+      );
+    }
+
     void main() {
       float t = u_time;
-      vec2 pos = a_pos;
+      vec2 pos = a_gridPos;
 
-      // Slow organic float — each orb drifts on its own path
-      pos.x += sin(t * a_speed * 0.15 + a_phase) * 0.12;
-      pos.y += cos(t * a_speed * 0.12 + a_phase * 1.3) * 0.08;
-      pos.x += sin(t * 0.05 + a_phase * 2.0) * 0.06;
-      pos.y += cos(t * 0.04 + a_phase * 0.7) * 0.05;
+      // Noise-based displacement — grid points pushed by flow field
+      float n1 = noise(pos * 2.0 + t * 0.15);
+      float n2 = noise(pos * 2.0 + t * 0.12 + 5.0);
+      float displacement = 0.015 + 0.01 * n1;
+      pos.x += (n1 - 0.5) * displacement * 2.0;
+      pos.y += (n2 - 0.5) * displacement * 2.0;
 
-      // Mouse parallax
-      pos.x += u_mouse.x * a_depth * 0.05 / u_aspect;
-      pos.y += u_mouse.y * a_depth * 0.05;
+      // Wave ripple — height mapped to brightness
+      float wave1 = sin(a_gridPos.x * 8.0 - t * 0.8 + a_gridPos.y * 3.0) * 0.5 + 0.5;
+      float wave2 = sin(a_gridPos.y * 6.0 + t * 0.5 + a_gridPos.x * 4.0) * 0.5 + 0.5;
+      float wave = wave1 * 0.6 + wave2 * 0.4;
 
-      // Slow breathing alpha
-      float breath = 0.7 + 0.3 * sin(t * a_speed * 0.2 + a_phase * 3.0);
-      v_alpha = a_alpha * breath;
-      v_temp = a_depth;
+      // Mouse interaction — ripple from cursor
+      float depth = 0.3 + a_rnd * 0.7;
+      pos.x += u_mouse.x * depth * 0.03 / u_aspect;
+      pos.y += u_mouse.y * depth * 0.03;
 
-      gl_PointSize = a_size * (u_resolution.y / 720.0);
+      // Size pulsing with wave
+      float baseSize = 1.2 + wave * 1.8;
+      gl_PointSize = baseSize * dpr * (u_resolution.y / 900.0);
+
+      // Alpha: wave-driven brightness
+      float edgeFade = smoothstep(1.15, 0.85, abs(a_gridPos.x))
+                     * smoothstep(1.15, 0.85, abs(a_gridPos.y));
+      v_alpha = (0.1 + wave * 0.35) * edgeFade;
+      v_temp = depth;
+
       gl_Position = vec4(pos, 0.0, 1.0);
     }
   `;
 
   const fsSource = `
-    precision highp float;
+    precision mediump float;
     varying float v_alpha;
     varying float v_temp;
 
     void main() {
-      vec2 c = gl_PointCoord - 0.5;
-      float d = length(c);
+      float d = length(gl_PointCoord - 0.5);
+      if (d > 0.5) discard;
+      float shape = smoothstep(0.5, 0.1, d);
 
-      // Bokeh shape: bright ring + soft fill
-      float ring = smoothstep(0.5, 0.42, d) * smoothstep(0.3, 0.4, d);
-      float fill = smoothstep(0.5, 0.1, d) * 0.3;
-      float shape = ring * 0.7 + fill;
-
-      // Color temperature
-      vec3 warm = vec3(1.0, 0.92, 0.75);
-      vec3 neutral = vec3(0.95, 0.95, 0.92);
-      vec3 cool = vec3(0.85, 0.92, 1.0);
+      vec3 warm = vec3(1.0, 0.92, 0.7);
+      vec3 neutral = vec3(0.95, 0.93, 0.88);
+      vec3 cool = vec3(0.85, 0.9, 1.0);
       vec3 col = v_temp < 0.5
         ? mix(warm, neutral, v_temp * 2.0)
         : mix(neutral, cool, (v_temp - 0.5) * 2.0);
@@ -1849,21 +1868,16 @@
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
   gl.useProgram(program);
 
-  const posData = new Float32Array(NUM * 2);
-  const sizeData = new Float32Array(NUM);
-  const speedData = new Float32Array(NUM);
-  const phaseData = new Float32Array(NUM);
-  const alphaData = new Float32Array(NUM);
-  const depthData = new Float32Array(NUM);
+  const gridData = new Float32Array(NUM * 2);
+  const rndData = new Float32Array(NUM);
 
-  for (let i = 0; i < NUM; i++) {
-    posData[i * 2]     = (Math.random() * 2 - 1) * 1.1;
-    posData[i * 2 + 1] = (Math.random() * 2 - 1) * 1.1;
-    sizeData[i]  = 40 + Math.random() * 120; // large circles
-    speedData[i] = 0.3 + Math.random() * 0.7;
-    phaseData[i] = Math.random() * Math.PI * 2;
-    alphaData[i] = 0.04 + Math.random() * 0.08; // very subtle
-    depthData[i] = Math.random();
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const i = row * COLS + col;
+      gridData[i * 2]     = (col / (COLS - 1)) * 2.2 - 1.1; // x: -1.1 to 1.1
+      gridData[i * 2 + 1] = (row / (ROWS - 1)) * 2.2 - 1.1; // y: -1.1 to 1.1
+      rndData[i] = Math.random();
+    }
   }
 
   function makeBuf(data, attr, size) {
@@ -1876,12 +1890,8 @@
     gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
   }
 
-  makeBuf(posData, 'a_pos', 2);
-  makeBuf(sizeData, 'a_size', 1);
-  makeBuf(speedData, 'a_speed', 1);
-  makeBuf(phaseData, 'a_phase', 1);
-  makeBuf(alphaData, 'a_alpha', 1);
-  makeBuf(depthData, 'a_depth', 1);
+  makeBuf(gridData, 'a_gridPos', 2);
+  makeBuf(rndData, 'a_rnd', 1);
 
   const uTime = gl.getUniformLocation(program, 'u_time');
   const uMouse = gl.getUniformLocation(program, 'u_mouse');
