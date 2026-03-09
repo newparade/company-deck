@@ -1357,20 +1357,26 @@
       float dist = length(a_pos); // original distance from center (0~1.6)
       float normDist = dist / 1.2; // normalize to ~0-1
 
+      // Per-particle random offset to break uniform ring shape
+      float rnd = fract(sin(a_twinklePhase * 127.1 + a_depth * 311.7) * 43758.5453);
+      float distJitter = normDist + (rnd - 0.5) * 0.35; // scatter the ring detection
+
       float wave = 0.0;
       if (cycle < 0.35) {
-        // 企画: inward wave — brightness ring sweeps from outside to center
+        // 企画: scattered inward flow — particles light up irregularly toward center
         float wavePos = 1.0 - cycle / 0.35; // 1→0
-        wave = 1.0 - smoothstep(0.0, 0.25, abs(normDist - wavePos));
+        float d = abs(distJitter - wavePos);
+        wave = smoothstep(0.4, 0.0, d) * (0.5 + rnd * 0.5);
       } else if (cycle < 0.55) {
         // つくる: center bloom — particles near center glow
         float t = (cycle - 0.35) / 0.2;
         float pulse = sin(t * 3.14159);
         wave = pulse * smoothstep(0.5, 0.0, normDist);
       } else {
-        // 届ける: outward wave — brightness ring sweeps from center to outside
+        // 届ける: scattered outward flow
         float wavePos = (cycle - 0.55) / 0.45; // 0→1
-        wave = 1.0 - smoothstep(0.0, 0.25, abs(normDist - wavePos));
+        float d = abs(distJitter - wavePos);
+        wave = smoothstep(0.4, 0.0, d) * (0.5 + rnd * 0.5);
       }
 
       // Twinkle
