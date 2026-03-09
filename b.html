@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>newparade - Company Deck</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --black: #0a0a0a;
+    --white: #f8f7f4;
+    --gray: #888;
+    --gray-light: #c8c8c8;
+    --gray-dark: #333;
+    --accent: #f8f7f4;
+    --accent-dim: rgba(255,255,255,0.08);
+  }
+
+  body {
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    background: var(--black);
+    color: var(--white);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .slide {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    padding: 60px 80px;
+    position: relative;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .slide.active { display: flex; }
+
+  .nav {
+    position: fixed;
+    bottom: 30px;
+    right: 40px;
+    z-index: 100;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .nav button {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+  .nav button:hover { background: rgba(255,255,255,0.2); }
+  .nav .counter {
+    color: var(--gray);
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+
+  .page-num {
+    position: absolute;
+    bottom: 30px;
+    left: 80px;
+    color: var(--gray);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* Typography */
+  h1 { font-size: 72px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+  h2 { font-size: 42px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 40px; }
+  h3 { font-size: 24px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 16px; }
+  p { font-size: 18px; line-height: 1.8; color: var(--gray-light); font-weight: 300; }
+  .label {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 20px; font-weight: 500;
+  }
+
+  /* Cover */
+  .slide-cover {
+    padding: 0; justify-content: flex-end; position: relative; overflow: hidden;
+  }
+  /* 左上: サブラベル */
+  .cover-top-left {
+    position: absolute; top: 48px; left: 60px; z-index: 2;
+  }
+  .cover-top-left .cover-label {
+    font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: rgba(255,255,255,0.45); font-weight: 500; line-height: 1.6;
+  }
+  /* 右端: 縦書きアクセント */
+  .cover-vertical {
+    position: absolute; top: 48px; right: 48px; z-index: 2;
+    writing-mode: vertical-rl; text-orientation: mixed;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .cover-vertical .vert-line {
+    width: 1px; height: 48px; background: rgba(255,255,255,0.2);
+  }
+  .cover-vertical .vert-text {
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: rgba(255,255,255,0.35); font-weight: 400;
+  }
+  /* 中段: 社名 */
+  .cover-mid-left {
+    position: absolute; top: 45%; right: 60px; z-index: 2;
+    transform: translateY(-50%);
+  }
+  .cover-tagline {
+    font-size: clamp(36px, 4.5vw, 64px); font-weight: 800; letter-spacing: -0.02em;
+    line-height: 1.1; color: var(--white);
+  }
+  .cover-logo {
+    height: clamp(80px, 10vw, 140px);
+    width: auto;
+    object-fit: contain;
+  }
+  /* 中央右: 説明テキスト */
+  .cover-mid-right {
+    position: absolute; top: 52%; left: 38%; right: 80px; z-index: 2;
+  }
+  .cover-body {
+    font-size: 14px; line-height: 1.9; color: rgba(255,255,255,0.5);
+    font-weight: 300; max-width: 560px;
+  }
+  /* 最下部: 事業名 */
+  .cover-bottom {
+    position: absolute; bottom: 32px; left: 0; right: 0; z-index: 2;
+    padding: 0 60px;
+  }
+  .cover-brand {
+    font-size: clamp(56px, 7.5vw, 108px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 0.9;
+    text-transform: uppercase; color: var(--white);
+    white-space: nowrap;
+  }
+  /* 下部情報バー */
+  .cover-sub-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 14px 0 32px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 12px;
+  }
+  .cover-sub-row .cover-year {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.4); font-weight: 400;
+  }
+  .cover-sub-row .cover-desc {
+    font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 300;
+    letter-spacing: 0.1em;
+  }
+
+  /* About */
+  .slide-about .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .about-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
+  .about-meta-item .meta-label {
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gray); margin-bottom: 6px;
+  }
+  .about-meta-item .meta-value { font-size: 15px; color: var(--white); font-weight: 400; }
+  .culture-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+  .culture-tag {
+    padding: 8px 20px; border: 1px solid rgba(255,255,255,0.15); border-radius: 100px;
+    font-size: 13px; color: var(--gray-light); font-weight: 400; letter-spacing: 0.02em;
+  }
+
+  /* Concept */
+  .slide-concept { text-align: center; align-items: center; overflow: hidden; }
+  .slide-concept .label,
+  .slide-concept .concept-copy,
+  .slide-concept .concept-desc { position: relative; z-index: 2; text-shadow: 0 0 30px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.7), 0 0 100px rgba(0,0,0,0.4); }
+  #concept-particles {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+  }
+  .concept-copy { font-size: 48px; font-weight: 700; line-height: 1.5; letter-spacing: -0.01em; margin-bottom: 48px; }
+  .concept-copy span { color: var(--accent); }
+  .concept-desc { max-width: 700px; text-align: center; font-size: 16px; line-height: 2; }
+
+  /* Concept background image mosaic */
+  .mosaic-bg {
+    position: absolute; top: -10%; left: -2%; right: -2%; bottom: -10%;
+    z-index: 0; opacity: 0.4;
+    columns: 10; column-gap: 4px;
+    overflow: hidden;
+  }
+  .mosaic-bg img {
+    width: 100%; display: block; break-inside: avoid;
+    margin-bottom: 4px;
+  }
+  /* Dark vignette over mosaic */
+  .mosaic-vignette {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1;
+    background: radial-gradient(ellipse at center, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.85) 70%, rgba(10,10,10,0.95) 100%);
+  }
+
+  /* Value Flow */
+  /* Why newparade — flow */
+  #why-particles {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+  }
+  .why-header, .flow-container { position: relative; z-index: 1; }
+  .why-header { text-align: center; margin-bottom: 56px; }
+  .why-header h2 { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.6; }
+  .why-header p { color: var(--gray); font-size: 14px; max-width: 640px; margin: 16px auto 0; line-height: 1.8; }
+  .flow-container { display: flex; align-items: stretch; justify-content: center; gap: 0; margin-top: 0; }
+  .flow-step {
+    text-align: center; padding: 32px 20px; flex: 1; position: relative;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  }
+  .flow-step:first-child { border-radius: 12px 0 0 12px; }
+  .flow-step:last-child { border-radius: 0 12px 12px 0; }
+  .flow-step + .flow-step { border-left: none; }
+  .flow-step .step-num { font-size: 11px; color: var(--accent); letter-spacing: 0.15em; margin-bottom: 12px; font-weight: 500; }
+  .flow-step .step-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; line-height: 1.5; }
+  .flow-step .step-desc { font-size: 12px; color: var(--gray); line-height: 1.6; }
+  .flow-connector {
+    width: 1px; height: 40px; background: rgba(255,255,255,0.15); position: relative; overflow: hidden;
+    align-self: center; flex-shrink: 0; margin: 0 -1px;
+  }
+  /* Chevron between steps */
+  .flow-step + .flow-step::before {
+    content: ''; position: absolute; left: -1px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0;
+    border-top: 8px solid transparent; border-bottom: 8px solid transparent;
+    border-left: 8px solid rgba(255,255,255,0.12);
+  }
+
+  /* Menu Overview */
+  #menu-particles {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+  }
+  .slide-menu { overflow: hidden; }
+  .slide-menu .label,
+  .slide-menu h2,
+  .slide-menu .menu-grid { position: relative; z-index: 2; }
+  .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
+  .menu-card {
+    padding: 40px 32px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; transition: all 0.3s;
+  }
+  .menu-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
+  .menu-card .menu-num {
+    font-size: 32px; font-weight: 800; color: rgba(255,255,255,0.08);
+    margin-bottom: 16px; line-height: 1;
+  }
+  .menu-card .menu-en { font-size: 24px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .menu-card .menu-ja { font-size: 13px; color: var(--gray); margin-bottom: 20px; }
+  .menu-card .menu-items { list-style: none; font-size: 12px; color: var(--gray-light); line-height: 2; }
+
+  /* Menu Detail */
+  .detail-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; height: 100%; padding: 20px 0; }
+  .detail-left h2 { margin-bottom: 12px; }
+  .detail-left .detail-ja { font-size: 16px; color: var(--gray); margin-bottom: 32px; }
+  .detail-items { list-style: none; margin-bottom: 32px; }
+  .detail-items li {
+    font-size: 15px; color: var(--gray-light); padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 300;
+  }
+  .detail-right { position: relative; overflow: hidden; align-self: stretch; }
+
+  /* Photo Grid (Service slides) */
+  .photo-grid {
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    gap: 8px; width: 100%; height: calc(100vh - 160px); overflow: hidden;
+  }
+  .photo-grid img {
+    width: 100%; height: 100%; min-height: 0; object-fit: cover; display: block; border-radius: 12px;
+  }
+
+  /* Case Study - Vertical Scroll */
+  .slide-case { padding: 0; overflow-y: auto; overflow-x: hidden; }
+  .slide-case::-webkit-scrollbar { width: 4px; }
+  .slide-case::-webkit-scrollbar-track { background: transparent; }
+  .slide-case::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+  .slide-case .page-num { display: none; }
+
+  .case-scroll { width: 100%; min-height: 100vh; }
+
+  /* ① FV Hero */
+  .case-fv { width: 100%; height: 85vh; position: relative; overflow: hidden; }
+  .case-fv img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .case-fv-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 60px 80px 48px;
+    background: linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.5) 60%, transparent 100%);
+  }
+  .case-fv-overlay .case-num {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gray); margin-bottom: 8px;
+  }
+  .case-fv-overlay h2 {
+    font-size: 52px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em;
+  }
+  .case-fv-overlay .case-fv-summary {
+    font-size: 15px; color: var(--gray-light); font-weight: 300; max-width: 600px;
+  }
+
+  /* Scroll indicator */
+  .case-scroll-hint {
+    position: absolute; bottom: 32px; right: 80px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    opacity: 1; transition: opacity 0.4s ease;
+    z-index: 5;
+  }
+  .case-scroll-hint.is-hidden { opacity: 0; pointer-events: none; }
+  .case-scroll-hint span {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.5); font-weight: 400;
+  }
+  .case-scroll-hint .scroll-line {
+    width: 1px; height: 40px; background: rgba(255,255,255,0.15); position: relative; overflow: hidden;
+  }
+  .case-scroll-hint .scroll-line::after {
+    content: ''; position: absolute; top: -100%; left: 0;
+    width: 1px; height: 100%; background: rgba(255,255,255,0.7);
+    animation: scrollLine 1.8s ease-in-out infinite;
+  }
+  @keyframes scrollLine {
+    0% { top: -100%; }
+    50% { top: 100%; }
+    50.01% { top: -100%; }
+    100% { top: 100%; }
+  }
+
+  /* Center scroll prompt (auto-dismiss) */
+  .case-scroll-prompt {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 10; pointer-events: none;
+    background: rgba(0,0,0,0.4);
+    opacity: 0; transition: opacity 0.4s ease;
+  }
+  .case-scroll-prompt.is-showing { opacity: 1; }
+  .case-scroll-prompt .prompt-mouse {
+    width: 30px; height: 48px; border: 2px solid rgba(255,255,255,0.9);
+    border-radius: 15px; position: relative; margin-bottom: 16px;
+  }
+  .case-scroll-prompt .prompt-mouse::after {
+    content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    width: 3px; height: 10px; background: #fff; border-radius: 2px;
+    animation: mouseScroll 1.4s ease-in-out infinite;
+  }
+  .case-scroll-prompt .prompt-text {
+    font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.85); font-weight: 400;
+  }
+  @keyframes mouseScroll {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(14px); }
+  }
+
+  /* ② Project Info Bar */
+  .case-info-bar {
+    display: flex; align-items: center; gap: 40px; flex-wrap: wrap;
+    padding: 28px 80px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+  }
+  .case-info-item .case-info-label {
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gray); margin-bottom: 3px;
+  }
+  .case-info-item .case-info-value {
+    font-size: 14px; color: var(--white); font-weight: 400;
+  }
+  .case-info-bar .case-services { margin-left: auto; }
+
+  /* ③ Overview */
+  .case-body { padding: 64px 80px 80px; }
+  .case-overview {
+    font-size: 17px; line-height: 2; color: var(--gray-light); font-weight: 300;
+    margin-bottom: 72px; max-width: 800px;
+  }
+
+  /* ④ Full-width image */
+  .case-img-full {
+    width: 100vw; margin-left: calc(-80px); margin-bottom: 72px; overflow: hidden;
+  }
+  .case-img-full img {
+    width: 100%; height: auto; display: block; max-height: 70vh; object-fit: cover;
+  }
+
+  /* ⑤ Challenge & Approach 2-column */
+  .case-two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+    margin-bottom: 72px;
+  }
+  .case-col-label {
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 16px; font-weight: 500;
+  }
+  .case-col-text {
+    font-size: 15px; color: var(--gray-light); font-weight: 300; line-height: 1.9;
+  }
+
+  /* ⑥ Image grid (2x2) */
+  .case-img-grid {
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    gap: 12px; margin-bottom: 72px;
+  }
+  .case-img-grid img {
+    width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 0;
+    aspect-ratio: 4/3;
+  }
+  .case-img-grid--2 { grid-template-rows: auto; }
+
+  /* ⑦ Footer (Output + Credits) */
+  .case-footer {
+    padding-top: 40px; margin-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 40px;
+  }
+  .case-footer-row {
+    display: flex; gap: 40px; align-items: start; flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .case-footer-row:last-child { margin-bottom: 0; }
+  .case-footer-label {
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gray); margin-bottom: 3px;
+  }
+  .case-footer-value {
+    font-size: 14px; color: var(--gray-light); font-weight: 400;
+  }
+  .case-services { display: flex; gap: 8px; flex-wrap: wrap; }
+  .case-service-tag {
+    padding: 6px 16px; background: var(--accent-dim);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 100px;
+    font-size: 11px; color: var(--accent); white-space: nowrap;
+  }
+
+  /* ===== Animations ===== */
+
+  /* Cover */
+  .slide-cover.active .cover-label {
+    animation: fadeIn 0.6s ease 0.2s both;
+  }
+  .slide-cover.active .cover-vertical {
+    animation: fadeIn 0.6s ease 0.3s both;
+  }
+  .slide-cover.active .cover-tagline,
+  .slide-cover.active .cover-logo {
+    animation: fadeUp 0.7s ease 0.4s both;
+  }
+  .slide-cover.active .cover-body {
+    animation: fadeUp 0.6s ease 0.7s both;
+  }
+  .slide-cover.active .cover-brand {
+    animation: coverBrandReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+  }
+  .slide-cover.active .cover-sub-row {
+    animation: fadeIn 0.6s ease 0.8s both;
+  }
+
+  /* About */
+  .slide-about.active .label {
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+  .slide-about.active h2 {
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+  .slide-about.active > .about-grid > div:first-child > p {
+    animation: fadeUp 0.6s ease 0.4s both;
+  }
+  .slide-about.active .culture-tag {
+    animation: fadeIn 0.5s ease both;
+  }
+  .slide-about.active .culture-tag:nth-child(1) { animation-delay: 0.5s; }
+  .slide-about.active .culture-tag:nth-child(2) { animation-delay: 0.6s; }
+  .slide-about.active .culture-tag:nth-child(3) { animation-delay: 0.7s; }
+  .slide-about.active .culture-tag:nth-child(4) { animation-delay: 0.8s; }
+  .slide-about.active .about-meta-item {
+    animation: fadeUp 0.5s ease both;
+  }
+  .slide-about.active .about-meta-item:nth-child(1) { animation-delay: 0.3s; }
+  .slide-about.active .about-meta-item:nth-child(2) { animation-delay: 0.4s; }
+  .slide-about.active .about-meta-item:nth-child(3) { animation-delay: 0.5s; }
+  .slide-about.active .about-meta-item:nth-child(4) { animation-delay: 0.6s; }
+
+  /* Concept */
+  .slide-concept.active .label {
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+  .slide-concept.active .concept-copy {
+    animation: fadeUp 0.7s ease 0.3s both;
+  }
+  .slide-concept.active .concept-desc {
+    animation: fadeUp 0.6s ease 0.6s both;
+  }
+
+  /* Why newparade */
+  .slide.active .why-header h2 { animation: fadeUp 0.6s ease 0.1s both; }
+  .slide.active .why-header p { animation: fadeUp 0.5s ease 0.25s both; }
+  .slide.active .flow-container .flow-step {
+    animation: fadeUp 0.5s ease both;
+  }
+  .slide.active .flow-container .flow-step:nth-child(1) { animation-delay: 0.3s; }
+  .slide.active .flow-container .flow-step:nth-child(2) { animation-delay: 0.4s; }
+  .slide.active .flow-container .flow-step:nth-child(3) { animation-delay: 0.5s; }
+  .slide.active .flow-container .flow-step:nth-child(4) { animation-delay: 0.6s; }
+  .slide.active .flow-container .flow-step:nth-child(5) { animation-delay: 0.7s; }
+
+  /* Menu Overview */
+  .slide.active .menu-card {
+    animation: fadeUp 0.5s ease both;
+  }
+  .slide.active .menu-card:nth-child(1) { animation-delay: 0.2s; }
+  .slide.active .menu-card:nth-child(2) { animation-delay: 0.35s; }
+  .slide.active .menu-card:nth-child(3) { animation-delay: 0.5s; }
+  .slide.active .menu-card:nth-child(4) { animation-delay: 0.65s; }
+
+  /* Contact */
+  .slide-contact.active .label {
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+  .slide-contact.active h1 {
+    animation: fadeUp 0.7s ease 0.3s both;
+  }
+  .slide-contact.active .contact-item {
+    animation: fadeUp 0.5s ease both;
+  }
+  .slide-contact.active .contact-item:nth-child(1) { animation-delay: 0.6s; }
+  .slide-contact.active .contact-item:nth-child(2) { animation-delay: 0.7s; }
+  .slide-contact.active .contact-item:nth-child(3) { animation-delay: 0.8s; }
+
+  /* Service slide stagger */
+  .slide.active .detail-left .label,
+  .slide.active .detail-left h2,
+  .slide.active .detail-left .detail-ja,
+  .slide.active .detail-left .detail-items li,
+  .slide.active .detail-left > p {
+    animation: fadeUp 0.6s ease both;
+  }
+  .slide.active .detail-left .label { animation-delay: 0.1s; }
+  .slide.active .detail-left h2 { animation-delay: 0.2s; }
+  .slide.active .detail-left .detail-ja { animation-delay: 0.3s; }
+  .slide.active .detail-left .detail-items li:nth-child(1) { animation-delay: 0.35s; }
+  .slide.active .detail-left .detail-items li:nth-child(2) { animation-delay: 0.4s; }
+  .slide.active .detail-left .detail-items li:nth-child(3) { animation-delay: 0.45s; }
+  .slide.active .detail-left .detail-items li:nth-child(4) { animation-delay: 0.5s; }
+  .slide.active .detail-left > p { animation-delay: 0.6s; }
+  .slide.active .photo-grid img {
+    animation: scaleIn 0.5s ease both;
+  }
+  .slide.active .photo-grid img:nth-child(1) { animation-delay: 0.2s; }
+  .slide.active .photo-grid img:nth-child(2) { animation-delay: 0.35s; }
+  .slide.active .photo-grid img:nth-child(3) { animation-delay: 0.5s; }
+  .slide.active .photo-grid img:nth-child(4) { animation-delay: 0.65s; }
+
+  /* Case Study FV */
+  .slide-case.active .case-fv img {
+    animation: slowZoom 8s ease-out both;
+  }
+  .slide-case.active .case-fv-overlay {
+    animation: fadeUp 0.8s ease 0.3s both;
+  }
+  .slide-case.active .case-info-bar {
+    animation: fadeIn 0.6s ease 0.5s both;
+  }
+  .slide-case.active .case-scroll-hint {
+    animation: fadeIn 0.6s ease 0.8s both;
+  }
+
+  /* Case Study scroll-triggered */
+  .case-reveal {
+    opacity: 0; transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .case-reveal.is-visible {
+    opacity: 1; transform: translateY(0);
+  }
+  .case-reveal-img {
+    opacity: 0; transform: scale(0.96);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .case-reveal-img.is-visible {
+    opacity: 1; transform: scale(1);
+  }
+  /* Stagger children in grid */
+  .case-img-grid.is-visible img { animation: scaleIn 0.5s ease both; }
+  .case-img-grid.is-visible img:nth-child(1) { animation-delay: 0s; }
+  .case-img-grid.is-visible img:nth-child(2) { animation-delay: 0.12s; }
+  .case-img-grid.is-visible img:nth-child(3) { animation-delay: 0.24s; }
+  .case-img-grid.is-visible img:nth-child(4) { animation-delay: 0.36s; }
+  .case-img-grid img {
+    opacity: 0; transform: scale(0.92);
+  }
+  /* Two-col stagger */
+  .case-two-col.is-visible > div:nth-child(1) { animation: fadeUp 0.6s ease 0s both; }
+  .case-two-col.is-visible > div:nth-child(2) { animation: fadeUp 0.6s ease 0.15s both; }
+  .case-two-col > div { opacity: 0; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes slowZoom {
+    from { transform: scale(1); }
+    to { transform: scale(1.06); }
+  }
+  @keyframes lineGrow {
+    from { opacity: 0; transform: scaleY(0); transform-origin: top; }
+    to { opacity: 1; transform: scaleY(1); transform-origin: top; }
+  }
+  @keyframes coverBrandReveal {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Contact */
+  /* Works */
+  .slide-works { overflow: hidden; }
+  .slide-works .mosaic-bg { opacity: 0.85; }
+  .slide-works .mosaic-vignette {
+    background: radial-gradient(ellipse at center, rgba(10,10,10,0.05) 0%, rgba(10,10,10,0.4) 70%, rgba(10,10,10,0.8) 100%);
+  }
+
+  .slide-contact { justify-content: center; align-items: center; text-align: center; }
+  .slide-contact h1 { font-size: 64px; margin-bottom: 40px; }
+  .contact-info { display: flex; gap: 60px; margin-top: 20px; }
+  .contact-item .ci-label {
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gray); margin-bottom: 8px;
+  }
+  .contact-item .ci-value { font-size: 16px; color: var(--gray-light); font-weight: 400; }
+  .contact-item .ci-value a { color: var(--accent); text-decoration: none; }
+
+  /* ===== Mobile: Scale-based landscape preservation ===== */
+  @media (max-width: 768px) {
+    .slide {
+      width: 1280px;
+      height: 720px;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(var(--slide-scale, 0.3));
+      transform-origin: center center;
+    }
+    .nav { bottom: 8px; right: 8px; gap: 6px; }
+    .nav button { width: 32px; height: 32px; font-size: 13px; }
+    .nav .counter { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Cover -->
+<div class="slide slide-cover active" data-slide="1">
+  <div class="cover-top-left">
+    <div class="cover-label">Company Deck 2026</div>
+  </div>
+  <div class="cover-vertical">
+    <div class="vert-line"></div>
+    <div class="vert-text">Tokyo, Japan</div>
+  </div>
+  <div class="cover-mid-left">
+    <div class="cover-tagline">Creative Boutique</div>
+  </div>
+  <div class="cover-mid-right">
+  </div>
+  <div class="cover-bottom">
+    <div class="cover-brand">newparade</div>
+    <div class="cover-sub-row">
+      <span class="cover-year">Est. 2023</span>
+      <span class="cover-desc">Strategy × Creative × Culture</span>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: About -->
+<div class="slide slide-about" data-slide="2">
+  <div class="about-grid">
+    <div>
+      <div class="label">Who We Are</div>
+      <h2>カルチャー・ライフスタイル<br>領域に特化した<br>クリエイティブブティック</h2>
+      <p>カルチャーに精通したクリエイターが、企画からクリエイティブまで一気通貫で手がけます。</p>
+      <div class="culture-tags">
+        <span class="culture-tag">City Culture</span>
+        <span class="culture-tag">Subculture</span>
+        <span class="culture-tag">Entertainment</span>
+        <span class="culture-tag">Street</span>
+      </div>
+    </div>
+    <div>
+      <div class="about-meta">
+        <div class="about-meta-item"><div class="meta-label">Founded</div><div class="meta-value">2023</div></div>
+        <div class="about-meta-item"><div class="meta-label">Location</div><div class="meta-value">Tokyo</div></div>
+        <div class="about-meta-item"><div class="meta-label">Team</div><div class="meta-value">Creative Boutique Div.</div></div>
+        <div class="about-meta-item"><div class="meta-label">Strength</div><div class="meta-value">Strategy + Creative + Sense</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-num">02 / 16</div>
+</div>
+
+<!-- SLIDE 3: Concept -->
+<div class="slide slide-concept" data-slide="3">
+  <canvas id="concept-particles"></canvas>
+  <div class="label">Our Concept</div>
+  <div class="concept-copy">企画する。<span>つくる。</span>届ける。</div>
+  <p class="concept-desc">
+    すべてのプロジェクトに、プロデュース × クリエイティブディレクションで上流から参画。<br>
+    カルチャーの目線で事業課題を再解釈し、企画して、形にします。
+  </p>
+  <div class="page-num">03 / 16</div>
+</div>
+
+<!-- SLIDE 4: Why newparade -->
+<div class="slide" data-slide="4">
+  <canvas id="why-particles"></canvas>
+  <div class="label">Why newparade</div>
+  <div class="why-header">
+    <h2>カルチャーの感性・知識で、<br>上流から、作って、届けるまで。</h2>
+    <p>プロデュース × クリエイティブディレクションの両軸で、<br>事業課題を「カルチャーの目線」で再解釈し、企画から体験まで一貫してつくります。</p>
+  </div>
+  <div class="flow-container">
+    <div class="flow-step"><div class="step-num">01</div><div class="step-title">事業課題を<br>受け取る</div><div class="step-desc">売上・認知・採用など<br>ビジネスの課題から入る</div></div>
+    <div class="flow-step"><div class="step-num">02</div><div class="step-title">カルチャー目線で<br>再解釈する</div><div class="step-desc">音楽・アート・ファッションなど<br>カルチャーの文脈から捉え直す</div></div>
+    <div class="flow-step"><div class="step-num">03</div><div class="step-title">企画・設計する</div><div class="step-desc">ブランド戦略・プロモ企画<br>イベント設計をワンチームで</div></div>
+    <div class="flow-step"><div class="step-num">04</div><div class="step-title">形にする</div><div class="step-desc">CI / KV / 映像 / 空間<br>すべてCDの目が通る品質</div></div>
+    <div class="flow-step"><div class="step-num">05</div><div class="step-title">事業を動かす</div><div class="step-desc">売上・認知・ブランド価値<br>目に見える成果へ</div></div>
+  </div>
+  <div class="page-num">04 / 16</div>
+</div>
+
+<!-- SLIDE 5: Menu Overview -->
+<div class="slide slide-menu" data-slide="5">
+  <canvas id="menu-particles"></canvas>
+  <div class="label">Menu</div>
+  <h2>4つのメニュー</h2>
+  <div class="menu-grid">
+    <div class="menu-card"><div class="menu-num">01</div><div class="menu-en">Produce</div><div class="menu-ja">企画・プロデュース</div><ul class="menu-items"><li>事業企画</li><li>キャンペーン企画</li><li>コンテンツ企画</li><li>PJ設計・チーム組成</li></ul></div>
+    <div class="menu-card"><div class="menu-num">02</div><div class="menu-en">Branding</div><div class="menu-ja">ブランドをつくる</div><ul class="menu-items"><li>ブランドコンセプト</li><li>CI / VI</li><li>ガイドライン</li><li>ネーミング</li></ul></div>
+    <div class="menu-card"><div class="menu-num">03</div><div class="menu-en">Creative Direction</div><div class="menu-ja">クリエイティブをつくる</div><ul class="menu-items"><li>KV / メインビジュアル</li><li>広告クリエイティブ</li><li>アートディレクション</li><li>プロモーション</li></ul></div>
+    <div class="menu-card"><div class="menu-num">04</div><div class="menu-en">Experience</div><div class="menu-ja">体験をつくる</div><ul class="menu-items"><li>ポップアップ</li><li>イベント</li><li>空間デザイン</li><li>体験設計</li></ul></div>
+  </div>
+  <div class="page-num">05 / 16</div>
+</div>
+
+<!-- SLIDE 6: Produce Detail -->
+<div class="slide" data-slide="6">
+  <div class="detail-layout">
+    <div class="detail-left">
+      <div class="label">Menu 01</div>
+      <h2>Produce</h2>
+      <p class="detail-ja">企画・プロデュース</p>
+      <ul class="detail-items">
+        <li>事業 / ブランド課題の言語化</li>
+        <li>プロジェクト設計・チーム組成</li>
+        <li>企画立案・コンセプトメイキング</li>
+        <li>プロジェクト進行・品質管理</li>
+      </ul>
+      <p style="font-size:14px; color:var(--gray); line-height:1.8;">
+        カルチャーのセンスを活かし、事業やキャンペーンの<br>
+        企画からクリエイティブの形にするまでを一気通貫で<br>
+        プロデュースします。
+      </p>
+    </div>
+    <div class="detail-right">
+      <div class="photo-grid">
+        <img src="images/ego-2.jpg" alt="">
+        <img src="images/tokio-4.jpg" alt="">
+        <img src="images/yoicha-4.jpg" alt="">
+        <img src="images/richill-pine.jpg" alt="">
+      </div>
+    </div>
+  </div>
+  <div class="page-num">06 / 16</div>
+</div>
+
+<!-- SLIDE 7: Branding Detail -->
+<div class="slide" data-slide="7">
+  <div class="detail-layout">
+    <div class="detail-left">
+      <div class="label">Menu 02</div>
+      <h2>Branding</h2>
+      <p class="detail-ja">ブランドをつくる</p>
+      <ul class="detail-items">
+        <li>ブランドコンセプト・ストーリー設計</li>
+        <li>CI / VI（ロゴ・カラー・タイポグラフィ）</li>
+        <li>ブランドガイドライン策定</li>
+        <li>ネーミング・コピーライティング</li>
+      </ul>
+      <p style="font-size:14px; color:var(--gray); line-height:1.8;">
+        ブランドの核をつくり、すべての接点に<br>
+        一貫性を持たせます。
+      </p>
+    </div>
+    <div class="detail-right">
+      <div class="photo-grid">
+        <img src="images/ego-logo.jpg" alt="">
+        <img src="images/nekasehai-1.jpg" alt="">
+        <img src="images/matcha-1.jpg" alt="">
+        <img src="images/yoicha-2.jpg" alt="">
+      </div>
+    </div>
+  </div>
+  <div class="page-num">07 / 16</div>
+</div>
+
+<!-- SLIDE 8: Creative Direction Detail -->
+<div class="slide" data-slide="8">
+  <div class="detail-layout">
+    <div class="detail-left">
+      <div class="label">Menu 03</div>
+      <h2>Creative Direction</h2>
+      <p class="detail-ja">クリエイティブをつくる</p>
+      <ul class="detail-items">
+        <li>コミュニケーション戦略設計</li>
+        <li>キービジュアル・メインビジュアル開発</li>
+        <li>広告クリエイティブ（OOH / Web / SNS）</li>
+        <li>アートディレクション</li>
+      </ul>
+      <p style="font-size:14px; color:var(--gray); line-height:1.8;">
+        キャンペーンやプロモーションの<br>
+        クリエイティブ全体を統括します。
+      </p>
+    </div>
+    <div class="detail-right">
+      <div class="photo-grid">
+        <img src="images/tokio-3.jpg" alt="">
+        <img src="images/ego-1.jpg" alt="">
+        <img src="images/charm-1.jpg" alt="">
+        <img src="images/yoicha-3.jpg" alt="">
+      </div>
+    </div>
+  </div>
+  <div class="page-num">08 / 16</div>
+</div>
+
+<!-- SLIDE 9: Experience Detail -->
+<div class="slide" data-slide="9">
+  <div class="detail-layout">
+    <div class="detail-left">
+      <div class="label">Menu 04</div>
+      <h2>Experience</h2>
+      <p class="detail-ja">体験をつくる</p>
+      <ul class="detail-items">
+        <li>ポップアップストア企画・設計</li>
+        <li>展示・インスタレーション</li>
+        <li>パーティー・ローンチイベント</li>
+        <li>空間デザイン・体験設計</li>
+      </ul>
+      <p style="font-size:14px; color:var(--gray); line-height:1.8;">
+        ブランドの世界観を体感できる<br>
+        場をつくります。
+      </p>
+    </div>
+    <div class="detail-right">
+      <div class="photo-grid">
+        <img src="images/nekasehai-1.jpg" alt="">
+        <img src="images/tokio-5.jpg" alt="">
+        <img src="images/matcha-2.jpg" alt="">
+        <img src="images/charm-2.jpg" alt="">
+      </div>
+    </div>
+  </div>
+  <div class="page-num">09 / 16</div>
+</div>
+
+<!-- SLIDE 10: Case Study 1 - ego graphica -->
+<div class="slide slide-case" data-slide="10">
+  <div class="case-scroll">
+    <!-- ① FV Hero -->
+    <div class="case-fv">
+      <img src="images/ego-logo.jpg" alt="ego graphica">
+      <div class="case-fv-overlay">
+        <div class="case-num">Case 01</div>
+        <h2>ego graphica</h2>
+        <p class="case-fv-summary">カジュアルなアート体験をひらく次世代プラットフォーム</p>
+      </div>
+      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-prompt"><div class="prompt-mouse"></div><div class="prompt-text">スクロールして、詳細へ</div></div>
+    </div>
+    <!-- ② Project Info Bar -->
+    <div class="case-info-bar">
+      <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">ego graphica</div></div>
+      <div class="case-info-item"><div class="case-info-label">Year</div><div class="case-info-value">2024</div></div>
+      <div class="case-info-item"><div class="case-info-label">Scope</div><div class="case-info-value">BI / CI・VI / Web / App UI / OOH</div></div>
+      <div class="case-services">
+        <span class="case-service-tag">Produce</span>
+        <span class="case-service-tag">Branding</span>
+        <span class="case-service-tag">Creative Direction</span>
+      </div>
+    </div>
+    <!-- ③ Overview -->
+    <div class="case-body">
+      <p class="case-overview case-reveal">
+        BI策定からCI・VI、Web、アプリUI、OOHまでトータルで担当。<br>
+        ブランドの根幹となるコンセプトの言語化から、すべての接点に一貫性をもたせるビジュアルシステムを構築しました。<br>
+        「アートをもっとカジュアルに」という理念を、見た人が直感的に感じ取れるブランド体験へと落とし込んでいます。
+      </p>
+      <!-- ④ Full-width Image -->
+      <div class="case-img-full case-reveal-img"><img src="images/ego-1.jpg" alt=""></div>
+      <!-- ⑤ Challenge & Approach 2-column -->
+      <div class="case-two-col case-reveal">
+        <div>
+          <div class="case-col-label">Challenge</div>
+          <p class="case-col-text">新規アートプラットフォームのブランドを、既存のアート業界とは異なる「カジュアルさ」で設計する必要がありました。アートに馴染みのないユーザーにも手に取りやすく、かつアート本来の価値を損なわないブランド体験をゼロから構築する挑戦。ギャラリーやオークションといった従来のアート流通とは異なる文脈で、「日常の中でアートに触れる」という新しい体験価値をブランドとして表現することが求められました。</p>
+        </div>
+        <div>
+          <div class="case-col-label">Approach</div>
+          <p class="case-col-text">BI策定から入り、CI・VIを核にWeb・アプリUI・OOHまで全接点を一貫設計。ブランドコンセプトの言語化からビジュアルシステムの構築、各タッチポイントへの展開までをワンチームで手がけました。ロゴタイプには遊び心と洗練さを同居させ、カラーシステムには親しみやすさと上質感を両立するパレットを設計。OOHではストリートのコンテキストに溶け込むグラフィック表現を展開し、アプリUIではアート鑑賞のUXを直感的に設計しています。</p>
+        </div>
+      </div>
+      <!-- ⑥ Image Grid (2x2) -->
+      <div class="case-img-grid case-reveal-img">
+        <img src="images/ego-logo.jpg" alt="">
+        <img src="images/ego-1.jpg" alt="">
+        <img src="images/ego-2.jpg" alt="">
+        <img src="images/ego-3.jpg" alt="">
+      </div>
+      <!-- ⑦ Footer -->
+      <div class="case-footer case-reveal">
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Output</div><div class="case-footer-value">ロゴ / カラーシステム / タイポグラフィ / Webサイト / アプリUI / OOH</div></div>
+        </div>
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Team</div><div class="case-footer-value">newparade Creative Boutique</div></div>
+          <div><div class="case-footer-label">Role</div><div class="case-footer-value">企画 / AD / デザイン</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: Case Study 2 - 寝かせハイ -->
+<div class="slide slide-case" data-slide="11">
+  <div class="case-scroll">
+    <div class="case-fv">
+      <img src="images/nekasehai-1.jpg" alt="寝かせハイ">
+      <div class="case-fv-overlay">
+        <div class="case-num">Case 02</div>
+        <h2>寝かせハイ</h2>
+        <p class="case-fv-summary">クラフト酒キットの新ブランド立ち上げ</p>
+      </div>
+      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-prompt"><div class="prompt-mouse"></div><div class="prompt-text">スクロールして、詳細へ</div></div>
+    </div>
+    <div class="case-info-bar">
+      <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">寝かせハイ</div></div>
+      <div class="case-info-item"><div class="case-info-label">Year</div><div class="case-info-value">2024</div></div>
+      <div class="case-info-item"><div class="case-info-label">Scope</div><div class="case-info-value">ブランドコンセプト / パッケージ / Web</div></div>
+      <div class="case-services">
+        <span class="case-service-tag">Produce</span>
+        <span class="case-service-tag">Branding</span>
+      </div>
+    </div>
+    <div class="case-body">
+      <p class="case-overview case-reveal">
+        ブランドコンセプトの策定からパッケージ・ラベル・Webサイトまで一貫して設計。<br>
+        「自宅で寝かせて完成する」という体験そのものをブランドの核に据え、すべてのクリエイティブに展開しました。<br>
+        プロダクトの手に取りやすさと特別感を両立させ、ギフト需要にも対応するパッケージ体験を実現しています。
+      </p>
+      <div class="case-img-full case-reveal-img"><img src="images/nekasehai-2.jpg" alt=""></div>
+      <div class="case-two-col case-reveal">
+        <div>
+          <div class="case-col-label">Challenge</div>
+          <p class="case-col-text">「自宅で寝かせて完成する」という新しい体験を、パッケージとブランドで直感的に伝える必要がありました。まだ世の中にないカテゴリのため、既存の酒類やキット商品の文脈では語れない。手に取った瞬間にワクワクし、完成までのプロセス自体が楽しめるプロダクトにするために、パッケージそのものがブランド体験の入口となる設計が求められました。</p>
+        </div>
+        <div>
+          <div class="case-col-label">Approach</div>
+          <p class="case-col-text">プロデュースとして企画段階から参画し、ブランドストーリーの策定からパッケージデザイン、ラベル、Webサイトまで上流から設計。「寝かせる時間」そのものをブランド体験に変換するコンセプトを軸に据え、待つ楽しさ・育てる喜びを視覚的に伝えるトーン&マナーを構築しました。パッケージは開封体験まで含めた設計を行い、Webサイトでは寝かせ方ガイドをコンテンツの軸に据えています。</p>
+        </div>
+      </div>
+      <div class="case-img-grid case-reveal-img">
+        <img src="images/nekasehai-1.jpg" alt="">
+        <img src="images/nekasehai-2.jpg" alt="">
+        <img src="images/nekasehai-3.jpg" alt="">
+        <img src="images/nekasehai-4.jpg" alt="">
+      </div>
+      <div class="case-footer case-reveal">
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Output</div><div class="case-footer-value">ブランドコンセプト / ロゴ / パッケージ / ラベル / Webサイト</div></div>
+        </div>
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Team</div><div class="case-footer-value">newparade Creative Boutique</div></div>
+          <div><div class="case-footer-label">Role</div><div class="case-footer-value">企画 / AD / デザイン</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12: Case Study 3 - MATCHA STYLE -->
+<div class="slide slide-case" data-slide="12">
+  <div class="case-scroll">
+    <div class="case-fv">
+      <img src="images/matcha-1.jpg" alt="MATCHA STYLE">
+      <div class="case-fv-overlay">
+        <div class="case-num">Case 03</div>
+        <h2>MATCHA STYLE</h2>
+        <p class="case-fv-summary">海外向け抹茶ブランドのクリエイティブ全般</p>
+      </div>
+      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-prompt"><div class="prompt-mouse"></div><div class="prompt-text">スクロールして、詳細へ</div></div>
+    </div>
+    <div class="case-info-bar">
+      <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">MATCHA STYLE</div></div>
+      <div class="case-info-item"><div class="case-info-label">Year</div><div class="case-info-value">2024</div></div>
+      <div class="case-info-item"><div class="case-info-label">Scope</div><div class="case-info-value">ブランドVI / パッケージ / ラベル</div></div>
+      <div class="case-services">
+        <span class="case-service-tag">Branding</span>
+        <span class="case-service-tag">Creative Direction</span>
+      </div>
+    </div>
+    <div class="case-body">
+      <p class="case-overview case-reveal">
+        パッケージ・ラベルをアートディレクションで統括。<br>
+        日本の抹茶をグローバルに展開するための、モダンで洗練されたブランドビジュアルを構築しました。<br>
+        海外市場における「日本品質」の信頼性と、現代的なライフスタイルブランドとしての魅力を一つのビジュアルに凝縮しています。
+      </p>
+      <div class="case-two-col case-reveal">
+        <div>
+          <div class="case-col-label">Challenge</div>
+          <p class="case-col-text">日本の抹茶を海外市場に向けて「モダンで洗練された」ブランドとして展開する。従来の和風デザインでは海外消費者に届きにくく、かといって和のエッセンスを排除すれば抹茶の本質が失われる。この両立が最大の設計課題でした。競合ひしめく海外の棚で、一目で「日本の本物」と認識されるビジュアルアイデンティティの構築が求められました。</p>
+        </div>
+        <div>
+          <div class="case-col-label">Approach</div>
+          <p class="case-col-text">和のエッセンスを現代的なデザイン言語に翻訳するアプローチを採用。書道や抹茶の所作から抽出した「間」と「余白」をデザイン原則に据え、ミニマルでありながら豊かな世界観を構築。パッケージとブランドビジュアルを統一設計し、カラーパレットには抹茶の深緑を軸にニュートラルトーンを組み合わせ、高級感とナチュラルさを両立させています。</p>
+        </div>
+      </div>
+      <div class="case-img-grid case-img-grid--2">
+        <img src="images/matcha-1.jpg" alt="">
+        <img src="images/matcha-2.jpg" alt="">
+      </div>
+      <div class="case-footer case-reveal">
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Output</div><div class="case-footer-value">ブランドVI / パッケージ / ラベル / 販促物</div></div>
+        </div>
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Team</div><div class="case-footer-value">newparade Creative Boutique</div></div>
+          <div><div class="case-footer-label">Role</div><div class="case-footer-value">AD / デザイン</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13: Case Study 4 - YOICHA -->
+<div class="slide slide-case" data-slide="13">
+  <div class="case-scroll">
+    <div class="case-fv">
+      <img src="images/yoicha-1.jpg" alt="YOICHA">
+      <div class="case-fv-overlay">
+        <div class="case-num">Case 04</div>
+        <h2>YOICHA</h2>
+        <p class="case-fv-summary">CBDボトリングティーのトータルデザイン</p>
+      </div>
+      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-prompt"><div class="prompt-mouse"></div><div class="prompt-text">スクロールして、詳細へ</div></div>
+    </div>
+    <div class="case-info-bar">
+      <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">YOICHA</div></div>
+      <div class="case-info-item"><div class="case-info-label">Year</div><div class="case-info-value">2024</div></div>
+      <div class="case-info-item"><div class="case-info-label">Scope</div><div class="case-info-value">ロゴ / パッケージ / KV</div></div>
+      <div class="case-services">
+        <span class="case-service-tag">Branding</span>
+        <span class="case-service-tag">Creative Direction</span>
+      </div>
+    </div>
+    <div class="case-body">
+      <p class="case-overview case-reveal">
+        ロゴ・パッケージ・KVをトータルデザイン。<br>
+        新カテゴリのプロダクトに、クリーンかつ洗練されたブランドイメージを付与しました。<br>
+        CBD市場が成長する中で、日本発のプレミアムティーブランドとしての独自のポジションを確立するビジュアル戦略を設計しています。
+      </p>
+      <div class="case-img-full case-reveal-img"><img src="images/yoicha-2.jpg" alt=""></div>
+      <div class="case-two-col case-reveal">
+        <div>
+          <div class="case-col-label">Challenge</div>
+          <p class="case-col-text">CBD飲料という新カテゴリのプロダクトを、怪しさを排除しつつ興味を引くデザインに仕上げること。日本市場ではCBDに対する認知がまだ低く、「健康食品」でも「嗜好品」でもない新しいポジションの視覚言語をゼロから開発する必要がありました。店頭で手に取るハードルを下げながらも、プレミアム感と信頼性を担保するバランスが鍵でした。</p>
+        </div>
+        <div>
+          <div class="case-col-label">Approach</div>
+          <p class="case-col-text">「お茶」のカルチャーとCBDのウェルネス性を融合し、クリーンかつ洗練されたトーンで設計。ロゴタイプには日本茶の落ち着きとモダンさを共存させ、パッケージカラーには自然由来の穏やかなパレットを採用。KVではライフスタイルシーンを軸に、「日常の中のリラクゼーション」というブランドメッセージを視覚化しました。手に取りやすさと上質さを両立するパッケージデザインを追求しています。</p>
+        </div>
+      </div>
+      <div class="case-img-grid case-reveal-img">
+        <img src="images/yoicha-1.jpg" alt="">
+        <img src="images/yoicha-2.jpg" alt="">
+        <img src="images/yoicha-3.jpg" alt="">
+        <img src="images/yoicha-4.jpg" alt="">
+      </div>
+      <div class="case-footer case-reveal">
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Output</div><div class="case-footer-value">ロゴ / パッケージ / KV / 販促物</div></div>
+        </div>
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Team</div><div class="case-footer-value">newparade Creative Boutique</div></div>
+          <div><div class="case-footer-label">Role</div><div class="case-footer-value">AD / デザイン</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14: Case Study 5 - TOKIOTOKYO -->
+<div class="slide slide-case" data-slide="14">
+  <div class="case-scroll">
+    <div class="case-fv">
+      <img src="images/tokio-3.jpg" alt="TOKIOTOKYO">
+      <div class="case-fv-overlay">
+        <div class="case-num">Case 05</div>
+        <h2>TOKIOTOKYO</h2>
+        <p class="case-fv-summary">パートナー型ライブハウスのフライヤー制作</p>
+      </div>
+      <div class="case-scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="case-scroll-prompt"><div class="prompt-mouse"></div><div class="prompt-text">スクロールして、詳細へ</div></div>
+    </div>
+    <div class="case-info-bar">
+      <div class="case-info-item"><div class="case-info-label">Client</div><div class="case-info-value">TOKIOTOKYO</div></div>
+      <div class="case-info-item"><div class="case-info-label">Year</div><div class="case-info-value">2024 –</div></div>
+      <div class="case-info-item"><div class="case-info-label">Scope</div><div class="case-info-value">フライヤー / イベントビジュアル</div></div>
+      <div class="case-services">
+        <span class="case-service-tag">Creative Direction</span>
+      </div>
+    </div>
+    <div class="case-body">
+      <p class="case-overview case-reveal">
+        多彩なビジュアル表現で月次更新し、統一感と個性を両立するシリーズデザインを展開。<br>
+        共通のフレームワークの中でアーティストごとの世界観を表現しています。<br>
+        フライヤーが単なる告知ツールではなく、コレクションしたくなるアートピースとして機能することを目指しました。
+      </p>
+      <div class="case-img-full case-reveal-img"><img src="images/tokio-4.jpg" alt=""></div>
+      <div class="case-two-col case-reveal">
+        <div>
+          <div class="case-col-label">Challenge</div>
+          <p class="case-col-text">毎月異なるアーティストのフライヤーを、統一感を保ちつつ個性を表現すること。ライブハウスとしてのブランド認知を継続的に積み上げながら、毎回の新鮮さも欠かせない。出演者のジャンルもロック、エレクトロ、ジャズと幅広く、あらゆる音楽性に対応できる柔軟なデザインフレームワークの構築が課題でした。</p>
+        </div>
+        <div>
+          <div class="case-col-label">Approach</div>
+          <p class="case-col-text">フォーマットとトーンの一貫性を軸に、アーティストごとのビジュアル表現を変化させる設計。共通のグリッドシステムとタイポグラフィルールを維持しながら、色・写真・グラフィック要素で個性を演出。毎月のリリースがSNS上でシリーズとして認知されるよう、「違うのに同じ」というバランスを意識した連作ビジュアルを展開しています。</p>
+        </div>
+      </div>
+      <div class="case-img-grid case-reveal-img">
+        <img src="images/tokio-3.jpg" alt="">
+        <img src="images/tokio-4.jpg" alt="">
+        <img src="images/tokio-5.jpg" alt="">
+        <img src="images/tokio-6.jpg" alt="">
+      </div>
+      <div class="case-footer case-reveal">
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Output</div><div class="case-footer-value">月次フライヤー / イベントビジュアル</div></div>
+        </div>
+        <div class="case-footer-row">
+          <div><div class="case-footer-label">Team</div><div class="case-footer-value">newparade Creative Boutique</div></div>
+          <div><div class="case-footer-label">Role</div><div class="case-footer-value">CD / デザイン</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 15: Works -->
+<div class="slide slide-works" data-slide="15">
+  <div class="mosaic-bg">
+    <img src="images/ego-logo.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/tokio-4.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/nekasehai-2.jpg" alt="">
+    <img src="images/matcha-2.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/yoicha-4.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/ego-3.jpg" alt="">
+    <img src="images/nekasehai-4.jpg" alt=""><img src="images/tokio-6.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/ego-logo.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt="">
+    <img src="images/tokio-4.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/nekasehai-2.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/charm-2.jpg" alt="">
+    <img src="images/richill-pine.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/ego-3.jpg" alt=""><img src="images/yoicha-4.jpg" alt=""><img src="images/tokio-6.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/nekasehai-4.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/ego-logo.jpg" alt="">
+    <img src="images/charm-1.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/ego-1.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/tokio-4.jpg" alt=""><img src="images/ego-2.jpg" alt="">
+    <img src="images/nekasehai-2.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/yoicha-2.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/ego-3.jpg" alt=""><img src="images/nekasehai-3.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/tokio-6.jpg" alt=""><img src="images/yoicha-4.jpg" alt="">
+    <img src="images/ego-1.jpg" alt=""><img src="images/matcha-2.jpg" alt=""><img src="images/tokio-3.jpg" alt=""><img src="images/nekasehai-1.jpg" alt=""><img src="images/charm-1.jpg" alt=""><img src="images/yoicha-1.jpg" alt=""><img src="images/parallel-1.jpg" alt=""><img src="images/ego-2.jpg" alt=""><img src="images/curry-1.jpg" alt=""><img src="images/tokio-4.jpg" alt="">
+    <img src="images/nekasehai-4.jpg" alt=""><img src="images/matcha-1.jpg" alt=""><img src="images/ego-logo.jpg" alt=""><img src="images/richill-pine.jpg" alt=""><img src="images/tokio-5.jpg" alt=""><img src="images/yoicha-3.jpg" alt=""><img src="images/charm-2.jpg" alt=""><img src="images/ego-3.jpg" alt=""><img src="images/curry-2.jpg" alt=""><img src="images/nekasehai-2.jpg" alt="">
+  </div>
+  <div class="mosaic-vignette"></div>
+  <div class="page-num">15 / 16</div>
+</div>
+
+<!-- SLIDE 16: Contact -->
+<div class="slide slide-contact" data-slide="16">
+  <div class="label">Get in Touch</div>
+  <h1>Let's Create<br>Together.</h1>
+  <div class="contact-info">
+    <div class="contact-item"><div class="ci-label">Email</div><div class="ci-value">hello@newparade.jp</div></div>
+    <div class="contact-item"><div class="ci-label">Web</div><div class="ci-value">newparade.jp</div></div>
+    <div class="contact-item"><div class="ci-label">Location</div><div class="ci-value">Tokyo, Japan</div></div>
+  </div>
+  <div class="page-num">16 / 16</div>
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <span class="counter"><span id="current">1</span> / 16</span>
+  <button id="prev">&larr;</button>
+  <button id="next">&rarr;</button>
+</div>
+
+<script>
+  // Mobile scale
+  function updateSlideScale() {
+    if (window.innerWidth <= 768) {
+      const scale = window.innerWidth / 1280;
+      document.documentElement.style.setProperty('--slide-scale', scale);
+    } else {
+      document.documentElement.style.removeProperty('--slide-scale');
+    }
+  }
+  updateSlideScale();
+  window.addEventListener('resize', updateSlideScale);
+
+  let current = 1;
+  const total = 16;
+  function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    const slide = document.querySelector(`[data-slide="${n}"]`);
+    slide.classList.add('active');
+    document.getElementById('current').textContent = n;
+    // Reset scroll and reveal states for case study slides
+    if (slide.classList.contains('slide-case')) {
+      slide.scrollTop = 0;
+      slide.querySelectorAll('.case-reveal.is-visible').forEach(el => el.classList.remove('is-visible'));
+      slide.querySelectorAll('.case-reveal-img.is-visible').forEach(el => el.classList.remove('is-visible'));
+      slide.querySelectorAll('.case-img-grid.is-visible').forEach(el => el.classList.remove('is-visible'));
+      slide.querySelectorAll('.case-two-col.is-visible').forEach(el => el.classList.remove('is-visible'));
+      slide.querySelectorAll('.case-scroll-hint.is-hidden').forEach(el => el.classList.remove('is-hidden'));
+      // Show center scroll prompt, then auto-dismiss
+      slide.querySelectorAll('.case-scroll-prompt').forEach(el => {
+        el.classList.remove('is-showing');
+        setTimeout(() => el.classList.add('is-showing'), 500);
+        setTimeout(() => el.classList.remove('is-showing'), 2800);
+      });
+    }
+  }
+  document.getElementById('next').addEventListener('click', () => { if (current < total) { current++; showSlide(current); } });
+  document.getElementById('prev').addEventListener('click', () => { if (current > 1) { current--; showSlide(current); } });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); if (current < total) { current++; showSlide(current); } }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); if (current > 1) { current--; showSlide(current); } }
+    // Space scrolls case study slides, advances others
+    if (e.key === ' ') {
+      const activeSlide = document.querySelector('.slide.active');
+      if (activeSlide && activeSlide.classList.contains('slide-case')) {
+        // Let space scroll naturally in case study
+        return;
+      }
+      e.preventDefault();
+      if (current < total) { current++; showSlide(current); }
+    }
+  });
+
+  // Touch swipe - horizontal only (vertical scroll is native in case study slides)
+  let touchStartX = 0;
+  let touchStartY = 0;
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    const dy = e.changedTouches[0].screenY - touchStartY;
+    // Only trigger slide change for strong horizontal swipes
+    if (Math.abs(dx) < 80 || Math.abs(dy) > Math.abs(dx) * 0.5) return;
+    if (dx < 0 && current < total) { current++; showSlide(current); }
+    if (dx > 0 && current > 1) { current--; showSlide(current); }
+  }, { passive: true });
+
+  // Hide scroll hint on scroll
+  document.querySelectorAll('.slide-case').forEach(slide => {
+    slide.addEventListener('scroll', () => {
+      const hint = slide.querySelector('.case-scroll-hint');
+      if (hint) {
+        if (slide.scrollTop > 60) hint.classList.add('is-hidden');
+        else hint.classList.remove('is-hidden');
+      }
+    }, { passive: true });
+  });
+
+  // IntersectionObserver for scroll-triggered animations in Case Study slides
+  (function initCaseReveal() {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.case-reveal, .case-reveal-img, .case-img-grid, .case-two-col').forEach(el => {
+      revealObserver.observe(el);
+    });
+
+    // Also observe within each case slide's scroll container
+    document.querySelectorAll('.slide-case').forEach(slide => {
+      const slideObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          }
+        });
+      }, { root: slide, threshold: 0.15 });
+
+      slide.querySelectorAll('.case-reveal, .case-reveal-img, .case-img-grid, .case-two-col').forEach(el => {
+        slideObserver.observe(el);
+      });
+    });
+  })();
+
+</script>
+
+<script>
+(function initConceptParticles() {
+  const canvas = document.getElementById('concept-particles');
+  if (!canvas) return;
+
+  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  if (!gl) return;
+
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  function resize() {
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // ── Shaders ──
+  // Dense light particles with story told through brightness waves:
+  //   inward wave (企画) → center bloom (つくる) → outward wave (届ける)
+  const vsSource = `
+    attribute vec2 a_pos;
+    attribute float a_brightness;
+    attribute float a_size;
+    attribute float a_twinkleSpeed;
+    attribute float a_twinklePhase;
+    attribute float a_depth;
+    uniform float u_time;
+    uniform vec2 u_mouse;
+    uniform float u_aspect;
+    varying float v_alpha;
+    varying float v_temp;
+
+    void main() {
+      vec2 pos = a_pos;
+
+      // Parallax from mouse
+      float parallax = a_depth * 0.05;
+      pos.x += u_mouse.x * parallax / u_aspect;
+      pos.y += u_mouse.y * parallax;
+
+      // Gentle drift
+      pos.x += sin(u_time * 0.08 + a_twinklePhase * 3.0) * 0.003 * a_depth;
+      pos.y += cos(u_time * 0.06 + a_twinklePhase * 2.0) * 0.002 * a_depth;
+
+      // ── Story wave: brightness ripple ──
+      // Slow cycle ~25s. Wave travels: outer→center (企画), center bloom (つくる), center→outer (届ける)
+      float cycle = fract(u_time * 0.08);
+      float dist = length(a_pos); // original distance from center (0~1.6)
+      float normDist = dist / 1.2; // normalize to ~0-1
+
+      // Per-particle random offset to break uniform ring shape
+      float rnd = fract(sin(a_twinklePhase * 127.1 + a_depth * 311.7) * 43758.5453);
+      float distJitter = normDist + (rnd - 0.5) * 0.35; // scatter the ring detection
+
+      float wave = 0.0;
+      if (cycle < 0.35) {
+        // 企画: scattered inward flow — particles light up irregularly toward center
+        float wavePos = 1.0 - cycle / 0.35; // 1→0
+        float d = abs(distJitter - wavePos);
+        wave = smoothstep(0.4, 0.0, d) * (0.5 + rnd * 0.5);
+      } else if (cycle < 0.55) {
+        // つくる: center bloom — particles near center glow
+        float t = (cycle - 0.35) / 0.2;
+        float pulse = sin(t * 3.14159);
+        wave = pulse * smoothstep(0.5, 0.0, normDist);
+      } else {
+        // 届ける: scattered outward flow
+        float wavePos = (cycle - 0.55) / 0.45; // 0→1
+        float d = abs(distJitter - wavePos);
+        wave = smoothstep(0.4, 0.0, d) * (0.5 + rnd * 0.5);
+      }
+
+      // Twinkle
+      float twinkle = 0.5 + 0.5 * sin(u_time * a_twinkleSpeed + a_twinklePhase);
+
+      float brightness = a_brightness * (0.4 + 0.6 * twinkle) + wave * 0.5;
+      float sizeMul = 1.0 + wave * 0.4;
+
+      gl_Position = vec4(pos, 0.0, 1.0);
+      gl_PointSize = a_size * sizeMul * (0.8 + 0.2 * twinkle);
+      v_alpha = min(brightness, 1.0);
+      v_temp = a_depth;
+    }
+  `;
+
+  const fsSource = `
+    precision mediump float;
+    varying float v_alpha;
+    varying float v_temp;
+
+    void main() {
+      float d = length(gl_PointCoord - 0.5);
+      if (d > 0.5) discard;
+
+      float core = smoothstep(0.5, 0.0, d);
+      float glow = exp(-d * 6.0);
+      float shape = core * 0.6 + glow * 0.4;
+
+      // Color temperature
+      vec3 warm = vec3(1.0, 0.92, 0.7);
+      vec3 neutral = vec3(0.97, 0.95, 0.9);
+      vec3 cool = vec3(0.85, 0.9, 1.0);
+      vec3 col = v_temp < 0.5
+        ? mix(warm, neutral, v_temp * 2.0)
+        : mix(neutral, cool, (v_temp - 0.5) * 2.0);
+
+      gl_FragColor = vec4(col, shape * v_alpha);
+    }
+  `;
+
+  function createShader(type, source) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, source);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+    return s;
+  }
+
+  const vs = createShader(gl.VERTEX_SHADER, vsSource);
+  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
+  gl.useProgram(program);
+
+  // ── Star field data ──
+  const COUNT = 150000;
+  const posArr = new Float32Array(COUNT * 2);
+  const brightArr = new Float32Array(COUNT);
+  const sizeArr = new Float32Array(COUNT);
+  const twinkleSpeedArr = new Float32Array(COUNT);
+  const twinklePhaseArr = new Float32Array(COUNT);
+  const depthArr = new Float32Array(COUNT);
+
+  for (let i = 0; i < COUNT; i++) {
+    // Spread across entire screen with slight center concentration
+    const cx = (Math.random() + Math.random()) / 2; // mild center bias
+    const cy = (Math.random() + Math.random()) / 2;
+    posArr[i * 2] = (cx * 2 - 1) * 1.15;     // x: -1.15 to 1.15
+    posArr[i * 2 + 1] = (cy * 2 - 1) * 1.15;  // y: -1.15 to 1.15
+
+    // Depth layer (0=far, 1=near) — affects parallax, size, brightness
+    const depth = Math.random();
+    depthArr[i] = depth;
+
+    // Most stars dim, few bright — exponential distribution
+    const rawBright = Math.pow(Math.random(), 2.5);
+    brightArr[i] = 0.15 + rawBright * 0.85;
+
+    // Mostly tiny particles, rare bright stars
+    const isBright = Math.random() < 0.003;
+    if (isBright) {
+      sizeArr[i] = (2.5 + Math.random() * 3.0) * dpr;
+      brightArr[i] = 0.7 + Math.random() * 0.3;
+    } else {
+      sizeArr[i] = (0.4 + depth * 0.8 + Math.random() * 0.8) * dpr;
+    }
+
+    // Twinkle: each star has its own frequency and phase
+    twinkleSpeedArr[i] = 0.5 + Math.random() * 3.0;
+    twinklePhaseArr[i] = Math.random() * Math.PI * 2;
+  }
+
+  function createBuffer(data, attrib, perVertex) {
+    const loc = gl.getAttribLocation(program, attrib);
+    if (loc === -1) return;
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, perVertex, gl.FLOAT, false, 0, 0);
+  }
+
+  createBuffer(posArr, 'a_pos', 2);
+  createBuffer(brightArr, 'a_brightness', 1);
+  createBuffer(sizeArr, 'a_size', 1);
+  createBuffer(twinkleSpeedArr, 'a_twinkleSpeed', 1);
+  createBuffer(twinklePhaseArr, 'a_twinklePhase', 1);
+  createBuffer(depthArr, 'a_depth', 1);
+
+  const uTime = gl.getUniformLocation(program, 'u_time');
+  const uMouse = gl.getUniformLocation(program, 'u_mouse');
+  const uAspect = gl.getUniformLocation(program, 'u_aspect');
+
+  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+  window.addEventListener('mousemove', (e) => {
+    mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.ty = -(e.clientY / window.innerHeight) * 2 + 1;
+  });
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE); // Additive for star glow
+  gl.clearColor(0, 0, 0, 0);
+
+  let time = 0;
+  let lastFrame = 0;
+  function animate(now) {
+    requestAnimationFrame(animate);
+
+    const conceptSlide = document.querySelector('[data-slide="3"]');
+    if (!conceptSlide || !conceptSlide.classList.contains('active')) { lastFrame = now; return; }
+
+    const dt = Math.min((now - lastFrame) / 1000, 0.05); // cap at 50ms
+    lastFrame = now;
+
+    mouse.x += (mouse.tx - mouse.x) * 0.03;
+    mouse.y += (mouse.ty - mouse.y) * 0.03;
+
+    time += dt;
+    const aspect = canvas.width / canvas.height;
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(uTime, time);
+    gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.uniform1f(uAspect, aspect);
+    gl.drawArrays(gl.POINTS, 0, COUNT);
+  }
+  animate();
+})();
+</script>
+
+<script>
+// Why newparade — Stage lighting blobs (slow, atmospheric, culture feel)
+(function() {
+  const canvas = document.getElementById('why-particles');
+  if (!canvas) return;
+
+  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  if (!gl) return;
+
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  function resize() {
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Full-screen quad
+  const vsSource = `
+    attribute vec2 a_pos;
+    varying vec2 v_uv;
+    void main() {
+      v_uv = a_pos * 0.5 + 0.5;
+      gl_Position = vec4(a_pos, 0.0, 1.0);
+    }
+  `;
+
+  const fsSource = `
+    precision highp float;
+    varying vec2 v_uv;
+    uniform float u_time;
+    uniform float u_aspect;
+
+    // Smooth noise
+    vec2 hash(vec2 p) {
+      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+      return -1.0 + 2.0 * fract(sin(p) * 43758.5453);
+    }
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+      return mix(
+        mix(dot(hash(i), f), dot(hash(i + vec2(1,0)), f - vec2(1,0)), u.x),
+        mix(dot(hash(i + vec2(0,1)), f - vec2(0,1)), dot(hash(i + vec2(1,1)), f - vec2(1,1)), u.x),
+        u.y
+      );
+    }
+    float fbm(vec2 p) {
+      float v = 0.0;
+      float a = 0.5;
+      for (int i = 0; i < 4; i++) {
+        v += a * noise(p);
+        p *= 2.0;
+        a *= 0.5;
+      }
+      return v;
+    }
+
+    void main() {
+      vec2 uv = v_uv;
+      uv.x *= u_aspect;
+      float t = u_time * 0.25;
+
+      // 4 large blobs drifting
+      float blob1 = fbm(uv * 1.2 + vec2(t * 0.3, t * 0.2));
+      float blob2 = fbm(uv * 1.0 + vec2(-t * 0.25, t * 0.35) + 5.0);
+      float blob3 = fbm(uv * 0.8 + vec2(t * 0.15, -t * 0.2) + 10.0);
+      float blob4 = fbm(uv * 1.5 + vec2(-t * 0.2, -t * 0.15) + 15.0);
+
+      // Soft blob shapes — more visible
+      float b1 = smoothstep(-0.1, 0.4, blob1) * 0.8;
+      float b2 = smoothstep(-0.05, 0.45, blob2) * 0.7;
+      float b3 = smoothstep(-0.15, 0.35, blob3) * 0.6;
+      float b4 = smoothstep(0.0, 0.4, blob4) * 0.5;
+
+      // Liquid abstract — deep teal × hot orange × dark
+      vec3 deepTeal  = vec3(0.05, 0.3, 0.35);  // dark teal green
+      vec3 hotOrange = vec3(0.85, 0.35, 0.05); // vivid hot orange
+      vec3 ember     = vec3(0.7, 0.15, 0.02);  // deep red-orange ember
+      vec3 darkTeal  = vec3(0.02, 0.18, 0.2);  // near-black teal
+
+      vec3 col = vec3(0.0);
+      col += deepTeal * b1;
+      col += hotOrange * b2;
+      col += ember * b3;
+      col += darkTeal * b4;
+
+      // Subtle vignette — darker at edges
+      vec2 center = v_uv - 0.5;
+      float vig = 1.0 - dot(center, center) * 1.2;
+      vig = clamp(vig, 0.0, 1.0);
+      col *= vig;
+
+      // Overall opacity — atmospheric, not overpowering
+      float alpha = length(col) * 3.5;
+      alpha = min(alpha, 0.55);
+
+      gl_FragColor = vec4(col, alpha);
+    }
+  `;
+
+  function createShader(type, source) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, source);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+    return s;
+  }
+
+  const vs = createShader(gl.VERTEX_SHADER, vsSource);
+  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
+  gl.useProgram(program);
+
+  // Full-screen quad
+  const quadVerts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(program, 'a_pos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uTime = gl.getUniformLocation(program, 'u_time');
+  const uAspect = gl.getUniformLocation(program, 'u_aspect');
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+  gl.clearColor(0, 0, 0, 0);
+
+  let time = 0;
+  let lastFrame = 0;
+  function animate(now) {
+    requestAnimationFrame(animate);
+
+    const whySlide = document.querySelector('[data-slide="4"]');
+    if (!whySlide || !whySlide.classList.contains('active')) { lastFrame = now; return; }
+
+    const dt = Math.min((now - lastFrame) / 1000, 0.05);
+    lastFrame = now;
+    time += dt;
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(uTime, time);
+    gl.uniform1f(uAspect, canvas.width / canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+  animate(0);
+})();
+</script>
+
+<script>
+// Menu — Flowing gradient mesh (teal × magenta × orange, culture-forward)
+(function() {
+  const canvas = document.getElementById('menu-particles');
+  if (!canvas) return;
+
+  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  if (!gl) return;
+
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  function resize() {
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const vsSource = `
+    attribute vec2 a_pos;
+    varying vec2 v_uv;
+    void main() {
+      v_uv = a_pos * 0.5 + 0.5;
+      gl_Position = vec4(a_pos, 0.0, 1.0);
+    }
+  `;
+
+  const fsSource = `
+    precision highp float;
+    varying vec2 v_uv;
+    uniform float u_time;
+    uniform float u_aspect;
+
+    vec2 hash(vec2 p) {
+      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+      return -1.0 + 2.0 * fract(sin(p) * 43758.5453);
+    }
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+      return mix(
+        mix(dot(hash(i), f), dot(hash(i + vec2(1,0)), f - vec2(1,0)), u.x),
+        mix(dot(hash(i + vec2(0,1)), f - vec2(0,1)), dot(hash(i + vec2(1,1)), f - vec2(1,1)), u.x),
+        u.y
+      );
+    }
+    float fbm(vec2 p) {
+      float v = 0.0; float a = 0.5;
+      for (int i = 0; i < 5; i++) {
+        v += a * noise(p);
+        p *= 2.0; a *= 0.5;
+      }
+      return v;
+    }
+
+    void main() {
+      vec2 uv = v_uv;
+      uv.x *= u_aspect;
+      float t = u_time * 0.2;
+
+      // Domain warping — gives organic flowing motion
+      float warp1 = fbm(uv * 1.5 + t * 0.3);
+      float warp2 = fbm(uv * 1.5 - t * 0.2 + 5.0);
+      vec2 warped = uv + vec2(warp1, warp2) * 0.4;
+
+      // Second pass warp for extra fluidity
+      float w2a = fbm(warped * 1.8 + t * 0.15);
+      float w2b = fbm(warped * 1.8 - t * 0.12 + 10.0);
+      vec2 warped2 = warped + vec2(w2a, w2b) * 0.2;
+
+      // Color field from double-warped coordinates
+      float field = fbm(warped2 * 2.0 + t * 0.1);
+
+      // Color gradient — teal to warm orange via magenta
+      vec3 teal    = vec3(0.04, 0.22, 0.28);
+      vec3 magenta = vec3(0.35, 0.06, 0.2);
+      vec3 orange  = vec3(0.5, 0.2, 0.02);
+      vec3 deep    = vec3(0.02, 0.08, 0.12);
+
+      // Map field to colors
+      float f = field * 0.5 + 0.5;
+      vec3 col;
+      if (f < 0.33) {
+        col = mix(deep, teal, f / 0.33);
+      } else if (f < 0.66) {
+        col = mix(teal, magenta, (f - 0.33) / 0.33);
+      } else {
+        col = mix(magenta, orange, (f - 0.66) / 0.34);
+      }
+
+      // Add subtle highlight streaks
+      float streak = smoothstep(0.15, 0.0, abs(fbm(warped2 * 3.0 + t * 0.08) - 0.1));
+      col += vec3(0.15, 0.08, 0.04) * streak * 0.5;
+
+      // Vignette — darker edges, keeps center readable
+      vec2 center = v_uv - 0.5;
+      float vig = 1.0 - dot(center, center) * 1.8;
+      col *= clamp(vig, 0.3, 1.0);
+
+      // Alpha — visible but not overpowering
+      float alpha = 0.55;
+
+      gl_FragColor = vec4(col, alpha);
+    }
+  `;
+
+  function createShader(type, source) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, source);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+    return s;
+  }
+
+  const vs = createShader(gl.VERTEX_SHADER, vsSource);
+  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
+  gl.useProgram(program);
+
+  const quadVerts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(program, 'a_pos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uTime = gl.getUniformLocation(program, 'u_time');
+  const uAspect = gl.getUniformLocation(program, 'u_aspect');
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+  gl.clearColor(0, 0, 0, 0);
+
+  let time = 0;
+  let lastFrame = 0;
+  function animate(now) {
+    requestAnimationFrame(animate);
+
+    const menuSlide = document.querySelector('[data-slide="5"]');
+    if (!menuSlide || !menuSlide.classList.contains('active')) { lastFrame = now; return; }
+
+    const dt = Math.min((now - lastFrame) / 1000, 0.05);
+    lastFrame = now;
+    time += dt;
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(uTime, time);
+    gl.uniform1f(uAspect, canvas.width / canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+  animate(0);
+})();
+</script>
+
+</body>
+</html>
