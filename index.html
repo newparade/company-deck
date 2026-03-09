@@ -1770,16 +1770,16 @@
     void main() {
       vec2 uv = v_uv;
       uv.x *= u_aspect;
-      float t = u_time * 0.12;
+      float t = u_time * 0.25;
 
-      // Moderate warp for visible but calm movement
+      // Visible flowing warp
       vec2 warp = uv;
-      warp += vec2(fbm(uv * 1.0 + t * 0.2), fbm(uv * 1.0 - t * 0.15 + 5.0)) * 0.18;
+      warp += vec2(fbm(uv * 1.2 + t * 0.35), fbm(uv * 1.2 - t * 0.25 + 5.0)) * 0.25;
 
-      // Soft color fields
-      float f1 = fbm(warp * 1.4 + t * 0.12);
-      float f2 = fbm(warp * 1.2 - t * 0.1 + 10.0);
-      float f3 = fbm(warp * 0.9 + t * 0.07 + 20.0);
+      // Soft color fields with clear motion
+      float f1 = fbm(warp * 1.6 + t * 0.2);
+      float f2 = fbm(warp * 1.3 - t * 0.18 + 10.0);
+      float f3 = fbm(warp * 1.0 + t * 0.12 + 20.0);
 
       float blob1 = smoothstep(-0.1, 0.35, f1);
       float blob2 = smoothstep(-0.05, 0.4, f2);
