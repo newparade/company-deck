@@ -224,10 +224,12 @@
     width: 1px; height: 40px; background: rgba(255,255,255,0.15); position: relative; overflow: hidden;
     align-self: center; flex-shrink: 0; margin: 0 -1px;
   }
-  /* Arrow between steps */
+  /* Chevron between steps */
   .flow-step + .flow-step::before {
-    content: '→'; position: absolute; left: -0.5em; top: 50%; transform: translate(-50%, -50%);
-    font-size: 16px; color: rgba(255,255,255,0.25); z-index: 1;
+    content: ''; position: absolute; left: -1px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0;
+    border-top: 8px solid transparent; border-bottom: 8px solid transparent;
+    border-left: 8px solid rgba(255,255,255,0.12);
   }
 
   /* Menu Overview */
