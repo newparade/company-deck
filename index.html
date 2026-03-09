@@ -1778,6 +1778,7 @@
     uniform vec2 u_mouse;
     uniform float u_aspect;
     uniform vec2 u_resolution;
+    uniform float u_dpr;
     varying float v_alpha;
     varying float v_temp;
 
@@ -1818,7 +1819,7 @@
 
       // Size pulsing with wave
       float baseSize = 1.2 + wave * 1.8;
-      gl_PointSize = baseSize * dpr * (u_resolution.y / 900.0);
+      gl_PointSize = baseSize * u_dpr * (u_resolution.y / 900.0);
 
       // Alpha: wave-driven brightness
       float edgeFade = smoothstep(1.15, 0.85, abs(a_gridPos.x))
@@ -1897,6 +1898,7 @@
   const uMouse = gl.getUniformLocation(program, 'u_mouse');
   const uAspect = gl.getUniformLocation(program, 'u_aspect');
   const uRes = gl.getUniformLocation(program, 'u_resolution');
+  const uDpr = gl.getUniformLocation(program, 'u_dpr');
 
   const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
   window.addEventListener('mousemove', (e) => {
@@ -1926,6 +1928,7 @@
     gl.uniform2f(uMouse, mouse.x, mouse.y);
     gl.uniform1f(uAspect, canvas.width / canvas.height);
     gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.uniform1f(uDpr, dpr);
     gl.drawArrays(gl.POINTS, 0, NUM);
   }
   animate(0);
