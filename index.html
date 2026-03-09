@@ -1607,25 +1607,25 @@
     void main() {
       vec2 uv = v_uv;
       uv.x *= u_aspect;
-      float t = u_time * 0.08; // very slow
+      float t = u_time * 0.25;
 
-      // 4 large blobs drifting slowly
+      // 4 large blobs drifting
       float blob1 = fbm(uv * 1.2 + vec2(t * 0.3, t * 0.2));
       float blob2 = fbm(uv * 1.0 + vec2(-t * 0.25, t * 0.35) + 5.0);
       float blob3 = fbm(uv * 0.8 + vec2(t * 0.15, -t * 0.2) + 10.0);
       float blob4 = fbm(uv * 1.5 + vec2(-t * 0.2, -t * 0.15) + 15.0);
 
-      // Soft blob shapes
-      float b1 = smoothstep(0.1, 0.5, blob1) * 0.6;
-      float b2 = smoothstep(0.15, 0.55, blob2) * 0.5;
-      float b3 = smoothstep(0.05, 0.45, blob3) * 0.4;
-      float b4 = smoothstep(0.2, 0.5, blob4) * 0.35;
+      // Soft blob shapes — more visible
+      float b1 = smoothstep(-0.1, 0.4, blob1) * 0.8;
+      float b2 = smoothstep(-0.05, 0.45, blob2) * 0.7;
+      float b3 = smoothstep(-0.15, 0.35, blob3) * 0.6;
+      float b4 = smoothstep(0.0, 0.4, blob4) * 0.5;
 
-      // Culture colors — deep, rich, moody
-      vec3 indigo  = vec3(0.15, 0.08, 0.35);  // deep indigo
-      vec3 magenta = vec3(0.35, 0.05, 0.25);  // dark magenta
-      vec3 teal    = vec3(0.02, 0.18, 0.22);  // dark teal
-      vec3 amber   = vec3(0.3, 0.15, 0.02);   // dark amber
+      // Culture colors — richer, more visible
+      vec3 indigo  = vec3(0.25, 0.12, 0.55);  // indigo
+      vec3 magenta = vec3(0.5, 0.08, 0.35);   // magenta
+      vec3 teal    = vec3(0.04, 0.3, 0.35);   // teal
+      vec3 amber   = vec3(0.45, 0.22, 0.04);  // amber
 
       vec3 col = vec3(0.0);
       col += indigo * b1;
@@ -1640,8 +1640,8 @@
       col *= vig;
 
       // Overall opacity — atmospheric, not overpowering
-      float alpha = length(col) * 2.5;
-      alpha = min(alpha, 0.35);
+      float alpha = length(col) * 3.5;
+      alpha = min(alpha, 0.55);
 
       gl_FragColor = vec4(col, alpha);
     }
