@@ -1547,248 +1547,378 @@
 </script>
 
 <script>
-// Shared particle system for Why newparade (slide 4) & Menu (slide 5)
-// Same design language as Concept: point particles, additive blend, twinkle, parallax
-// Variation: different density, distribution, wave patterns per slide
+// Why newparade — Generative flowing lines (thread-like curves)
 (function() {
-  function initSlideParticles(canvasId, slideSelector, config) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
+  const canvas = document.getElementById('why-particles');
+  if (!canvas) return;
+  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  if (!gl) return;
 
-    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-    if (!gl) return;
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  function resize() {
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
 
-    const dpr = Math.min(window.devicePixelRatio, 2);
-    function resize() {
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = window.innerWidth + 'px';
-      canvas.style.height = window.innerHeight + 'px';
-      gl.viewport(0, 0, canvas.width, canvas.height);
+  // Many short line segments that form flowing curves
+  const NUM_LINES = 3000;
+  const SEGS = 8; // segments per line
+  const TOTAL_VERTS = NUM_LINES * SEGS * 2; // 2 verts per segment
+
+  const vsSource = `
+    attribute vec2 a_pos;
+    attribute float a_phase;
+    attribute float a_depth;
+    attribute float a_progress;
+    uniform float u_time;
+    uniform vec2 u_mouse;
+    uniform float u_aspect;
+    varying float v_alpha;
+    varying float v_temp;
+
+    // Simple noise in shader
+    float hash(vec2 p) {
+      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
     }
-    resize();
-    window.addEventListener('resize', resize);
-
-    const vsSource = `
-      attribute vec2 a_pos;
-      attribute float a_brightness;
-      attribute float a_size;
-      attribute float a_twinkleSpeed;
-      attribute float a_twinklePhase;
-      attribute float a_depth;
-      uniform float u_time;
-      uniform vec2 u_mouse;
-      uniform float u_aspect;
-      uniform float u_waveMode;
-      varying float v_alpha;
-      varying float v_temp;
-
-      void main() {
-        vec2 pos = a_pos;
-        float rnd = fract(sin(a_twinklePhase * 127.1 + a_depth * 311.7) * 43758.5453);
-        float dist = length(a_pos);
-        float normDist = dist / 1.2;
-        float wave = 0.0;
-
-        if (u_waveMode < 0.5) {
-          // Why newparade: VORTEX — particles slowly orbit center
-          float angle = atan(a_pos.y, a_pos.x);
-          float speed = 0.15 + (1.0 - normDist) * 0.1; // inner orbits faster
-          float t = u_time * speed + rnd * 6.28;
-          float r = dist;
-          // Slight inward/outward breathing
-          r += sin(u_time * 0.12 + a_twinklePhase) * 0.03;
-          pos.x = cos(angle + t * 0.08) * r;
-          pos.y = sin(angle + t * 0.08) * r;
-          // Brightness pulse radiates outward
-          float pulse = sin(u_time * 0.3 - normDist * 5.0 + rnd * 2.0);
-          wave = max(pulse, 0.0) * 0.5;
-        } else {
-          // Menu: HORIZONTAL FLOW — particles drift rightward like a current
-          float speed = 0.02 + rnd * 0.03 + a_depth * 0.02;
-          pos.x = mod(a_pos.x + 1.3 + u_time * speed, 2.6) - 1.3;
-          // Gentle vertical wave
-          pos.y += sin(u_time * 0.15 + a_pos.x * 2.0 + a_twinklePhase) * 0.02;
-          // Brightness wave travels with flow
-          float xNorm = (pos.x + 1.3) / 2.6;
-          float flowWave = sin(u_time * 0.4 - xNorm * 8.0 + rnd * 3.0);
-          wave = max(flowWave, 0.0) * 0.4;
-        }
-
-        // Parallax from mouse
-        float parallax = a_depth * 0.04;
-        pos.x += u_mouse.x * parallax / u_aspect;
-        pos.y += u_mouse.y * parallax;
-
-        // Twinkle
-        float twinkle = 0.5 + 0.5 * sin(u_time * a_twinkleSpeed + a_twinklePhase);
-
-        float brightness = a_brightness * (0.4 + 0.6 * twinkle) + wave * 0.4;
-        float sizeMul = 1.0 + wave * 0.3;
-
-        gl_Position = vec4(pos, 0.0, 1.0);
-        gl_PointSize = a_size * sizeMul * (0.8 + 0.2 * twinkle);
-        v_alpha = min(brightness, 1.0);
-        v_temp = a_depth;
-      }
-    `;
-
-    const fsSource = `
-      precision mediump float;
-      varying float v_alpha;
-      varying float v_temp;
-
-      void main() {
-        float d = length(gl_PointCoord - 0.5);
-        if (d > 0.5) discard;
-
-        float core = smoothstep(0.5, 0.0, d);
-        float glow = exp(-d * 6.0);
-        float shape = core * 0.6 + glow * 0.4;
-
-        // Same color temperature as Concept
-        vec3 warm = vec3(1.0, 0.92, 0.7);
-        vec3 neutral = vec3(0.97, 0.95, 0.9);
-        vec3 cool = vec3(0.85, 0.9, 1.0);
-        vec3 col = v_temp < 0.5
-          ? mix(warm, neutral, v_temp * 2.0)
-          : mix(neutral, cool, (v_temp - 0.5) * 2.0);
-
-        gl_FragColor = vec4(col, shape * v_alpha);
-      }
-    `;
-
-    function createShader(type, source) {
-      const s = gl.createShader(type);
-      gl.shaderSource(s, source);
-      gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
-      return s;
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      f = f * f * (3.0 - 2.0 * f);
+      return mix(
+        mix(hash(i), hash(i + vec2(1, 0)), f.x),
+        mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x),
+        f.y
+      );
     }
 
-    const vs = createShader(gl.VERTEX_SHADER, vsSource);
-    const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
-    const program = gl.createProgram();
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
-    gl.useProgram(program);
+    void main() {
+      float t = u_time * 0.12;
+      vec2 pos = a_pos;
 
-    const COUNT = config.count;
-    const posArr = new Float32Array(COUNT * 2);
-    const brightArr = new Float32Array(COUNT);
-    const sizeArr = new Float32Array(COUNT);
-    const twinkleSpeedArr = new Float32Array(COUNT);
-    const twinklePhaseArr = new Float32Array(COUNT);
-    const depthArr = new Float32Array(COUNT);
+      // Flow field displacement — each point follows a noise-based vector field
+      float n1 = noise(pos * 1.5 + t * 0.3 + a_phase);
+      float n2 = noise(pos * 1.5 - t * 0.2 + a_phase + 5.0);
+      float angle = (n1 - 0.5) * 6.28;
+      pos += vec2(cos(angle), sin(angle)) * 0.06 * a_depth;
 
-    for (let i = 0; i < COUNT; i++) {
-      // Distribution varies by config
-      let x, y;
-      if (config.distribution === 'wide') {
-        // Wider spread, less center bias — for Why (text in upper half, cards in lower)
-        x = (Math.random() * 2 - 1) * 1.3;
-        y = (Math.random() * 2 - 1) * 1.3;
-      } else {
-        // Even spread across full area — for Menu
-        x = (Math.random() * 2 - 1) * 1.2;
-        y = (Math.random() * 2 - 1) * 1.2;
-      }
-      posArr[i * 2] = x;
-      posArr[i * 2 + 1] = y;
+      // Second warp layer
+      float n3 = noise(pos * 2.0 + t * 0.15);
+      pos += vec2(cos(n3 * 6.28), sin(n3 * 6.28)) * 0.03;
 
-      const depth = Math.random();
-      depthArr[i] = depth;
+      // Mouse parallax
+      pos.x += u_mouse.x * a_depth * 0.03 / u_aspect;
+      pos.y += u_mouse.y * a_depth * 0.03;
 
-      const rawBright = Math.pow(Math.random(), 2.5);
-      brightArr[i] = 0.15 + rawBright * 0.85;
+      // Fade at line ends and edges
+      float endFade = sin(a_progress * 3.14159);
+      float edgeFade = smoothstep(1.3, 0.9, abs(pos.x)) * smoothstep(1.3, 0.9, abs(pos.y));
 
-      const isBright = Math.random() < config.brightStarRate;
-      if (isBright) {
-        sizeArr[i] = (2.5 + Math.random() * 3.0) * dpr;
-        brightArr[i] = 0.7 + Math.random() * 0.3;
-      } else {
-        sizeArr[i] = (0.4 + depth * 0.8 + Math.random() * 0.8) * dpr;
-      }
-
-      twinkleSpeedArr[i] = 0.5 + Math.random() * 3.0;
-      twinklePhaseArr[i] = Math.random() * Math.PI * 2;
+      v_alpha = endFade * edgeFade * (0.15 + a_depth * 0.2);
+      v_temp = a_depth;
+      gl_Position = vec4(pos, 0.0, 1.0);
     }
+  `;
 
-    function createBuffer(data, attrib, perVertex) {
-      const loc = gl.getAttribLocation(program, attrib);
-      if (loc === -1) return;
-      const buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(loc);
-      gl.vertexAttribPointer(loc, perVertex, gl.FLOAT, false, 0, 0);
+  const fsSource = `
+    precision mediump float;
+    varying float v_alpha;
+    varying float v_temp;
+    void main() {
+      vec3 warm = vec3(1.0, 0.92, 0.7);
+      vec3 neutral = vec3(0.95, 0.93, 0.88);
+      vec3 cool = vec3(0.85, 0.9, 1.0);
+      vec3 col = v_temp < 0.5
+        ? mix(warm, neutral, v_temp * 2.0)
+        : mix(neutral, cool, (v_temp - 0.5) * 2.0);
+      gl_FragColor = vec4(col, v_alpha);
     }
+  `;
 
-    createBuffer(posArr, 'a_pos', 2);
-    createBuffer(brightArr, 'a_brightness', 1);
-    createBuffer(sizeArr, 'a_size', 1);
-    createBuffer(twinkleSpeedArr, 'a_twinkleSpeed', 1);
-    createBuffer(twinklePhaseArr, 'a_twinklePhase', 1);
-    createBuffer(depthArr, 'a_depth', 1);
-
-    const uTime = gl.getUniformLocation(program, 'u_time');
-    const uMouse = gl.getUniformLocation(program, 'u_mouse');
-    const uAspect = gl.getUniformLocation(program, 'u_aspect');
-    const uWaveMode = gl.getUniformLocation(program, 'u_waveMode');
-
-    const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
-    window.addEventListener('mousemove', (e) => {
-      mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.ty = -(e.clientY / window.innerHeight) * 2 + 1;
-    });
-
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-    gl.clearColor(0, 0, 0, 0);
-
-    let time = 0;
-    let lastFrame = 0;
-    function animate(now) {
-      requestAnimationFrame(animate);
-
-      const slide = document.querySelector(slideSelector);
-      if (!slide || !slide.classList.contains('active')) { lastFrame = now; return; }
-
-      const dt = Math.min((now - lastFrame) / 1000, 0.05);
-      lastFrame = now;
-
-      mouse.x += (mouse.tx - mouse.x) * 0.03;
-      mouse.y += (mouse.ty - mouse.y) * 0.03;
-
-      time += dt;
-
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.uniform1f(uTime, time);
-      gl.uniform2f(uMouse, mouse.x, mouse.y);
-      gl.uniform1f(uAspect, canvas.width / canvas.height);
-      gl.uniform1f(uWaveMode, config.waveMode);
-      gl.drawArrays(gl.POINTS, 0, COUNT);
-    }
-    animate(0);
+  function createShader(type, source) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, source);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+    return s;
   }
 
-  // Why newparade: 80k particles, breathing pulse wave, wider spread
-  initSlideParticles('why-particles', '[data-slide="4"]', {
-    count: 80000,
-    distribution: 'wide',
-    brightStarRate: 0.004,
-    waveMode: 0.0
+  const vs = createShader(gl.VERTEX_SHADER, vsSource);
+  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
+  gl.useProgram(program);
+
+  // Generate line data
+  const posData = new Float32Array(TOTAL_VERTS * 2);
+  const phaseData = new Float32Array(TOTAL_VERTS);
+  const depthData = new Float32Array(TOTAL_VERTS);
+  const progressData = new Float32Array(TOTAL_VERTS);
+
+  let vi = 0;
+  for (let l = 0; l < NUM_LINES; l++) {
+    const startX = (Math.random() * 2 - 1) * 1.2;
+    const startY = (Math.random() * 2 - 1) * 1.2;
+    const phase = Math.random() * Math.PI * 2;
+    const depth = Math.random();
+    const len = 0.02 + Math.random() * 0.08;
+    const baseAngle = Math.random() * Math.PI * 2;
+
+    for (let s = 0; s < SEGS; s++) {
+      const t0 = s / SEGS;
+      const t1 = (s + 1) / SEGS;
+      const a0 = baseAngle + t0 * 2.0;
+      const a1 = baseAngle + t1 * 2.0;
+
+      // Segment start
+      posData[vi * 2] = startX + Math.cos(a0) * len * t0;
+      posData[vi * 2 + 1] = startY + Math.sin(a0) * len * t0;
+      phaseData[vi] = phase;
+      depthData[vi] = depth;
+      progressData[vi] = t0;
+      vi++;
+
+      // Segment end
+      posData[vi * 2] = startX + Math.cos(a1) * len * t1;
+      posData[vi * 2 + 1] = startY + Math.sin(a1) * len * t1;
+      phaseData[vi] = phase;
+      depthData[vi] = depth;
+      progressData[vi] = t1;
+      vi++;
+    }
+  }
+
+  function makeBuf(data, attr, size) {
+    const loc = gl.getAttribLocation(program, attr);
+    if (loc === -1) return;
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+  }
+
+  makeBuf(posData, 'a_pos', 2);
+  makeBuf(phaseData, 'a_phase', 1);
+  makeBuf(depthData, 'a_depth', 1);
+  makeBuf(progressData, 'a_progress', 1);
+
+  const uTime = gl.getUniformLocation(program, 'u_time');
+  const uMouse = gl.getUniformLocation(program, 'u_mouse');
+  const uAspect = gl.getUniformLocation(program, 'u_aspect');
+
+  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+  window.addEventListener('mousemove', (e) => {
+    mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.ty = -(e.clientY / window.innerHeight) * 2 + 1;
   });
 
-  // Menu: 60k particles, horizontal sweep wave, even spread
-  initSlideParticles('menu-particles', '[data-slide="5"]', {
-    count: 60000,
-    distribution: 'even',
-    brightStarRate: 0.005,
-    waveMode: 1.0
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+  gl.clearColor(0, 0, 0, 0);
+
+  let time = 0;
+  let lastFrame = 0;
+  function animate(now) {
+    requestAnimationFrame(animate);
+    const slide = document.querySelector('[data-slide="4"]');
+    if (!slide || !slide.classList.contains('active')) { lastFrame = now; return; }
+
+    const dt = Math.min((now - lastFrame) / 1000, 0.05);
+    lastFrame = now;
+    mouse.x += (mouse.tx - mouse.x) * 0.03;
+    mouse.y += (mouse.ty - mouse.y) * 0.03;
+    time += dt;
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(uTime, time);
+    gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.uniform1f(uAspect, canvas.width / canvas.height);
+    gl.drawArrays(gl.LINES, 0, TOTAL_VERTS);
+  }
+  animate(0);
+})();
+</script>
+
+<script>
+// Menu — Bokeh circles (soft, large, floating light orbs)
+(function() {
+  const canvas = document.getElementById('menu-particles');
+  if (!canvas) return;
+  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  if (!gl) return;
+
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  function resize() {
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const NUM = 50; // Few but large
+
+  const vsSource = `
+    attribute vec2 a_pos;
+    attribute float a_size;
+    attribute float a_speed;
+    attribute float a_phase;
+    attribute float a_alpha;
+    attribute float a_depth;
+    uniform float u_time;
+    uniform vec2 u_mouse;
+    uniform float u_aspect;
+    uniform vec2 u_resolution;
+    varying float v_alpha;
+    varying float v_temp;
+
+    void main() {
+      float t = u_time;
+      vec2 pos = a_pos;
+
+      // Slow organic float — each orb drifts on its own path
+      pos.x += sin(t * a_speed * 0.15 + a_phase) * 0.12;
+      pos.y += cos(t * a_speed * 0.12 + a_phase * 1.3) * 0.08;
+      pos.x += sin(t * 0.05 + a_phase * 2.0) * 0.06;
+      pos.y += cos(t * 0.04 + a_phase * 0.7) * 0.05;
+
+      // Mouse parallax
+      pos.x += u_mouse.x * a_depth * 0.05 / u_aspect;
+      pos.y += u_mouse.y * a_depth * 0.05;
+
+      // Slow breathing alpha
+      float breath = 0.7 + 0.3 * sin(t * a_speed * 0.2 + a_phase * 3.0);
+      v_alpha = a_alpha * breath;
+      v_temp = a_depth;
+
+      gl_PointSize = a_size * (u_resolution.y / 720.0);
+      gl_Position = vec4(pos, 0.0, 1.0);
+    }
+  `;
+
+  const fsSource = `
+    precision highp float;
+    varying float v_alpha;
+    varying float v_temp;
+
+    void main() {
+      vec2 c = gl_PointCoord - 0.5;
+      float d = length(c);
+
+      // Bokeh shape: bright ring + soft fill
+      float ring = smoothstep(0.5, 0.42, d) * smoothstep(0.3, 0.4, d);
+      float fill = smoothstep(0.5, 0.1, d) * 0.3;
+      float shape = ring * 0.7 + fill;
+
+      // Color temperature
+      vec3 warm = vec3(1.0, 0.92, 0.75);
+      vec3 neutral = vec3(0.95, 0.95, 0.92);
+      vec3 cool = vec3(0.85, 0.92, 1.0);
+      vec3 col = v_temp < 0.5
+        ? mix(warm, neutral, v_temp * 2.0)
+        : mix(neutral, cool, (v_temp - 0.5) * 2.0);
+
+      gl_FragColor = vec4(col, shape * v_alpha);
+    }
+  `;
+
+  function createShader(type, source) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, source);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+    return s;
+  }
+
+  const vs = createShader(gl.VERTEX_SHADER, vsSource);
+  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
+  gl.useProgram(program);
+
+  const posData = new Float32Array(NUM * 2);
+  const sizeData = new Float32Array(NUM);
+  const speedData = new Float32Array(NUM);
+  const phaseData = new Float32Array(NUM);
+  const alphaData = new Float32Array(NUM);
+  const depthData = new Float32Array(NUM);
+
+  for (let i = 0; i < NUM; i++) {
+    posData[i * 2]     = (Math.random() * 2 - 1) * 1.1;
+    posData[i * 2 + 1] = (Math.random() * 2 - 1) * 1.1;
+    sizeData[i]  = 40 + Math.random() * 120; // large circles
+    speedData[i] = 0.3 + Math.random() * 0.7;
+    phaseData[i] = Math.random() * Math.PI * 2;
+    alphaData[i] = 0.04 + Math.random() * 0.08; // very subtle
+    depthData[i] = Math.random();
+  }
+
+  function makeBuf(data, attr, size) {
+    const loc = gl.getAttribLocation(program, attr);
+    if (loc === -1) return;
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+  }
+
+  makeBuf(posData, 'a_pos', 2);
+  makeBuf(sizeData, 'a_size', 1);
+  makeBuf(speedData, 'a_speed', 1);
+  makeBuf(phaseData, 'a_phase', 1);
+  makeBuf(alphaData, 'a_alpha', 1);
+  makeBuf(depthData, 'a_depth', 1);
+
+  const uTime = gl.getUniformLocation(program, 'u_time');
+  const uMouse = gl.getUniformLocation(program, 'u_mouse');
+  const uAspect = gl.getUniformLocation(program, 'u_aspect');
+  const uRes = gl.getUniformLocation(program, 'u_resolution');
+
+  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+  window.addEventListener('mousemove', (e) => {
+    mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.ty = -(e.clientY / window.innerHeight) * 2 + 1;
   });
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+  gl.clearColor(0, 0, 0, 0);
+
+  let time = 0;
+  let lastFrame = 0;
+  function animate(now) {
+    requestAnimationFrame(animate);
+    const slide = document.querySelector('[data-slide="5"]');
+    if (!slide || !slide.classList.contains('active')) { lastFrame = now; return; }
+
+    const dt = Math.min((now - lastFrame) / 1000, 0.05);
+    lastFrame = now;
+    mouse.x += (mouse.tx - mouse.x) * 0.03;
+    mouse.y += (mouse.ty - mouse.y) * 0.03;
+    time += dt;
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(uTime, time);
+    gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.uniform1f(uAspect, canvas.width / canvas.height);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.drawArrays(gl.POINTS, 0, NUM);
+  }
+  animate(0);
 })();
 </script>
 
