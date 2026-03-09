@@ -237,6 +237,9 @@
   }
 
   /* Menu Overview */
+  #menu-particles {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+  }
   .slide-menu { overflow: hidden; }
   .slide-menu .label,
   .slide-menu h2,
@@ -742,6 +745,7 @@
 
 <!-- SLIDE 5: Menu Overview -->
 <div class="slide slide-menu" data-slide="5">
+  <canvas id="menu-particles"></canvas>
   <div class="label">Menu</div>
   <h2>4つのメニュー</h2>
   <div class="menu-grid">
@@ -1687,6 +1691,183 @@
 
     const whySlide = document.querySelector('[data-slide="4"]');
     if (!whySlide || !whySlide.classList.contains('active')) { lastFrame = now; return; }
+
+    const dt = Math.min((now - lastFrame) / 1000, 0.05);
+    lastFrame = now;
+    time += dt;
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(uTime, time);
+    gl.uniform1f(uAspect, canvas.width / canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+  animate(0);
+})();
+</script>
+
+<script>
+// Menu — Ink drops / paint bloom (slow, organic, art-culture feel)
+(function() {
+  const canvas = document.getElementById('menu-particles');
+  if (!canvas) return;
+
+  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+  if (!gl) return;
+
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  function resize() {
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const vsSource = `
+    attribute vec2 a_pos;
+    varying vec2 v_uv;
+    void main() {
+      v_uv = a_pos * 0.5 + 0.5;
+      gl_Position = vec4(a_pos, 0.0, 1.0);
+    }
+  `;
+
+  const fsSource = `
+    precision highp float;
+    varying vec2 v_uv;
+    uniform float u_time;
+    uniform float u_aspect;
+
+    vec3 hash3(vec2 p) {
+      vec3 q = vec3(dot(p, vec2(127.1, 311.7)),
+                     dot(p, vec2(269.5, 183.3)),
+                     dot(p, vec2(419.2, 371.9)));
+      return fract(sin(q) * 43758.5453);
+    }
+
+    // Voronoi for organic cell/ink shapes
+    float voronoi(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      float minDist = 1.0;
+      for (int y = -1; y <= 1; y++) {
+        for (int x = -1; x <= 1; x++) {
+          vec2 neighbor = vec2(float(x), float(y));
+          vec3 r = hash3(i + neighbor);
+          vec2 point = neighbor + r.xy - f;
+          float d = dot(point, point);
+          minDist = min(minDist, d);
+        }
+      }
+      return sqrt(minDist);
+    }
+
+    // Smooth noise
+    vec2 hash(vec2 p) {
+      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+      return -1.0 + 2.0 * fract(sin(p) * 43758.5453);
+    }
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+      return mix(
+        mix(dot(hash(i), f), dot(hash(i + vec2(1,0)), f - vec2(1,0)), u.x),
+        mix(dot(hash(i + vec2(0,1)), f - vec2(0,1)), dot(hash(i + vec2(1,1)), f - vec2(1,1)), u.x),
+        u.y
+      );
+    }
+
+    void main() {
+      vec2 uv = v_uv;
+      uv.x *= u_aspect;
+      float t = u_time * 0.12;
+
+      // Warped coordinates for organic movement
+      vec2 warp = uv;
+      warp += vec2(noise(uv * 2.0 + t * 0.3), noise(uv * 2.0 + t * 0.2 + 5.0)) * 0.15;
+
+      // Multiple ink drop layers using voronoi
+      float v1 = voronoi(warp * 3.0 + t * 0.15);
+      float v2 = voronoi(warp * 2.5 - t * 0.12 + 8.0);
+      float v3 = voronoi(warp * 4.0 + t * 0.08 + 16.0);
+
+      // Ink blob shapes — sharp edges like real ink
+      float ink1 = smoothstep(0.5, 0.2, v1);
+      float ink2 = smoothstep(0.45, 0.15, v2);
+      float ink3 = smoothstep(0.4, 0.18, v3);
+
+      // Edge glow — like ink bleeding at borders
+      float edge1 = smoothstep(0.5, 0.35, v1) * smoothstep(0.15, 0.3, v1);
+      float edge2 = smoothstep(0.45, 0.3, v2) * smoothstep(0.1, 0.25, v2);
+
+      // Colors — complementary to Why slide, more ink/paint feel
+      vec3 inkTeal   = vec3(0.03, 0.2, 0.22);
+      vec3 inkOrange = vec3(0.5, 0.18, 0.03);
+      vec3 edgeGlow  = vec3(0.08, 0.35, 0.3);
+
+      vec3 col = vec3(0.0);
+      col += inkTeal * ink1 * 0.6;
+      col += inkOrange * ink2 * 0.4;
+      col += edgeGlow * (edge1 + edge2) * 0.5;
+
+      // Subtle noise texture overlay — paper/canvas feel
+      float grain = noise(uv * 80.0) * 0.02;
+      col += grain;
+
+      // Vignette
+      vec2 center = v_uv - 0.5;
+      float vig = 1.0 - dot(center, center) * 1.5;
+      col *= clamp(vig, 0.0, 1.0);
+
+      float alpha = length(col) * 3.0;
+      alpha = min(alpha, 0.3);
+
+      gl_FragColor = vec4(col, alpha);
+    }
+  `;
+
+  function createShader(type, source) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, source);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+    return s;
+  }
+
+  const vs = createShader(gl.VERTEX_SHADER, vsSource);
+  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
+  gl.useProgram(program);
+
+  const quadVerts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(program, 'a_pos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uTime = gl.getUniformLocation(program, 'u_time');
+  const uAspect = gl.getUniformLocation(program, 'u_aspect');
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+  gl.clearColor(0, 0, 0, 0);
+
+  let time = 0;
+  let lastFrame = 0;
+  function animate(now) {
+    requestAnimationFrame(animate);
+
+    const menuSlide = document.querySelector('[data-slide="5"]');
+    if (!menuSlide || !menuSlide.classList.contains('active')) { lastFrame = now; return; }
 
     const dt = Math.min((now - lastFrame) / 1000, 0.05);
     lastFrame = now;
