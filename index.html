@@ -240,7 +240,7 @@
   #menu-particles {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
   }
-  .slide-menu { overflow: hidden; background: linear-gradient(165deg, #1a6fc4 0%, #4da0e8 30%, #e8dcc8 65%, #d4c5a0 100%); }
+  .slide-menu { overflow: hidden; background: linear-gradient(165deg, #0a3a7a 0%, #1a5ca0 30%, #8a7a5a 65%, #6a5a3a 100%); }
   .slide-menu .label,
   .slide-menu h2,
   .slide-menu .menu-grid { position: relative; z-index: 2; }
@@ -250,19 +250,19 @@
   .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
   .menu-card {
     padding: 40px 32px;
-    background: rgba(255,255,255,0.25);
+    background: rgba(0,0,0,0.25);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.4);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 16px; transition: all 0.3s;
   }
-  .menu-card:hover { background: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.6); }
+  .menu-card:hover { background: rgba(0,0,0,0.35); border-color: rgba(255,255,255,0.2); }
   .menu-card .menu-num {
-    font-size: 32px; font-weight: 800; color: rgba(0,60,120,0.12);
+    font-size: 32px; font-weight: 800; color: rgba(255,255,255,0.08);
     margin-bottom: 16px; line-height: 1;
   }
-  .menu-card .menu-en { font-size: 24px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; color: #1a3a5c; }
-  .menu-card .menu-ja { font-size: 13px; color: #5a7a9a; margin-bottom: 20px; }
-  .menu-card .menu-items { list-style: none; font-size: 12px; color: #4a6a8a; line-height: 2; }
+  .menu-card .menu-en { font-size: 24px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; color: #fff; }
+  .menu-card .menu-ja { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 20px; }
+  .menu-card .menu-items { list-style: none; font-size: 12px; color: rgba(255,255,255,0.6); line-height: 2; }
 
   /* Menu Detail */
   .detail-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; height: 100%; padding: 20px 0; }
@@ -1792,10 +1792,10 @@
       float glow1 = smoothstep(0.25, 0.0, abs(ribbon1 - 0.1)) * 0.3;
       float glow2 = smoothstep(0.3, 0.0, abs(ribbon2 - 0.05)) * 0.25;
 
-      // Colors — white cloth, vivid blue, dark accent
-      vec3 white   = vec3(1.0, 0.98, 0.96);
-      vec3 skyBlue = vec3(0.15, 0.45, 0.9);
-      vec3 dark    = vec3(0.08, 0.08, 0.12);
+      // Colors — soft white cloth, deep blue, dark accent
+      vec3 white   = vec3(0.85, 0.83, 0.8);
+      vec3 skyBlue = vec3(0.1, 0.3, 0.7);
+      vec3 dark    = vec3(0.04, 0.04, 0.08);
 
       vec3 col = vec3(0.0);
       col += white * (band1 + glow1);
@@ -1804,10 +1804,10 @@
 
       // Light dust particles — tiny bright spots
       float dust = smoothstep(0.48, 0.5, noise(uv * 40.0 + t * 0.5));
-      col += white * dust * 0.15;
+      col += white * dust * 0.1;
 
-      float alpha = (band1 + band2 + band3 + glow1 + glow2 + dust * 0.1);
-      alpha = clamp(alpha, 0.0, 0.5);
+      float alpha = (band1 + band2 + band3 + glow1 + glow2 + dust * 0.08);
+      alpha = clamp(alpha, 0.0, 0.35);
 
       gl_FragColor = vec4(col, alpha);
     }
