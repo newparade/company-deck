@@ -224,12 +224,11 @@
     width: 1px; height: 40px; background: rgba(255,255,255,0.15); position: relative; overflow: hidden;
     align-self: center; flex-shrink: 0; margin: 0 -1px;
   }
-  /* Chevron between steps */
+  /* Gradient line between steps */
   .flow-step + .flow-step::before {
-    content: ''; position: absolute; left: -1px; top: 50%; transform: translateY(-50%);
-    width: 0; height: 0;
-    border-top: 8px solid transparent; border-bottom: 8px solid transparent;
-    border-left: 8px solid rgba(255,255,255,0.12);
+    content: ''; position: absolute; left: 0; top: 15%; height: 70%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.15) 30%, rgba(255,255,255,0.15) 70%, transparent);
   }
 
   /* Menu Overview */
