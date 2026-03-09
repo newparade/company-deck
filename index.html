@@ -1338,6 +1338,7 @@
     uniform float u_aspect;
     varying float v_alpha;
     varying float v_temp;
+    varying vec2 v_pos;
 
     void main() {
       vec2 pos = a_pos;
@@ -1389,6 +1390,7 @@
       gl_PointSize = a_size * sizeMul * (0.8 + 0.2 * twinkle);
       v_alpha = min(brightness, 1.0);
       v_temp = a_depth;
+      v_pos = pos;
     }
   `;
 
@@ -1396,6 +1398,8 @@
     precision mediump float;
     varying float v_alpha;
     varying float v_temp;
+    varying vec2 v_pos;
+    uniform float u_time;
 
     void main() {
       float d = length(gl_PointCoord - 0.5);
@@ -1405,23 +1409,38 @@
       float glow = exp(-d * 6.0);
       float shape = core * 0.6 + glow * 0.4;
 
-      // Cosmic nebula colors
-      vec3 deepBlue = vec3(0.3, 0.4, 1.0);      // deep space blue
-      vec3 teal = vec3(0.2, 0.8, 0.85);          // nebula teal
-      vec3 white = vec3(0.95, 0.93, 1.0);        // bright star white
-      vec3 purple = vec3(0.6, 0.3, 0.9);         // cosmic purple
-      vec3 rose = vec3(0.9, 0.35, 0.5);          // nebula rose
+      // Aurora colors — shift slowly based on position + time
+      vec3 green  = vec3(0.1, 0.9, 0.4);    // aurora green
+      vec3 teal   = vec3(0.1, 0.7, 0.7);    // teal shimmer
+      vec3 blue   = vec3(0.2, 0.3, 0.95);   // deep blue
+      vec3 purple = vec3(0.5, 0.15, 0.8);   // aurora purple
+      vec3 pink   = vec3(0.8, 0.2, 0.5);    // aurora pink
+      vec3 white  = vec3(0.9, 0.95, 0.95);  // bright core
+
+      // Slowly undulating color based on position and time (aurora curtain effect)
+      float t = fract(
+        v_pos.x * 0.8
+        + v_pos.y * 0.5
+        + sin(v_pos.x * 2.0 + u_time * 0.15) * 0.3
+        + sin(v_pos.y * 1.5 + u_time * 0.1) * 0.2
+        + u_time * 0.03
+      );
 
       vec3 col;
-      if (v_temp < 0.25) {
-        col = mix(deepBlue, teal, v_temp * 4.0);
-      } else if (v_temp < 0.5) {
-        col = mix(teal, white, (v_temp - 0.25) * 4.0);
-      } else if (v_temp < 0.75) {
-        col = mix(white, purple, (v_temp - 0.5) * 4.0);
+      if (t < 0.2) {
+        col = mix(green, teal, t * 5.0);
+      } else if (t < 0.4) {
+        col = mix(teal, blue, (t - 0.2) * 5.0);
+      } else if (t < 0.6) {
+        col = mix(blue, purple, (t - 0.4) * 5.0);
+      } else if (t < 0.8) {
+        col = mix(purple, pink, (t - 0.6) * 5.0);
       } else {
-        col = mix(purple, rose, (v_temp - 0.75) * 4.0);
+        col = mix(pink, green, (t - 0.8) * 5.0);
       }
+
+      // Bright stars stay whiter
+      col = mix(col, white, smoothstep(0.6, 1.0, v_alpha) * 0.5);
 
       gl_FragColor = vec4(col, shape * v_alpha);
     }
