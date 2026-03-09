@@ -1585,34 +1585,40 @@
 
       void main() {
         vec2 pos = a_pos;
+        float rnd = fract(sin(a_twinklePhase * 127.1 + a_depth * 311.7) * 43758.5453);
+        float dist = length(a_pos);
+        float normDist = dist / 1.2;
+        float wave = 0.0;
+
+        if (u_waveMode < 0.5) {
+          // Why newparade: VORTEX — particles slowly orbit center
+          float angle = atan(a_pos.y, a_pos.x);
+          float speed = 0.15 + (1.0 - normDist) * 0.1; // inner orbits faster
+          float t = u_time * speed + rnd * 6.28;
+          float r = dist;
+          // Slight inward/outward breathing
+          r += sin(u_time * 0.12 + a_twinklePhase) * 0.03;
+          pos.x = cos(angle + t * 0.08) * r;
+          pos.y = sin(angle + t * 0.08) * r;
+          // Brightness pulse radiates outward
+          float pulse = sin(u_time * 0.3 - normDist * 5.0 + rnd * 2.0);
+          wave = max(pulse, 0.0) * 0.5;
+        } else {
+          // Menu: HORIZONTAL FLOW — particles drift rightward like a current
+          float speed = 0.02 + rnd * 0.03 + a_depth * 0.02;
+          pos.x = mod(a_pos.x + 1.3 + u_time * speed, 2.6) - 1.3;
+          // Gentle vertical wave
+          pos.y += sin(u_time * 0.15 + a_pos.x * 2.0 + a_twinklePhase) * 0.02;
+          // Brightness wave travels with flow
+          float xNorm = (pos.x + 1.3) / 2.6;
+          float flowWave = sin(u_time * 0.4 - xNorm * 8.0 + rnd * 3.0);
+          wave = max(flowWave, 0.0) * 0.4;
+        }
 
         // Parallax from mouse
         float parallax = a_depth * 0.04;
         pos.x += u_mouse.x * parallax / u_aspect;
         pos.y += u_mouse.y * parallax;
-
-        // Gentle drift
-        pos.x += sin(u_time * 0.1 + a_twinklePhase * 3.0) * 0.004 * a_depth;
-        pos.y += cos(u_time * 0.07 + a_twinklePhase * 2.0) * 0.003 * a_depth;
-
-        // Wave animation
-        float dist = length(a_pos);
-        float normDist = dist / 1.2;
-        float rnd = fract(sin(a_twinklePhase * 127.1 + a_depth * 311.7) * 43758.5453);
-
-        float wave = 0.0;
-        if (u_waveMode < 0.5) {
-          // Why newparade: slow breathing pulse from center outward
-          float cycle = fract(u_time * 0.05);
-          float pulse = sin(cycle * 6.28318 - normDist * 4.0 + rnd * 1.5);
-          wave = max(pulse, 0.0) * 0.6;
-        } else {
-          // Menu: horizontal sweep left→right, repeating
-          float cycle = fract(u_time * 0.06);
-          float xNorm = (a_pos.x + 1.2) / 2.4;
-          float d = abs(xNorm - cycle + (rnd - 0.5) * 0.2);
-          wave = smoothstep(0.3, 0.0, d) * 0.5;
-        }
 
         // Twinkle
         float twinkle = 0.5 + 0.5 * sin(u_time * a_twinkleSpeed + a_twinklePhase);
