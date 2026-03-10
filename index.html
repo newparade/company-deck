@@ -1547,349 +1547,235 @@
 </script>
 
 <script>
-// Why newparade — Generative flowing lines (thread-like curves)
+// Unified particle system for Why (slide 4) & Menu (slide 5)
+// Same gl.POINTS + same fragment shader as Concept — motion is the only difference
 (function() {
-  const canvas = document.getElementById('why-particles');
-  if (!canvas) return;
-  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-  if (!gl) return;
+  function initParticles(canvasId, slideSelector, motionMode) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    if (!gl) return;
 
-  const dpr = Math.min(window.devicePixelRatio, 2);
-  function resize() {
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    canvas.style.width = window.innerWidth + 'px';
-    canvas.style.height = window.innerHeight + 'px';
-    gl.viewport(0, 0, canvas.width, canvas.height);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Many short line segments that form flowing curves
-  const NUM_LINES = 3000;
-  const SEGS = 8; // segments per line
-  const TOTAL_VERTS = NUM_LINES * SEGS * 2; // 2 verts per segment
-
-  const vsSource = `
-    attribute vec2 a_pos;
-    attribute float a_phase;
-    attribute float a_depth;
-    attribute float a_progress;
-    uniform float u_time;
-    uniform vec2 u_mouse;
-    uniform float u_aspect;
-    varying float v_alpha;
-    varying float v_temp;
-
-    // Simple noise in shader
-    float hash(vec2 p) {
-      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+    const dpr = Math.min(window.devicePixelRatio, 2);
+    function resize() {
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      gl.viewport(0, 0, canvas.width, canvas.height);
     }
-    float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      f = f * f * (3.0 - 2.0 * f);
-      return mix(
-        mix(hash(i), hash(i + vec2(1, 0)), f.x),
-        mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x),
-        f.y
-      );
-    }
+    resize();
+    window.addEventListener('resize', resize);
 
-    void main() {
-      float t = u_time * 0.12;
-      vec2 pos = a_pos;
+    // Same vertex shader structure as Concept, different motion
+    const vsSource = `
+      attribute vec2 a_pos;
+      attribute float a_brightness;
+      attribute float a_size;
+      attribute float a_twinkleSpeed;
+      attribute float a_twinklePhase;
+      attribute float a_depth;
+      uniform float u_time;
+      uniform vec2 u_mouse;
+      uniform float u_aspect;
+      uniform float u_mode;
+      varying float v_alpha;
+      varying float v_temp;
 
-      // Flow field displacement — each point follows a noise-based vector field
-      float n1 = noise(pos * 1.5 + t * 0.3 + a_phase);
-      float n2 = noise(pos * 1.5 - t * 0.2 + a_phase + 5.0);
-      float angle = (n1 - 0.5) * 6.28;
-      pos += vec2(cos(angle), sin(angle)) * 0.06 * a_depth;
-
-      // Second warp layer
-      float n3 = noise(pos * 2.0 + t * 0.15);
-      pos += vec2(cos(n3 * 6.28), sin(n3 * 6.28)) * 0.03;
-
-      // Mouse parallax
-      pos.x += u_mouse.x * a_depth * 0.03 / u_aspect;
-      pos.y += u_mouse.y * a_depth * 0.03;
-
-      // Fade at line ends and edges
-      float endFade = sin(a_progress * 3.14159);
-      float edgeFade = smoothstep(1.3, 0.9, abs(pos.x)) * smoothstep(1.3, 0.9, abs(pos.y));
-
-      v_alpha = endFade * edgeFade * (0.15 + a_depth * 0.2);
-      v_temp = a_depth;
-      gl_Position = vec4(pos, 0.0, 1.0);
-    }
-  `;
-
-  const fsSource = `
-    precision mediump float;
-    varying float v_alpha;
-    varying float v_temp;
-    void main() {
-      vec3 warm = vec3(1.0, 0.92, 0.7);
-      vec3 neutral = vec3(0.95, 0.93, 0.88);
-      vec3 cool = vec3(0.85, 0.9, 1.0);
-      vec3 col = v_temp < 0.5
-        ? mix(warm, neutral, v_temp * 2.0)
-        : mix(neutral, cool, (v_temp - 0.5) * 2.0);
-      gl_FragColor = vec4(col, v_alpha);
-    }
-  `;
-
-  function createShader(type, source) {
-    const s = gl.createShader(type);
-    gl.shaderSource(s, source);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
-    return s;
-  }
-
-  const vs = createShader(gl.VERTEX_SHADER, vsSource);
-  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
-  const program = gl.createProgram();
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
-  gl.useProgram(program);
-
-  // Generate line data
-  const posData = new Float32Array(TOTAL_VERTS * 2);
-  const phaseData = new Float32Array(TOTAL_VERTS);
-  const depthData = new Float32Array(TOTAL_VERTS);
-  const progressData = new Float32Array(TOTAL_VERTS);
-
-  let vi = 0;
-  for (let l = 0; l < NUM_LINES; l++) {
-    const startX = (Math.random() * 2 - 1) * 1.2;
-    const startY = (Math.random() * 2 - 1) * 1.2;
-    const phase = Math.random() * Math.PI * 2;
-    const depth = Math.random();
-    const len = 0.02 + Math.random() * 0.08;
-    const baseAngle = Math.random() * Math.PI * 2;
-
-    for (let s = 0; s < SEGS; s++) {
-      const t0 = s / SEGS;
-      const t1 = (s + 1) / SEGS;
-      const a0 = baseAngle + t0 * 2.0;
-      const a1 = baseAngle + t1 * 2.0;
-
-      // Segment start
-      posData[vi * 2] = startX + Math.cos(a0) * len * t0;
-      posData[vi * 2 + 1] = startY + Math.sin(a0) * len * t0;
-      phaseData[vi] = phase;
-      depthData[vi] = depth;
-      progressData[vi] = t0;
-      vi++;
-
-      // Segment end
-      posData[vi * 2] = startX + Math.cos(a1) * len * t1;
-      posData[vi * 2 + 1] = startY + Math.sin(a1) * len * t1;
-      phaseData[vi] = phase;
-      depthData[vi] = depth;
-      progressData[vi] = t1;
-      vi++;
-    }
-  }
-
-  function makeBuf(data, attr, size) {
-    const loc = gl.getAttribLocation(program, attr);
-    if (loc === -1) return;
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
-  }
-
-  makeBuf(posData, 'a_pos', 2);
-  makeBuf(phaseData, 'a_phase', 1);
-  makeBuf(depthData, 'a_depth', 1);
-  makeBuf(progressData, 'a_progress', 1);
-
-  const uTime = gl.getUniformLocation(program, 'u_time');
-  const uMouse = gl.getUniformLocation(program, 'u_mouse');
-  const uAspect = gl.getUniformLocation(program, 'u_aspect');
-
-  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
-  window.addEventListener('mousemove', (e) => {
-    mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
-    mouse.ty = -(e.clientY / window.innerHeight) * 2 + 1;
-  });
-
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-  gl.clearColor(0, 0, 0, 0);
-
-  let time = 0;
-  let lastFrame = 0;
-  function animate(now) {
-    requestAnimationFrame(animate);
-    const slide = document.querySelector('[data-slide="4"]');
-    if (!slide || !slide.classList.contains('active')) { lastFrame = now; return; }
-
-    const dt = Math.min((now - lastFrame) / 1000, 0.05);
-    lastFrame = now;
-    mouse.x += (mouse.tx - mouse.x) * 0.03;
-    mouse.y += (mouse.ty - mouse.y) * 0.03;
-    time += dt;
-
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform1f(uTime, time);
-    gl.uniform2f(uMouse, mouse.x, mouse.y);
-    gl.uniform1f(uAspect, canvas.width / canvas.height);
-    gl.drawArrays(gl.LINES, 0, TOTAL_VERTS);
-  }
-  animate(0);
-})();
-</script>
-
-<script>
-// Menu — Topographic contour lines (living noise field rendered as isoLines)
-(function() {
-  const canvas = document.getElementById('menu-particles');
-  if (!canvas) return;
-  const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-  if (!gl) return;
-
-  const dpr = Math.min(window.devicePixelRatio, 2);
-  function resize() {
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    canvas.style.width = window.innerWidth + 'px';
-    canvas.style.height = window.innerHeight + 'px';
-    gl.viewport(0, 0, canvas.width, canvas.height);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  const vsSource = `
-    attribute vec2 a_pos;
-    varying vec2 v_uv;
-    void main() {
-      v_uv = a_pos * 0.5 + 0.5;
-      gl_Position = vec4(a_pos, 0.0, 1.0);
-    }
-  `;
-
-  const fsSource = `
-    precision highp float;
-    varying vec2 v_uv;
-    uniform float u_time;
-    uniform float u_aspect;
-
-    vec2 hash(vec2 p) {
-      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
-      return -1.0 + 2.0 * fract(sin(p) * 43758.5453);
-    }
-    float noise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
-      return mix(
-        mix(dot(hash(i), f), dot(hash(i + vec2(1,0)), f - vec2(1,0)), u.x),
-        mix(dot(hash(i + vec2(0,1)), f - vec2(0,1)), dot(hash(i + vec2(1,1)), f - vec2(1,1)), u.x),
-        u.y
-      );
-    }
-    float fbm(vec2 p) {
-      float v = 0.0; float a = 0.5;
-      for (int i = 0; i < 5; i++) {
-        v += a * noise(p);
-        p *= 2.0; a *= 0.5;
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
       }
-      return v;
+      float noise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        return mix(
+          mix(hash(i), hash(i + vec2(1, 0)), f.x),
+          mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x),
+          f.y
+        );
+      }
+
+      void main() {
+        vec2 pos = a_pos;
+        float rnd = fract(sin(a_twinklePhase * 127.1 + a_depth * 311.7) * 43758.5453);
+        float wave = 0.0;
+
+        if (u_mode < 0.5) {
+          // WHY: Flow field — particles drift along noise-based currents
+          float t = u_time * 0.08;
+          float n1 = noise(a_pos * 1.5 + t + a_twinklePhase);
+          float n2 = noise(a_pos * 1.5 - t * 0.7 + 5.0 + a_twinklePhase);
+          float angle = (n1 - 0.5) * 6.28;
+          // Cumulative drift
+          pos.x += cos(angle) * 0.05 * a_depth;
+          pos.y += sin(angle) * 0.05 * a_depth;
+          pos.x += (n2 - 0.5) * 0.03;
+          pos.y += cos(n1 * 6.28) * 0.02;
+          // Brightness: noise-driven soft glow zones
+          wave = smoothstep(0.4, 0.6, noise(pos * 2.0 + t * 0.3)) * 0.5;
+        } else {
+          // MENU: Contour-like clustering — particles shift to form flowing bands
+          float t = u_time * 0.05;
+          float n = noise(a_pos * 2.0 + t * 0.2);
+          float n2 = noise(a_pos * 1.5 - t * 0.15 + 10.0);
+          // Push particles toward contour lines of the noise field
+          float contourVal = fract(n * 6.0);
+          float pull = (contourVal - 0.5) * 0.02;
+          // Gradient direction approximation
+          float dx = noise(a_pos * 2.0 + vec2(0.01, 0.0) + t * 0.2) - n;
+          float dy = noise(a_pos * 2.0 + vec2(0.0, 0.01) + t * 0.2) - n;
+          vec2 grad = normalize(vec2(dx, dy) + 0.0001);
+          pos += grad * pull;
+          // Gentle along-contour drift
+          pos += vec2(-grad.y, grad.x) * 0.008 * a_depth;
+          pos.x += sin(t * 0.3 + a_twinklePhase) * 0.003;
+          pos.y += cos(t * 0.2 + a_twinklePhase) * 0.002;
+          // Brightness: near contour lines = brighter
+          wave = smoothstep(0.15, 0.0, abs(contourVal - 0.5)) * 0.6;
+          wave += smoothstep(0.4, 0.6, n2) * 0.2;
+        }
+
+        // Mouse parallax (same as Concept)
+        float parallax = a_depth * 0.05;
+        pos.x += u_mouse.x * parallax / u_aspect;
+        pos.y += u_mouse.y * parallax;
+
+        // Twinkle (same as Concept)
+        float twinkle = 0.5 + 0.5 * sin(u_time * a_twinkleSpeed + a_twinklePhase);
+        float brightness = a_brightness * (0.4 + 0.6 * twinkle) + wave * 0.4;
+        float sizeMul = 1.0 + wave * 0.4;
+
+        gl_Position = vec4(pos, 0.0, 1.0);
+        gl_PointSize = a_size * sizeMul * (0.8 + 0.2 * twinkle);
+        v_alpha = min(brightness, 1.0);
+        v_temp = a_depth;
+      }
+    `;
+
+    // Exact same fragment shader as Concept
+    const fsSource = `
+      precision mediump float;
+      varying float v_alpha;
+      varying float v_temp;
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        if (d > 0.5) discard;
+        float core = smoothstep(0.5, 0.0, d);
+        float glow = exp(-d * 6.0);
+        float shape = core * 0.6 + glow * 0.4;
+        vec3 warm = vec3(1.0, 0.92, 0.7);
+        vec3 neutral = vec3(0.97, 0.95, 0.9);
+        vec3 cool = vec3(0.85, 0.9, 1.0);
+        vec3 col = v_temp < 0.5
+          ? mix(warm, neutral, v_temp * 2.0)
+          : mix(neutral, cool, (v_temp - 0.5) * 2.0);
+        gl_FragColor = vec4(col, shape * v_alpha);
+      }
+    `;
+
+    function createShader(type, source) {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, source);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+      return s;
     }
 
-    void main() {
-      vec2 uv = v_uv;
-      uv.x *= u_aspect;
-      float t = u_time * 0.04;
+    const vs = createShader(gl.VERTEX_SHADER, vsSource);
+    const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+    const program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
+    gl.useProgram(program);
 
-      // Gentle domain warp
-      float w1 = fbm(uv * 1.2 + t * 0.2);
-      float w2 = fbm(uv * 1.2 - t * 0.15 + 5.0);
-      vec2 warped = uv + vec2(w1, w2) * 0.12;
+    const COUNT = 100000;
+    const posArr = new Float32Array(COUNT * 2);
+    const brightArr = new Float32Array(COUNT);
+    const sizeArr = new Float32Array(COUNT);
+    const twinkleSpeedArr = new Float32Array(COUNT);
+    const twinklePhaseArr = new Float32Array(COUNT);
+    const depthArr = new Float32Array(COUNT);
 
-      // Noise field
-      float field = fbm(warped * 2.0 + t * 0.1);
-
-      // Sparse contour lines — wide spacing
-      float levels = 7.0;
-      float contour = fract(field * levels);
-      float line = smoothstep(0.02, 0.0, contour) + smoothstep(0.98, 1.0, contour);
-
-      // Very soft line — almost like a pencil sketch
-      float intensity = line * 0.25;
-
-      // Subtle fill between lines — gentle terrain shading
-      float shade = smoothstep(-0.2, 0.5, field) * 0.04;
-      intensity += shade;
-
-      // Warm white
-      vec3 col = vec3(0.95, 0.92, 0.85);
-
-      // Vignette
-      vec2 center = v_uv - 0.5;
-      float vig = 1.0 - dot(center, center) * 1.2;
-      intensity *= clamp(vig, 0.0, 1.0);
-
-      gl_FragColor = vec4(col, intensity);
+    for (let i = 0; i < COUNT; i++) {
+      const cx = (Math.random() + Math.random()) / 2;
+      const cy = (Math.random() + Math.random()) / 2;
+      posArr[i * 2] = (cx * 2 - 1) * 1.15;
+      posArr[i * 2 + 1] = (cy * 2 - 1) * 1.15;
+      const depth = Math.random();
+      depthArr[i] = depth;
+      const rawBright = Math.pow(Math.random(), 2.5);
+      brightArr[i] = 0.15 + rawBright * 0.85;
+      const isBright = Math.random() < 0.003;
+      if (isBright) {
+        sizeArr[i] = (2.5 + Math.random() * 3.0) * dpr;
+        brightArr[i] = 0.7 + Math.random() * 0.3;
+      } else {
+        sizeArr[i] = (0.4 + depth * 0.8 + Math.random() * 0.8) * dpr;
+      }
+      twinkleSpeedArr[i] = 0.5 + Math.random() * 3.0;
+      twinklePhaseArr[i] = Math.random() * Math.PI * 2;
     }
-  `;
 
-  function createShader(type, source) {
-    const s = gl.createShader(type);
-    gl.shaderSource(s, source);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
-    return s;
+    function createBuffer(data, attrib, perVertex) {
+      const loc = gl.getAttribLocation(program, attrib);
+      if (loc === -1) return;
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, perVertex, gl.FLOAT, false, 0, 0);
+    }
+
+    createBuffer(posArr, 'a_pos', 2);
+    createBuffer(brightArr, 'a_brightness', 1);
+    createBuffer(sizeArr, 'a_size', 1);
+    createBuffer(twinkleSpeedArr, 'a_twinkleSpeed', 1);
+    createBuffer(twinklePhaseArr, 'a_twinklePhase', 1);
+    createBuffer(depthArr, 'a_depth', 1);
+
+    const uTime = gl.getUniformLocation(program, 'u_time');
+    const uMouse = gl.getUniformLocation(program, 'u_mouse');
+    const uAspect = gl.getUniformLocation(program, 'u_aspect');
+    const uMode = gl.getUniformLocation(program, 'u_mode');
+
+    const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+    window.addEventListener('mousemove', (e) => {
+      mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.ty = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    gl.clearColor(0, 0, 0, 0);
+
+    let time = 0;
+    let lastFrame = 0;
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const slide = document.querySelector(slideSelector);
+      if (!slide || !slide.classList.contains('active')) { lastFrame = now; return; }
+      const dt = Math.min((now - lastFrame) / 1000, 0.05);
+      lastFrame = now;
+      mouse.x += (mouse.tx - mouse.x) * 0.03;
+      mouse.y += (mouse.ty - mouse.y) * 0.03;
+      time += dt;
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.uniform1f(uTime, time);
+      gl.uniform2f(uMouse, mouse.x, mouse.y);
+      gl.uniform1f(uAspect, canvas.width / canvas.height);
+      gl.uniform1f(uMode, motionMode);
+      gl.drawArrays(gl.POINTS, 0, COUNT);
+    }
+    animate(0);
   }
 
-  const vs = createShader(gl.VERTEX_SHADER, vsSource);
-  const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
-  const program = gl.createProgram();
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
-  gl.useProgram(program);
-
-  const quadVerts = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(program, 'a_pos');
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-  const uTime = gl.getUniformLocation(program, 'u_time');
-  const uAspect = gl.getUniformLocation(program, 'u_aspect');
-
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-  gl.clearColor(0, 0, 0, 0);
-
-  let time = 0;
-  let lastFrame = 0;
-  function animate(now) {
-    requestAnimationFrame(animate);
-    const slide = document.querySelector('[data-slide="5"]');
-    if (!slide || !slide.classList.contains('active')) { lastFrame = now; return; }
-
-    const dt = Math.min((now - lastFrame) / 1000, 0.05);
-    lastFrame = now;
-    time += dt;
-
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform1f(uTime, time);
-    gl.uniform1f(uAspect, canvas.width / canvas.height);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  }
-  animate(0);
+  // Why: flow field drift (mode 0)
+  initParticles('why-particles', '[data-slide="4"]', 0.0);
+  // Menu: contour clustering (mode 1)
+  initParticles('menu-particles', '[data-slide="5"]', 1.0);
 })();
 </script>
 
