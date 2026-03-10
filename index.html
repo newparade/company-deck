@@ -209,7 +209,7 @@
   #why-particles {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
   }
-  .why-header, .flow-container { position: relative; z-index: 1; }
+  .why-header, .flow-container { position: relative; z-index: 2; text-shadow: 0 0 30px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.7), 0 0 100px rgba(0,0,0,0.4); }
   .why-header { text-align: center; margin-bottom: 56px; }
   .why-header h2 { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.6; }
   .why-header p { color: var(--gray); font-size: 14px; max-width: 640px; margin: 16px auto 0; line-height: 1.8; }
@@ -243,7 +243,7 @@
   .slide-menu { overflow: hidden; }
   .slide-menu .label,
   .slide-menu h2,
-  .slide-menu .menu-grid { position: relative; z-index: 2; }
+  .slide-menu .menu-grid { position: relative; z-index: 2; text-shadow: 0 0 30px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.7), 0 0 100px rgba(0,0,0,0.4); }
   .menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
   .menu-card {
     padding: 40px 32px;
@@ -1607,33 +1607,26 @@
           float n1 = noise(a_pos * 1.5 + t + a_twinklePhase);
           float n2 = noise(a_pos * 1.5 - t * 0.7 + 5.0 + a_twinklePhase);
           float angle = (n1 - 0.5) * 6.28;
-          // Cumulative drift
           pos.x += cos(angle) * 0.05 * a_depth;
           pos.y += sin(angle) * 0.05 * a_depth;
           pos.x += (n2 - 0.5) * 0.03;
           pos.y += cos(n1 * 6.28) * 0.02;
-          // Brightness: noise-driven soft glow zones
           wave = smoothstep(0.4, 0.6, noise(pos * 2.0 + t * 0.3)) * 0.5;
         } else {
           // MENU: Contour-like clustering — particles shift to form flowing bands
-          float t = u_time * 0.05;
-          float n = noise(a_pos * 2.0 + t * 0.2);
+          float t = u_time * 0.08;
+          float n = noise(a_pos * 1.5 + t * 0.2);
           float n2 = noise(a_pos * 1.5 - t * 0.15 + 10.0);
-          // Push particles toward contour lines of the noise field
           float contourVal = fract(n * 6.0);
-          float pull = (contourVal - 0.5) * 0.02;
-          // Gradient direction approximation
-          float dx = noise(a_pos * 2.0 + vec2(0.01, 0.0) + t * 0.2) - n;
-          float dy = noise(a_pos * 2.0 + vec2(0.0, 0.01) + t * 0.2) - n;
+          float pull = (contourVal - 0.5) * 0.015;
+          float dx = noise(a_pos * 1.5 + vec2(0.01, 0.0) + t * 0.2) - n;
+          float dy = noise(a_pos * 1.5 + vec2(0.0, 0.01) + t * 0.2) - n;
           vec2 grad = normalize(vec2(dx, dy) + 0.0001);
           pos += grad * pull;
-          // Gentle along-contour drift
-          pos += vec2(-grad.y, grad.x) * 0.008 * a_depth;
+          pos += vec2(-grad.y, grad.x) * 0.006 * a_depth;
           pos.x += sin(t * 0.3 + a_twinklePhase) * 0.003;
           pos.y += cos(t * 0.2 + a_twinklePhase) * 0.002;
-          // Brightness: near contour lines = brighter
-          wave = smoothstep(0.15, 0.0, abs(contourVal - 0.5)) * 0.6;
-          wave += smoothstep(0.4, 0.6, n2) * 0.2;
+          wave = smoothstep(0.15, 0.0, abs(contourVal - 0.5)) * 0.5;
         }
 
         // Mouse parallax (same as Concept)
@@ -1643,7 +1636,7 @@
 
         // Twinkle (same as Concept)
         float twinkle = 0.5 + 0.5 * sin(u_time * a_twinkleSpeed + a_twinklePhase);
-        float brightness = a_brightness * (0.4 + 0.6 * twinkle) + wave * 0.4;
+        float brightness = a_brightness * (0.4 + 0.6 * twinkle) + wave * 0.5;
         float sizeMul = 1.0 + wave * 0.4;
 
         gl_Position = vec4(pos, 0.0, 1.0);
@@ -1691,7 +1684,7 @@
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(program));
     gl.useProgram(program);
 
-    const COUNT = 100000;
+    const COUNT = 150000;
     const posArr = new Float32Array(COUNT * 2);
     const brightArr = new Float32Array(COUNT);
     const sizeArr = new Float32Array(COUNT);
